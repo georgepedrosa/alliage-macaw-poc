@@ -21,9 +21,28 @@
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="7Ya-dJ-Ka4">
                                 <rect key="frame" x="0.0" y="44" width="414" height="818"/>
                                 <subviews>
-                                    <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6hA-cc-iSh">
-                                        <rect key="frame" x="0.0" y="0.0" width="414" height="818"/>
+                                    <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" minimumZoomScale="0.0" maximumZoomScale="9" translatesAutoresizingMaskIntoConstraints="NO" id="6hA-cc-iSh">
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="780"/>
                                     </scrollView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="7JC-yd-ygI">
+                                        <rect key="frame" x="0.0" y="788" width="414" height="30"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sTw-eg-CJO" userLabel="Rect">
+                                                <rect key="frame" x="0.0" y="0.0" width="207" height="30"/>
+                                                <state key="normal" title="Rect"/>
+                                                <connections>
+                                                    <action selector="activeRectTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="aa2-WW-RvQ"/>
+                                                </connections>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ctm-vA-tLO" userLabel="Circle">
+                                                <rect key="frame" x="207" y="0.0" width="207" height="30"/>
+                                                <state key="normal" title="Circle"/>
+                                                <connections>
+                                                    <action selector="activeCircleTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hQu-Pg-GyF"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                    </stackView>
                                 </subviews>
                             </stackView>
                         </subviews>

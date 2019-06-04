@@ -9,6 +9,13 @@
 import UIKit
 import Macaw
 
+
+enum Tool {
+    case circle
+    case rect
+    case none
+}
+
 class ViewController: UIViewController {
     
     var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double)] = [:]
@@ -19,6 +26,7 @@ class ViewController: UIViewController {
     let stroke = Stroke(fill: Color.red, width: 1.0)
     var group: Group!
     var canvasActive: Bool = false
+    var activeTool: Tool = .none
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,7 +50,18 @@ class ViewController: UIViewController {
             }
             
             startPoint = loc
-            panel = Shape(form: Rect(x: startPoint.x, y: startPoint.y, w: 0, h: 0), fill: Color.clear, stroke: self.stroke)
+            let locus: Locus
+            switch self.activeTool {
+                
+            case .circle:
+                locus = Circle(cx: startPoint.x, cy: startPoint.y, r: 0)
+            case .rect:
+                locus = Rect(x: startPoint.x, y: startPoint.y, w: 0, h: 0)
+            case .none:
+                return
+            }
+            
+            panel = Shape(form: locus, fill: Color.clear, stroke: self.stroke)
             self.group.contents.append(panel!)
         }
         
@@ -56,14 +75,29 @@ class ViewController: UIViewController {
             let width = loc.x - startPoint.x
             let height = loc.y - startPoint.y
             
-            panel!.form = Rect(x: startPoint.x, y: startPoint.y, w: width, h: height)
-            lastForm = Rect(x: 0, y: 0, w: width, h: height)
+            let locus: Locus
             
+            switch self.activeTool {
+                
+            case .circle:
+                locus = Circle(cx: startPoint.x, cy: startPoint.y, r: width)
+                lastForm = Circle(cx: 0, cy: 0, r: width)
+            case .rect:
+                locus = Rect(x: startPoint.x, y: startPoint.y, w: width, h: height)
+                lastForm = Rect(x: 0, y: 0, w: width, h: height)
+            case .none:
+                return
+            }
+            
+            panel!.form = locus
+           
         }
         
         // leaving new shape on canvas when releasing first touch
         canvas.onTouchReleased { (event) in
-            
+            guard self.activeTool != .none else { return }
+                
+                
             self.group.contents.remove(at: self.group.contents.count - 1)
             
             let shape = Shape(form: lastForm!, fill: Color.clear, stroke: self.stroke)
@@ -90,10 +124,6 @@ class ViewController: UIViewController {
                     self.shapeTransformations.updateValue((dx, dy, scale), forKey: node.hash)
                     
                     node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale)
-                    
-//                  if event.count == 0 {
-//                      used when releasing the panned object
-//                  }
                     
                 }
             }
@@ -143,8 +173,14 @@ class ViewController: UIViewController {
         macawView.heightAnchor.constraint(equalTo:imageView.heightAnchor).isActive = true
     }
     
-//    @IBAction func onDelete(_ sender: Any) {
-//        group.contents.popLast()
-//    }
+
+    @IBAction func activeRectTool(_ sender: UIButton) {
+        activeTool = .rect
+    }
+    
+    
+    @IBAction func activeCircleTool(_ sender: Any) {
+        activeTool = .circle
+    }
     
 }

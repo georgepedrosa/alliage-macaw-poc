@@ -36,7 +36,6 @@ class ViewController: UIViewController {
         
         // creating new shape during first touch on canvas
         canvas.onTouchPressed { event in
-            print("canvas.onTouchPressed")
             
             guard let loc = event.points.first?.location(in: .scene)  else {
                 return
@@ -51,8 +50,6 @@ class ViewController: UIViewController {
         canvas.onTouchMoved { (event) in
             
             self.canvasActive = true
-            
-            print("canvas.onTouchMoved")
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             

@@ -9,27 +9,23 @@
 import UIKit
 import Macaw
 
-enum ShapeType {
-    case rectLine
-    case arrow
-    case other
-}
-
 enum Tool {
     case line
-    case circle
+    case ellipse
     case rect
     case rectLine
     case arrow
+    case asterisk
     case none
 }
 
 class ViewController: UIViewController {
     
+    var shapeActive: Bool = false
+    
     var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] = [:]
     
     @IBOutlet weak var scrollview: UIScrollView!
-    
     @IBOutlet weak var selectionButton: UIButton!
     
     var macawView = MacawView()
@@ -38,6 +34,8 @@ class ViewController: UIViewController {
     var group: Group!
     var canvas: Shape!
     var shapesGroup: Group = Group()
+    var redoShapes: [Node] = []
+    var newShape: CustomShape!
     
     var canvasActive: Bool = false
     var activeTool: Tool = .none
@@ -46,7 +44,6 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         configMacawView()
         createCanvas()
     }
@@ -56,8 +53,6 @@ class ViewController: UIViewController {
         
         var startPoint = Point()
         var panel: Node?
-        var lastForm: Locus?
-        var shapeType: ShapeType?
         
         // creating new shape during first touch on canvas
         canvas.onTouchPressed { event in
@@ -67,26 +62,25 @@ class ViewController: UIViewController {
             }
             
             startPoint = loc
-            let locus: Locus
+            
             switch self.activeTool {
-                
             case .line:
-                locus = Line(startPoint.x, startPoint.y, startPoint.x, startPoint.y)
-                panel = Shape(form: locus, fill: Color.clear, stroke: self.stroke)
-            case .circle:
-                locus = Circle(cx: startPoint.x, cy: startPoint.y, r: 0)
-                panel = Shape(form: locus, fill: Color.clear, stroke: self.stroke)
+                panel = CustomLine(startPoint: startPoint, lastPoint: startPoint)
+            case .ellipse:
+                panel = CustomEllipse(startPoint: startPoint, lastPoint: startPoint)
             case .rect:
-                locus = Rect(x: startPoint.x, y: startPoint.y, w: 0, h: 0)
-                panel = Shape(form: locus, fill: Color.clear, stroke: self.stroke)
+                panel = CustomRect(startPoint: startPoint, lastPoint: startPoint)
             case .arrow:
                 panel = Arrow(startPoint: startPoint, lastPoint: startPoint)
             case .rectLine:
                 panel = RectLine(startPoint: startPoint, lastPoint: startPoint)
+            case .asterisk:
+                panel = Asterisk(startPoint: startPoint, lastPoint: startPoint)
             case .none:
                 return
             }
             
+            self.redoShapes = []
             self.group.contents.append(panel!)
         }
         
@@ -97,42 +91,23 @@ class ViewController: UIViewController {
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
-            let width = loc.x - startPoint.x
-            let height = loc.y - startPoint.y
-            
-            let locus: Locus
-            
             switch self.activeTool {
-                
-            case .line:
-                locus = Line(startPoint.x, startPoint.y, loc.x, loc.y)
-                lastForm = Line(0, 0, loc.x - startPoint.x, loc.y - startPoint.y)
-                let shape = panel as! Shape
-                shape.form = locus
-                shapeType = .other
-            case .circle:
-                locus = Circle(cx: startPoint.x, cy: startPoint.y, r: width)
-                lastForm = Circle(cx: 0, cy: 0, r: width)
-                let shape = panel as! Shape
-                shape.form = locus
-                shapeType = .other
-            case .rect:
-                locus = Rect(x: startPoint.x, y: startPoint.y, w: width, h: height)
-                lastForm = Rect(x: 0, y: 0, w: width, h: height)
-                let shape = panel as! Shape
-                shape.form = locus
-                shapeType = .other
-            case .arrow:
-                let arrow = panel as! Arrow
-                arrow.updateForm(startPoint: startPoint, lastPoint: loc)
-                shapeType = .arrow
-            case .rectLine:
-                let rectLine = panel as! RectLine
-                rectLine.changeShape(startPoint: startPoint, lastPoint: loc)
-                shapeType = .rectLine
             case .none:
                 return
+            case .line:
+                self.newShape = panel as! CustomLine
+            case .ellipse:
+                self.newShape = panel as! CustomEllipse
+            case .rect:
+                self.newShape = panel as! CustomRect
+            case .arrow:
+                self.newShape = panel as! Arrow
+            case .rectLine:
+                self.newShape = panel as! RectLine
+            case .asterisk:
+                self.newShape = panel as! Asterisk
             }
+            self.newShape.updateForm(startPoint: startPoint, lastPoint: loc)
         }
         
         // leaving new shape on canvas when releasing first touch
@@ -142,25 +117,34 @@ class ViewController: UIViewController {
             
             guard self.activeTool != .none else { return }
             
-            self.group.contents.remove(at: self.group.contents.count - 1)
+            self.group.contents.removeLast()
+            self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
+            self.newShape.activateCircleAction()
+            self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
+            self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y,1, 0)
             
-            let shape: Node!
-            
-            switch shapeType! {
-            case .other:
-                shape = Shape(form: lastForm!, fill: Color.clear, stroke: self.stroke)
-            case .rectLine:
-                shape = RectLine(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-            case .arrow:
-                shape = Arrow(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-            }
-            
-            shape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-            
-            self.shapeTransformations[shape.hash] = (startPoint.x,startPoint.y,1, 0)
+            self.newShape.onTap(f: { (event) in
+                
+                guard let node = event.node else { print("problem on panel pan")
+                    return
+                }
+                
+                self.shapeActive = !self.shapeActive
+                
+                if let customShape = node as? CustomShape {
+                    
+                    if self.shapeActive {
+                        let stroke = Stroke(fill: Color.blue, width: 2.0)
+                        customShape.updateStroke(stroke: stroke)
+                    } else {
+                        let stroke = Stroke(fill: Color.red, width: 2.0)
+                        customShape.updateStroke(stroke: stroke)
+                    }
+                }
+            })
             
             // moving existing shape
-            shape.onPan { event in
+            self.newShape.onPan { event in
                 
                 if !self.canvasActive {
                     guard let node = event.node else { print("problem on panel pan")
@@ -184,7 +168,7 @@ class ViewController: UIViewController {
             }
             
             // resizing existing shape
-            shape.onPinch { event in
+            self.newShape.onPinch { event in
                 
                 guard let node = event.node else { print("problem on panel pinch")
                     return
@@ -198,10 +182,15 @@ class ViewController: UIViewController {
                 
                 self.shapeTransformations.updateValue((dx, dy, scale, angle), forKey: node.hash)
                 node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle)
-                //shape.stroke = Stroke(fill: Color.red, width: self.stroke.width/scale)
+                
+                let newStroke = Stroke(fill: Color.red, width: self.stroke.width/scale)
+                
+                if let shape = node as? CustomShape {
+                    shape.updateStroke(stroke: newStroke)
+                }
             }
             
-            shape.onRotate { event in
+            self.newShape.onRotate { event in
                 guard let node = event.node else { print("problem on panel rotate")
                     return
                 }
@@ -216,10 +205,7 @@ class ViewController: UIViewController {
                 node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle)
             }
             
-            self.shapesGroup.contents.append(shape)// = Group(contents: shape)
-//            let macawGroup = self.macawView.node as! Group
-//            macawGroup.contents.append(contentsOf: self.shapes)
-            //self.group.contents.append(shape)
+            self.shapesGroup.contents.append(self.newShape)
             self.canvasActive = false
         }
         
@@ -270,7 +256,7 @@ class ViewController: UIViewController {
         activeTool = .rect
     }
     @IBAction func activeCircleTool(_ sender: Any) {
-        activeTool = .circle
+        activeTool = .ellipse
     }
     @IBAction func activeShapeTool(_ sender: Any) {
         activeTool = .rectLine
@@ -278,12 +264,24 @@ class ViewController: UIViewController {
     @IBAction func activeArrowTool(_ sender: Any) {
         activeTool = .arrow
     }
-    
+    @IBAction func activeAsteriskTool(_ sender: Any) {
+        activeTool = .asterisk
+    }
     @IBAction func activateSelectionTool(_ sender: Any) {
-        
         selectionButton.isSelected = !selectionButton.isSelected
         let first = group.contents.remove(at: 0)
         group.contents.append(first)
+    }
+    @IBAction func undoTool(_ sender: Any) {
+        if let undoneNode = shapesGroup.contents.popLast() {
+            redoShapes.append(undoneNode)
+        }
+    }
+    
+    @IBAction func redoTool(_ sender: Any) {
+        if let redoneNode = redoShapes.popLast() {
+            shapesGroup.contents.append(redoneNode)
+        }
     }
     
 }

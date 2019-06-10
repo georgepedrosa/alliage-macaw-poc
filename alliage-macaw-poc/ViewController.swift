@@ -10,6 +10,7 @@ import UIKit
 import Macaw
 
 enum Tool {
+    case freeDraw
     case line
     case ellipse
     case rect
@@ -23,7 +24,7 @@ class ViewController: UIViewController {
     
     var shapeActive: Bool = false
     
-    var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] = [:]
+    var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double, angleX:Double, angleY: Double)] = [:]
     
     @IBOutlet weak var scrollview: UIScrollView!
     @IBOutlet weak var selectionButton: UIButton!
@@ -52,7 +53,7 @@ class ViewController: UIViewController {
         self.canvas = Shape(form: Rect(x: 0, y: 0, w: Double(image.size.width), h: Double(image.size.height)), fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
         
         var startPoint = Point()
-        var panel: Node?
+        //var panel: Node?
         
         // creating new shape during first touch on canvas
         canvas.onTouchPressed { event in
@@ -64,65 +65,65 @@ class ViewController: UIViewController {
             startPoint = loc
             
             switch self.activeTool {
+            case .freeDraw:
+                self.newShape = FreeDrawing(startPoint: startPoint, lastPoint: startPoint)
             case .line:
-                panel = CustomLine(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = CustomLine(startPoint: startPoint, lastPoint: startPoint)
             case .ellipse:
-                panel = CustomEllipse(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = CustomEllipse(startPoint: startPoint, lastPoint: startPoint)
             case .rect:
-                panel = CustomRect(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = CustomRect(startPoint: startPoint, lastPoint: startPoint)
             case .arrow:
-                panel = Arrow(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = Arrow(startPoint: startPoint, lastPoint: startPoint)
             case .rectLine:
-                panel = RectLine(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = RectLine(startPoint: startPoint, lastPoint: startPoint)
             case .asterisk:
-                panel = Asterisk(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = Asterisk(startPoint: startPoint, lastPoint: startPoint)
             case .none:
                 return
             }
             
             self.redoShapes = []
-            self.group.contents.append(panel!)
+            self.group.contents.append(self.newShape)
         }
         
         // resizing new shape when moving first touch
         canvas.onTouchMoved { (event) in
-            
+                    
             //self.canvasActive = true
+            
+            if self.activeTool == .none {
+                return
+            }
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
-            switch self.activeTool {
-            case .none:
-                return
-            case .line:
-                self.newShape = panel as! CustomLine
-            case .ellipse:
-                self.newShape = panel as! CustomEllipse
-            case .rect:
-                self.newShape = panel as! CustomRect
-            case .arrow:
-                self.newShape = panel as! Arrow
-            case .rectLine:
-                self.newShape = panel as! RectLine
-            case .asterisk:
-                self.newShape = panel as! Asterisk
-            }
             self.newShape.updateForm(startPoint: startPoint, lastPoint: loc)
+            
+            if self.activeTool == .freeDraw {
+                startPoint = loc
+            }
         }
         
         // leaving new shape on canvas when releasing first touch
         canvas.onTouchReleased { (event) in
             
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
             guard self.activeTool != .none else { return }
             
-            self.group.contents.removeLast()
-            self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-            self.newShape.activateCircleAction()
-            self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-            self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y,1, 0)
+            guard let loc = event.points.first?.location(in: .scene) else { return }
             
+            if let _ = self.newShape as? FreeDrawing {
+                let center = self.newShape.getCenter()
+                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y,1, 0, center?.x ?? 0, center?.y ?? 0)
+            } else {
+                self.group.contents.removeLast()
+                self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
+                self.newShape.activateCircleAction()
+                self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
+                let center = self.newShape.getCenter()
+                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y,1, 0, center?.x ?? 0, center?.y ?? 0)
+            }
+
             self.newShape.onTap(f: { (event) in
                 
                 guard let node = event.node else { print("problem on panel pan")
@@ -159,10 +160,15 @@ class ViewController: UIViewController {
                     let dy = transform!.dy + event.dy
                     let scale = transform!.scale
                     let angle = transform!.angle
+                    let angleX = transform!.angleX
+                    let angleY = transform!.angleY
                     
-                    self.shapeTransformations.updateValue((dx, dy, scale, angle), forKey: node.hash)
+                    let shape = node as! CustomShape
+                    let center = shape.getCenter()
                     
-                    node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle)
+                    node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle, x: angleX, y: angleY)
+                    
+                    self.shapeTransformations.updateValue((dx, dy, scale, angle, angleX, angleY), forKey: node.hash)
                     
                 }
             }
@@ -179,9 +185,15 @@ class ViewController: UIViewController {
                 let dy = transform!.dy
                 let scale = transform!.scale * event.scale
                 let angle = transform!.angle
+                let angleX = transform!.angleX
+                let angleY = transform!.angleY
                 
-                self.shapeTransformations.updateValue((dx, dy, scale, angle), forKey: node.hash)
-                node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle)
+                let shape = node as! CustomShape
+                let center = shape.getCenter()
+                
+                node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle, x: angleX, y: angleY)
+                
+                self.shapeTransformations.updateValue((dx, dy, scale, angle, angleX, angleY), forKey: node.hash)
                 
                 let newStroke = Stroke(fill: Color.red, width: self.stroke.width/scale)
                 
@@ -195,14 +207,20 @@ class ViewController: UIViewController {
                     return
                 }
                 
+                let shape = node as! CustomShape
+                let center = shape.getCenter()
+                
                 let transform = self.shapeTransformations[node.hash]
                 let dx = transform!.dx
                 let dy = transform!.dy
                 let scale = transform!.scale
                 let angle = transform!.angle + event.angle
+                let angleX = center?.x ?? 0
+                let angleY = center?.y ?? 0
                 
-                self.shapeTransformations.updateValue((dx, dy, scale, angle), forKey: node.hash)
-                node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle)
+                node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle, x: angleX, y: angleY)
+                
+                self.shapeTransformations.updateValue((dx, dy, scale, angle, angleX, angleY), forKey: node.hash)
             }
             
             self.shapesGroup.contents.append(self.newShape)
@@ -249,6 +267,9 @@ class ViewController: UIViewController {
         macawView.heightAnchor.constraint(equalTo:imageView.heightAnchor).isActive = true
     }
     
+    @IBAction func freeDrawingTool(_ sender: UIButton) {
+        activeTool = .freeDraw
+    }
     @IBAction func activeLineTool(_ sender: UIButton) {
         activeTool = .line
     }
@@ -274,12 +295,18 @@ class ViewController: UIViewController {
     }
     @IBAction func undoTool(_ sender: Any) {
         if let undoneNode = shapesGroup.contents.popLast() {
+            if let freeDrawing = undoneNode as? FreeDrawing {
+                freeDrawing.deleteShape()
+            }
             redoShapes.append(undoneNode)
         }
     }
     
     @IBAction func redoTool(_ sender: Any) {
         if let redoneNode = redoShapes.popLast() {
+            if let freeDrawing = redoneNode as? FreeDrawing {
+                freeDrawing.redoShape()
+            }
             shapesGroup.contents.append(redoneNode)
         }
     }

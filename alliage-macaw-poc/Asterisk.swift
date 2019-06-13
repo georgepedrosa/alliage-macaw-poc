@@ -21,6 +21,15 @@ class Asterisk: Group, CustomShape {
     var backgroundLine3: Shape!
     var backgroundLine4: Shape!
     
+    var isActive: Bool = false {
+        didSet {
+            line1.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            line2.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            line3.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            line4.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+        }
+    }
+    
     required init(startPoint: Point, lastPoint: Point) {
         super.init()
 
@@ -122,7 +131,7 @@ class Asterisk: Group, CustomShape {
     }
     
     func getCenter() -> Point? {
-        return nil
+        return line1.bounds?.center()
     }
     
     func activateCircleAction() {

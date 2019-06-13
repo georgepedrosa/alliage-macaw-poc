@@ -15,6 +15,20 @@ class RectLine: Group, CustomShape {
     var rect: Shape!
     var circle: Shape!
     
+    var isActive: Bool = false {
+        didSet {
+            if isActive {
+                rect.stroke = Stroke(fill: Color.blue, width: 2.0)
+                line.stroke = Stroke(fill: Color.blue, width: 2.0)
+                circle.stroke = Stroke(fill: Color.green, width: 2.0)
+            } else {
+                rect.stroke = Stroke(fill: Color.red, width: 2.0)
+                line.stroke = Stroke(fill: Color.red, width: 2.0)
+                circle.stroke = Stroke(fill: Color.clear, width: 2.0)
+            }
+        }
+    }
+    
     required init(startPoint: Point, lastPoint: Point) {
         super.init()
         let locusLine = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)

@@ -13,17 +13,21 @@ import UIKit
 import Macaw
 
 class Arrow: Group, CustomShape {
-    func activateCircleAction() {
-        
-    }
-    
-    
+
     var line: Shape!
     var headLeft: Shape!
     var headRight: Shape!
     var backgroundLine: Shape!
     var backgroundHeadLeft: Shape!
     var backgroundHeadRight: Shape!
+    
+    var isActive: Bool = false {
+        didSet {
+            line.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            headLeft.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            headRight.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+        }
+    }
     
     required init(startPoint: Point, lastPoint: Point) {
         super.init()
@@ -99,7 +103,7 @@ class Arrow: Group, CustomShape {
     }
     
     func getCenter() -> Point? {
-        return nil
+        return line.bounds?.center()
     }
     
     func distance(_ a: Point, _ b: Point) -> Double {
@@ -108,4 +112,7 @@ class Arrow: Group, CustomShape {
         return Double(sqrt(xDist * xDist + yDist * yDist))
     }
     
+    func activateCircleAction() {
+        
+    }
 }

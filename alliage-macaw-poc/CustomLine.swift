@@ -14,6 +14,12 @@ class CustomLine: Group, CustomShape {
     var line: Shape!
     var backgroundLine: Shape!
     
+    var isActive: Bool = false {
+        didSet {
+            line.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+        }
+    }
+    
     required init(startPoint: Point, lastPoint: Point) {
         super.init()
         
@@ -34,7 +40,7 @@ class CustomLine: Group, CustomShape {
     }
     
     func getCenter() -> Point? {
-        return nil
+        return line.bounds?.center()
     }
     
     func activateCircleAction() {

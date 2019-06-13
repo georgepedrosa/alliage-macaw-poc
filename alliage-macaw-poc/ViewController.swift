@@ -11,6 +11,7 @@ import Macaw
 
 enum Tool {
     case freeDraw
+    case text
     case line
     case ellipse
     case rect
@@ -24,36 +25,118 @@ class ViewController: UIViewController {
     
     var shapeActive: Bool = false
     
-    var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double, angleX:Double, angleY: Double)] = [:]
+    var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] = [:]
     
+    @IBOutlet weak var buttonsStackView: UIStackView!
     @IBOutlet weak var scrollview: UIScrollView!
     @IBOutlet weak var selectionButton: UIButton!
     
     var macawView = MacawView()
+    
+    let messageInputContainerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.white
+        return view
+    }()
+    
+    let inputTextField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = "Enter message"
+        return textField
+    }()
+    
     let stroke = Stroke(fill: Color.red, width: 2.0)
     
     var group: Group!
     var canvas: Shape!
     var shapesGroup: Group = Group()
     var redoShapes: [Node] = []
+    
     var newShape: CustomShape!
+    
+    var customTexts: [CustomText] = []
+    
+    //var newCustomText: CustomText!
     
     var canvasActive: Bool = false
     var activeTool: Tool = .none
     let image = #imageLiteral(resourceName: "Medical_X-Ray_imaging_AAR02_nevit")
     var backgroundView = UIView()
     
+    var bottomConstraint: NSLayoutConstraint?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configMacawView()
         createCanvas()
+        
+        view.addSubview(messageInputContainerView)
+        messageInputContainerView.translatesAutoresizingMaskIntoConstraints = false
+        messageInputContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        messageInputContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        messageInputContainerView.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        
+        bottomConstraint = NSLayoutConstraint(item: messageInputContainerView, attribute: .bottom, relatedBy: .equal, toItem: view, attribute: .bottom, multiplier: 1, constant: 0)
+        view.addConstraint(bottomConstraint!)
+        
+        setupInputComponents()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification), name: UIResponder.keyboardWillShowNotification, object: nil)
+        
+         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification), name: UIResponder.keyboardWillHideNotification, object: nil)
+        
+        messageInputContainerView.isHidden = true
+        
+        inputTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        inputTextField.addTarget(self, action: #selector(textFieldBecameFirstResponder(_:)), for: .editingDidBegin)
+    }
+    
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        let customText = customTexts.last
+        customText?.textNode.text = textField.text ?? ""
+    }
+    
+    @objc func textFieldBecameFirstResponder(_ textField: UITextField) {
+        let customText = customTexts.last
+        textField.text = customText?.textNode.text
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        buttonsStackView.isHidden = false
+    }
+    
+    func setupInputComponents() {
+        messageInputContainerView.addSubview(inputTextField)
+        inputTextField.translatesAutoresizingMaskIntoConstraints = false
+        inputTextField.leadingAnchor.constraint(equalTo: messageInputContainerView.leadingAnchor, constant: 8).isActive = true
+        inputTextField.trailingAnchor.constraint(equalTo: messageInputContainerView.trailingAnchor).isActive = true
+        inputTextField.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
+        inputTextField.topAnchor.constraint(equalTo: messageInputContainerView.topAnchor).isActive = true
+    }
+    
+    @objc func handleKeyboardNotification(notification: NSNotification) {
+        
+        if let userInfo = notification.userInfo {
+            let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+            
+            let isKeyboardShowing = notification.name == UIResponder.keyboardWillShowNotification
+            
+            bottomConstraint?.constant = isKeyboardShowing ? -keyboardFrame.height : 0
+            
+            UIView.animate(withDuration: 0, delay: 0, options: UIView.AnimationOptions.curveEaseOut, animations: {
+                self.messageInputContainerView.isHidden = !self.messageInputContainerView.isHidden
+                self.view.layoutIfNeeded()
+            }) { (completed) in
+            }
+        }
     }
     
     func createCanvas() {
         self.canvas = Shape(form: Rect(x: 0, y: 0, w: Double(image.size.width), h: Double(image.size.height)), fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
         
         var startPoint = Point()
-        //var panel: Node?
         
         // creating new shape during first touch on canvas
         canvas.onTouchPressed { event in
@@ -64,9 +147,17 @@ class ViewController: UIViewController {
             
             startPoint = loc
             
+            self.redoShapes = []
+            
             switch self.activeTool {
             case .freeDraw:
                 self.newShape = FreeDrawing(startPoint: startPoint, lastPoint: startPoint)
+            case .text:
+                return
+                //self.newCustomText = CustomText(text: "asd asdas dsa dsadas", startPoint: startPoint)
+//                self.newShape = CustomText(text: "asd asdas dsa dsadas", startPoint: startPoint)
+//                let customText = self.newShape as! CustomText
+//                customText.delegate = self
             case .line:
                 self.newShape = CustomLine(startPoint: startPoint, lastPoint: startPoint)
             case .ellipse:
@@ -83,8 +174,12 @@ class ViewController: UIViewController {
                 return
             }
             
-            self.redoShapes = []
-            self.group.contents.append(self.newShape)
+            
+//            if self.activeTool == .text {
+//
+//            } else {
+                self.group.contents.append(self.newShape)
+            //}
         }
         
         // resizing new shape when moving first touch
@@ -92,7 +187,7 @@ class ViewController: UIViewController {
                     
             //self.canvasActive = true
             
-            if self.activeTool == .none {
+            if self.activeTool == .none || self.activeTool == .text {
                 return
             }
             
@@ -112,42 +207,108 @@ class ViewController: UIViewController {
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
+//            if let customText = self.newShape as? CustomText {
+//                //let center = self.newShape.getCenter()
+//                self.shapeTransformations[self.newShape.hash] = (0,0, 1, 0)
+//
+//                customText.rect.onTap(f: { (event) in
+//                    print("customText.rect.onTap")
+//                    customText.active = !customText.active
+//                    if customText.active {
+//                        let stroke = Stroke(fill: Color.blue, width: 2.0)
+//                        customText.updateStroke(stroke: stroke)
+//                        self.inputTextField.becomeFirstResponder()
+//                    } else {
+//                        let stroke = Stroke(fill: Color.red, width: 2.0)
+//                        customText.updateStroke(stroke: stroke)
+//                        self.inputTextField.resignFirstResponder()
+//                    }
+//                })
+//
+//            } else
+            
+            if self.activeTool == .text {
+                let customText = CustomText(text: "asd asdas dsa dsadas", startPoint: startPoint)
+                self.customTexts.append(customText)
+                
+                self.shapeTransformations[customText.hash] = (0,0, 1, 0)
+                
+                customText.onTap(f: { (event) in
+                    print("customText.onTap")
+                    customText.active = !customText.active
+                    if customText.active {
+                        
+                        self.customTexts.removeAll(where: { (text) -> Bool in
+                            text == customText
+                        })
+                        
+                        for text in self.customTexts {
+                            let stroke = Stroke(fill: Color.red, width: 2.0)
+                            text.updateStroke(stroke: stroke)
+                        }
+                        
+                        self.customTexts.append(customText)
+                        
+                        let stroke = Stroke(fill: Color.blue, width: 2.0)
+                        customText.updateStroke(stroke: stroke)
+                        self.inputTextField.becomeFirstResponder()
+                    } else {
+                        let stroke = Stroke(fill: Color.red, width: 2.0)
+                        customText.updateStroke(stroke: stroke)
+                        self.inputTextField.resignFirstResponder()
+                    }
+                })
+                
+                customText.onPan { event in
+                    
+                    print("customText.onPan")
+                    
+                    //self.scrollview.isScrollEnabled = false
+                    
+                    let transform = self.shapeTransformations[customText.hash]
+                    self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: customText.hash)
+                    self.updatePlace(node: customText)
+                    //}
+                }
+                
+                self.group.contents.append(customText)
+                
+                return
+                
+            } else
+            
             if let _ = self.newShape as? FreeDrawing {
-                let center = self.newShape.getCenter()
-                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y,1, 0, center?.x ?? 0, center?.y ?? 0)
+                //let center = self.newShape.getCenter()
+                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
             } else {
                 self.group.contents.removeLast()
                 self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
                 self.newShape.activateCircleAction()
                 self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-                let center = self.newShape.getCenter()
-                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y,1, 0, center?.x ?? 0, center?.y ?? 0)
+                //let center = self.newShape.getCenter()
+                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
             }
 
-            self.newShape.onTap(f: { (event) in
-                
-                guard let node = event.node else { print("problem on panel pan")
-                    return
-                }
-                
-                self.shapeActive = !self.shapeActive
-                
-                if let customShape = node as? CustomShape {
-                    
-                    if self.shapeActive {
-                        let stroke = Stroke(fill: Color.blue, width: 2.0)
-                        customShape.updateStroke(stroke: stroke)
-                    } else {
-                        let stroke = Stroke(fill: Color.red, width: 2.0)
-                        customShape.updateStroke(stroke: stroke)
-                    }
-                }
-            })
+//            self.newShape.onTap(f: { (event) in
+//
+//                print("newShape.onTap")
+//
+//                guard let node = event.node else { print("problem on panel pan")
+//                    return
+//                }
+//
+//                if let customShape = node as? CustomShape {
+//                    customShape.isActive = !customShape.isActive
+//                }
+//
+//            })
             
             // moving existing shape
             self.newShape.onPan { event in
                 
-                if !self.canvasActive {
+                print("newShape.onPan")
+                
+                //if !self.canvasActive {
                     guard let node = event.node else { print("problem on panel pan")
                         return
                     }
@@ -155,72 +316,49 @@ class ViewController: UIViewController {
                     //self.scrollview.isScrollEnabled = false
                     
                     let transform = self.shapeTransformations[node.hash]
-                    
-                    let dx = transform!.dx + event.dx
-                    let dy = transform!.dy + event.dy
-                    let scale = transform!.scale
-                    let angle = transform!.angle
-                    let angleX = transform!.angleX
-                    let angleY = transform!.angleY
-                    
-                    let shape = node as! CustomShape
-                    let center = shape.getCenter()
-                    
-                    node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle, x: angleX, y: angleY)
-                    
-                    self.shapeTransformations.updateValue((dx, dy, scale, angle, angleX, angleY), forKey: node.hash)
-                    
-                }
+                    self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: node.hash)
+                    self.updatePlace(node: node)
+                //}
             }
             
             // resizing existing shape
             self.newShape.onPinch { event in
                 
+                print("newShape.onPinch")
+                
                 guard let node = event.node else { print("problem on panel pinch")
                     return
                 }
                 
+                if let _ = node as? CustomText {
+                    return
+                }
+                
                 let transform = self.shapeTransformations[node.hash]
-                let dx = transform!.dx
-                let dy = transform!.dy
-                let scale = transform!.scale * event.scale
-                let angle = transform!.angle
-                let angleX = transform!.angleX
-                let angleY = transform!.angleY
+                self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale * event.scale, transform!.angle), forKey: node.hash)
+                self.updatePlace(node: node)
                 
-                let shape = node as! CustomShape
-                let center = shape.getCenter()
-                
-                node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle, x: angleX, y: angleY)
-                
-                self.shapeTransformations.updateValue((dx, dy, scale, angle, angleX, angleY), forKey: node.hash)
-                
-                let newStroke = Stroke(fill: Color.red, width: self.stroke.width/scale)
-                
+                let newStroke = Stroke(fill: Color.red, width: self.stroke.width/(transform!.scale * event.scale))
                 if let shape = node as? CustomShape {
                     shape.updateStroke(stroke: newStroke)
                 }
             }
             
             self.newShape.onRotate { event in
+                
+                print("newShape.onRotate")
+                
                 guard let node = event.node else { print("problem on panel rotate")
                     return
                 }
                 
-                let shape = node as! CustomShape
-                let center = shape.getCenter()
+                if let _ = node as? CustomText {
+                    return
+                }
                 
                 let transform = self.shapeTransformations[node.hash]
-                let dx = transform!.dx
-                let dy = transform!.dy
-                let scale = transform!.scale
-                let angle = transform!.angle + event.angle
-                let angleX = center?.x ?? 0
-                let angleY = center?.y ?? 0
-                
-                node.place = Transform.move(dx: dx, dy: dy).scale(sx: scale, sy: scale).rotate(angle: angle, x: angleX, y: angleY)
-                
-                self.shapeTransformations.updateValue((dx, dy, scale, angle, angleX, angleY), forKey: node.hash)
+                self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale, transform!.angle + event.angle), forKey: node.hash)
+                self.updatePlace(node: node)
             }
             
             self.shapesGroup.contents.append(self.newShape)
@@ -230,6 +368,20 @@ class ViewController: UIViewController {
         group = Group(contents: [canvas, shapesGroup])
         macawView.node = group
         scrollview.bounces = false
+    }
+    
+    func updatePlace(node: Node) {
+        
+        let shape = node as! CustomShape
+        
+        if let _ = shape as? FreeDrawing {
+            return
+        }
+        
+        let center = shape.getCenter()
+        let transform = self.shapeTransformations[node.hash]
+        
+        node.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
     }
     
     func configMacawView(){
@@ -270,6 +422,11 @@ class ViewController: UIViewController {
     @IBAction func freeDrawingTool(_ sender: UIButton) {
         activeTool = .freeDraw
     }
+    
+    @IBAction func textTool(_ sender: UIButton) {
+        activeTool = .text
+    }
+    
     @IBAction func activeLineTool(_ sender: UIButton) {
         activeTool = .line
     }
@@ -318,3 +475,16 @@ class ViewController: UIViewController {
 //        return backgroundView
 //    }
 //}
+
+extension ViewController: CustomTextDelegate {
+    
+    func activateKeyboard(customText: CustomText, activate: Bool) {
+        if activate {
+            self.inputTextField.becomeFirstResponder()
+            self.messageInputContainerView.isHidden = true
+        } else {
+            self.inputTextField.becomeFirstResponder()
+            self.messageInputContainerView.isHidden = false
+        }
+    }
+}

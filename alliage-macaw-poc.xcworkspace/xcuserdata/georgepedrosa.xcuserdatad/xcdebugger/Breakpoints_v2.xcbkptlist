@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "alliage-macaw-poc/FreeDrawing.swift"
-            timestampString = "581972088.937553"
+            timestampString = "582480618.3580461"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "48"
@@ -26,43 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "alliage-macaw-poc/ViewController.swift"
-            timestampString = "582132066.99738"
+            timestampString = "582480618.35814"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "152"
-            endingLineNumber = "152"
-            landmarkName = "createCanvas()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "alliage-macaw-poc/ViewController.swift"
-            timestampString = "582132066.99783"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "315"
-            endingLineNumber = "315"
-            landmarkName = "createCanvas()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "alliage-macaw-poc/ViewController.swift"
-            timestampString = "582132066.998086"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "208"
-            endingLineNumber = "208"
+            startingLineNumber = "339"
+            endingLineNumber = "339"
             landmarkName = "createCanvas()"
             landmarkType = "7">
          </BreakpointContent>
@@ -74,12 +42,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "alliage-macaw-poc/ViewController.swift"
-            timestampString = "582132066.998351"
+            timestampString = "582480618.3587869"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "122"
-            endingLineNumber = "122"
-            landmarkName = "handleKeyboardNotification(notification:)"
+            startingLineNumber = "298"
+            endingLineNumber = "298"
+            landmarkName = "createCanvas()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -90,12 +58,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "alliage-macaw-poc/ViewController.swift"
-            timestampString = "582132066.998595"
+            timestampString = "582480618.359242"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "127"
-            endingLineNumber = "127"
-            landmarkName = "handleKeyboardNotification(notification:)"
+            startingLineNumber = "392"
+            endingLineNumber = "392"
+            landmarkName = "createCanvas()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

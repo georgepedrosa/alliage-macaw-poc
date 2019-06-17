@@ -39,9 +39,9 @@ class ViewController: UIViewController {
         return view
     }()
     
-    let inputTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "Enter message"
+    let inputTextField: UITextView = {
+        let textField = UITextView()
+        //textField.placeholder = "Enter message"
         return textField
     }()
     
@@ -55,8 +55,7 @@ class ViewController: UIViewController {
     var newShape: CustomShape!
     
     var customTexts: [CustomText] = []
-    
-    //var newCustomText: CustomText!
+    var isKeyboardShowing: Bool = false
     
     var canvasActive: Bool = false
     var activeTool: Tool = .none
@@ -80,20 +79,15 @@ class ViewController: UIViewController {
         view.addConstraint(bottomConstraint!)
         
         setupInputComponents()
+        configInputNotifications()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification), name: UIResponder.keyboardWillShowNotification, object: nil)
-        
-         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification), name: UIResponder.keyboardWillHideNotification, object: nil)
-        
-        messageInputContainerView.isHidden = true
-        
-        inputTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        inputTextField.addTarget(self, action: #selector(textFieldBecameFirstResponder(_:)), for: .editingDidBegin)
+        //inputTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        //inputTextField.addTarget(self, action: #selector(textFieldBecameFirstResponder(_:)), for: .editingDidBegin)
     }
     
     @objc func textFieldDidChange(_ textField: UITextField) {
         let customText = customTexts.last
-        customText?.textNode.text = textField.text ?? ""
+        customText?.setText(text: textField.text ?? "")
     }
     
     @objc func textFieldBecameFirstResponder(_ textField: UITextField) {
@@ -114,6 +108,13 @@ class ViewController: UIViewController {
         inputTextField.trailingAnchor.constraint(equalTo: messageInputContainerView.trailingAnchor).isActive = true
         inputTextField.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
         inputTextField.topAnchor.constraint(equalTo: messageInputContainerView.topAnchor).isActive = true
+        messageInputContainerView.isHidden = true
+        inputTextField.delegate = self
+    }
+    
+    func configInputNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardNotification), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     @objc func handleKeyboardNotification(notification: NSNotification) {
@@ -121,12 +122,18 @@ class ViewController: UIViewController {
         if let userInfo = notification.userInfo {
             let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
             
-            let isKeyboardShowing = notification.name == UIResponder.keyboardWillShowNotification
+            isKeyboardShowing = notification.name == UIResponder.keyboardWillShowNotification
+            
+            if !isKeyboardShowing {
+                for text in self.customTexts {
+                text.isActive = false
+                }
+            }
             
             bottomConstraint?.constant = isKeyboardShowing ? -keyboardFrame.height : 0
-            
+            self.messageInputContainerView.isHidden = !self.messageInputContainerView.isHidden
+
             UIView.animate(withDuration: 0, delay: 0, options: UIView.AnimationOptions.curveEaseOut, animations: {
-                self.messageInputContainerView.isHidden = !self.messageInputContainerView.isHidden
                 self.view.layoutIfNeeded()
             }) { (completed) in
             }
@@ -228,33 +235,48 @@ class ViewController: UIViewController {
 //            } else
             
             if self.activeTool == .text {
-                let customText = CustomText(text: "asd asdas dsa dsadas", startPoint: startPoint)
-                self.customTexts.append(customText)
                 
+                if self.isKeyboardShowing {
+                    self.inputTextField.resignFirstResponder()
+                    return
+                }
+                
+                let customText = CustomText(text: "", startPoint: startPoint)
+                self.customTexts.append(customText)
+                self.inputTextField.becomeFirstResponder()
                 self.shapeTransformations[customText.hash] = (0,0, 1, 0)
                 
                 customText.onTap(f: { (event) in
                     print("customText.onTap")
-                    customText.active = !customText.active
-                    if customText.active {
-                        
+                    
+                    if self.isKeyboardShowing && !customText.isActive {
+                        self.inputTextField.resignFirstResponder()
+                        return
+                    }
+                    
+                    customText.isActive = !customText.isActive
+                    if customText.isActive {
                         self.customTexts.removeAll(where: { (text) -> Bool in
                             text == customText
                         })
                         
                         for text in self.customTexts {
-                            let stroke = Stroke(fill: Color.red, width: 2.0)
-                            text.updateStroke(stroke: stroke)
+                            //et stroke = Stroke(fill: Color.red, width: 2.0)
+                            //text.updateStroke(stroke: stroke)
+                            text.isActive = false
                         }
                         
                         self.customTexts.append(customText)
                         
-                        let stroke = Stroke(fill: Color.blue, width: 2.0)
-                        customText.updateStroke(stroke: stroke)
+                        //let stroke = Stroke(fill: Color.blue, width: 2.0)
+                        //customText.updateStroke(stroke: stroke)
                         self.inputTextField.becomeFirstResponder()
+                        //self.customTextIsActive = true
+
                     } else {
-                        let stroke = Stroke(fill: Color.red, width: 2.0)
-                        customText.updateStroke(stroke: stroke)
+                        //let stroke = Stroke(fill: Color.red, width: 2.0)
+                        //customText.updateStroke(stroke: stroke)
+                        //self.customTextIsActive = false
                         self.inputTextField.resignFirstResponder()
                     }
                 })
@@ -271,7 +293,9 @@ class ViewController: UIViewController {
                     //}
                 }
                 
-                self.group.contents.append(customText)
+                self.shapesGroup.contents.append(customText)
+                
+                //self.group.contents.append(customText)
                 
                 return
                 
@@ -455,6 +479,9 @@ class ViewController: UIViewController {
             if let freeDrawing = undoneNode as? FreeDrawing {
                 freeDrawing.deleteShape()
             }
+            if let text = undoneNode as? CustomText {
+                text.deleteShape()
+            }
             redoShapes.append(undoneNode)
         }
     }
@@ -463,6 +490,9 @@ class ViewController: UIViewController {
         if let redoneNode = redoShapes.popLast() {
             if let freeDrawing = redoneNode as? FreeDrawing {
                 freeDrawing.redoShape()
+            }
+            if let text = redoneNode as? CustomText {
+                text.redoShape()
             }
             shapesGroup.contents.append(redoneNode)
         }
@@ -486,5 +516,18 @@ extension ViewController: CustomTextDelegate {
             self.inputTextField.becomeFirstResponder()
             self.messageInputContainerView.isHidden = false
         }
+    }
+}
+
+extension ViewController: UITextViewDelegate {
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        let customText = customTexts.last
+        textView.text = customText?.textNode.text
+    }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        let customText = customTexts.last
+        customText?.setText(text: textView.text ?? "")
     }
 }

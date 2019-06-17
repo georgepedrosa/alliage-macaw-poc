@@ -21,7 +21,11 @@ class CustomText: Group, CustomShape {
     public var rect: Shape!
     var textNode: Text!
     
-    var isActive: Bool = false
+    var isActive: Bool = true {
+        didSet {
+            rect.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+        }
+    }
     
     var delegate: CustomTextDelegate!
     
@@ -32,26 +36,23 @@ class CustomText: Group, CustomShape {
     init(text: String, startPoint: Point) {
         super.init()
         textNode = Text(text: text, fill: Color.white, place: .move(startPoint.x, startPoint.y))
-        let rectLocus = Rect(x: 0, y: 0, w: textNode.bounds.w, h: textNode.bounds.h)
-        rect = Shape(form: rectLocus, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0), place: .move(startPoint.x, startPoint.y))
-        
-//        self.onTap { (event) in
-//            self.active = !self.active
-//            if self.active {
-//                self.rect.stroke = Stroke(fill: Color.green, width: 2.0)
-//                self.delegate.activateKeyboard(customText: self, activate: true)
-//                
-//            } else {
-//                self.rect.stroke = Stroke(fill: Color.red, width: 2.0)
-//                self.delegate.activateKeyboard(customText: self, activate: false)
-//            }
-//        }
-//        
-//        self.onPan { (event) in
-//            print("panned")
-//        }
+        let rectLocus = Rect(x: 0, y: 0, w: 30, h: textNode.bounds.h)
+        rect = Shape(form: rectLocus, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0), place: .move(startPoint.x, startPoint.y))
         
         contents = [rect, textNode]
+    }
+    
+    func setText(text: String) {
+        textNode.text = text
+        
+        let rectLocus: Locus!
+        
+        if text == "" {
+            rectLocus = Rect(x: 0, y: 0, w: 30, h: textNode.bounds.h)
+        } else {
+            rectLocus = Rect(x: 0, y: 0, w: textNode.bounds.w, h: textNode.bounds.h)
+        }
+        rect.form = rectLocus
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
@@ -68,6 +69,14 @@ class CustomText: Group, CustomShape {
     
     func activateCircleAction() {
         
+    }
+    
+    func deleteShape() {
+        contents = []
+    }
+    
+    func redoShape() {
+        contents = [rect, textNode]
     }
 
 }

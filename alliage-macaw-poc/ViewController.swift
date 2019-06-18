@@ -39,10 +39,9 @@ class ViewController: UIViewController {
         return view
     }()
     
-    let inputTextField: UITextView = {
-        let textField = UITextView()
-        //textField.placeholder = "Enter message"
-        return textField
+    let inputTextView: UITextView = {
+        let textView = UITextView()
+        return textView
     }()
     
     let stroke = Stroke(fill: Color.red, width: 2.0)
@@ -80,9 +79,6 @@ class ViewController: UIViewController {
         
         setupInputComponents()
         configInputNotifications()
-        
-        //inputTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        //inputTextField.addTarget(self, action: #selector(textFieldBecameFirstResponder(_:)), for: .editingDidBegin)
     }
     
     @objc func textFieldDidChange(_ textField: UITextField) {
@@ -102,14 +98,14 @@ class ViewController: UIViewController {
     }
     
     func setupInputComponents() {
-        messageInputContainerView.addSubview(inputTextField)
-        inputTextField.translatesAutoresizingMaskIntoConstraints = false
-        inputTextField.leadingAnchor.constraint(equalTo: messageInputContainerView.leadingAnchor, constant: 8).isActive = true
-        inputTextField.trailingAnchor.constraint(equalTo: messageInputContainerView.trailingAnchor).isActive = true
-        inputTextField.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
-        inputTextField.topAnchor.constraint(equalTo: messageInputContainerView.topAnchor).isActive = true
+        messageInputContainerView.addSubview(inputTextView)
+        inputTextView.translatesAutoresizingMaskIntoConstraints = false
+        inputTextView.leadingAnchor.constraint(equalTo: messageInputContainerView.leadingAnchor, constant: 8).isActive = true
+        inputTextView.trailingAnchor.constraint(equalTo: messageInputContainerView.trailingAnchor).isActive = true
+        inputTextView.bottomAnchor.constraint(equalTo: messageInputContainerView.bottomAnchor).isActive = true
+        inputTextView.topAnchor.constraint(equalTo: messageInputContainerView.topAnchor).isActive = true
         messageInputContainerView.isHidden = true
-        inputTextField.delegate = self
+        inputTextView.delegate = self
     }
     
     func configInputNotifications() {
@@ -161,10 +157,6 @@ class ViewController: UIViewController {
                 self.newShape = FreeDrawing(startPoint: startPoint, lastPoint: startPoint)
             case .text:
                 return
-                //self.newCustomText = CustomText(text: "asd asdas dsa dsadas", startPoint: startPoint)
-//                self.newShape = CustomText(text: "asd asdas dsa dsadas", startPoint: startPoint)
-//                let customText = self.newShape as! CustomText
-//                customText.delegate = self
             case .line:
                 self.newShape = CustomLine(startPoint: startPoint, lastPoint: startPoint)
             case .ellipse:
@@ -185,7 +177,8 @@ class ViewController: UIViewController {
 //            if self.activeTool == .text {
 //
 //            } else {
-                self.group.contents.append(self.newShape)
+                self.shapesGroup.contents.append(self.newShape)
+                //self.group.contents.append(self.newShape)
             //}
         }
         
@@ -214,43 +207,22 @@ class ViewController: UIViewController {
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
-//            if let customText = self.newShape as? CustomText {
-//                //let center = self.newShape.getCenter()
-//                self.shapeTransformations[self.newShape.hash] = (0,0, 1, 0)
-//
-//                customText.rect.onTap(f: { (event) in
-//                    print("customText.rect.onTap")
-//                    customText.active = !customText.active
-//                    if customText.active {
-//                        let stroke = Stroke(fill: Color.blue, width: 2.0)
-//                        customText.updateStroke(stroke: stroke)
-//                        self.inputTextField.becomeFirstResponder()
-//                    } else {
-//                        let stroke = Stroke(fill: Color.red, width: 2.0)
-//                        customText.updateStroke(stroke: stroke)
-//                        self.inputTextField.resignFirstResponder()
-//                    }
-//                })
-//
-//            } else
-            
             if self.activeTool == .text {
                 
                 if self.isKeyboardShowing {
-                    self.inputTextField.resignFirstResponder()
+                    self.inputTextView.resignFirstResponder()
                     return
                 }
                 
                 let customText = CustomText(text: "", startPoint: startPoint)
                 self.customTexts.append(customText)
-                self.inputTextField.becomeFirstResponder()
+                self.inputTextView.becomeFirstResponder()
                 self.shapeTransformations[customText.hash] = (0,0, 1, 0)
                 
                 customText.onTap(f: { (event) in
-                    print("customText.onTap")
                     
                     if self.isKeyboardShowing && !customText.isActive {
-                        self.inputTextField.resignFirstResponder()
+                        self.inputTextView.resignFirstResponder()
                         return
                     }
                     
@@ -270,32 +242,27 @@ class ViewController: UIViewController {
                         
                         //let stroke = Stroke(fill: Color.blue, width: 2.0)
                         //customText.updateStroke(stroke: stroke)
-                        self.inputTextField.becomeFirstResponder()
+                        self.inputTextView.becomeFirstResponder()
                         //self.customTextIsActive = true
 
                     } else {
                         //let stroke = Stroke(fill: Color.red, width: 2.0)
                         //customText.updateStroke(stroke: stroke)
                         //self.customTextIsActive = false
-                        self.inputTextField.resignFirstResponder()
+                        self.inputTextView.resignFirstResponder()
                     }
                 })
                 
                 customText.onPan { event in
-                    
-                    print("customText.onPan")
-                    
+                                        
                     //self.scrollview.isScrollEnabled = false
                     
                     let transform = self.shapeTransformations[customText.hash]
                     self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: customText.hash)
                     self.updatePlace(node: customText)
-                    //}
                 }
                 
                 self.shapesGroup.contents.append(customText)
-                
-                //self.group.contents.append(customText)
                 
                 return
                 
@@ -305,11 +272,10 @@ class ViewController: UIViewController {
                 //let center = self.newShape.getCenter()
                 self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
             } else {
-                self.group.contents.removeLast()
+                self.shapesGroup.contents.removeLast()
                 self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
                 self.newShape.activateCircleAction()
                 self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-                //let center = self.newShape.getCenter()
                 self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
             }
 
@@ -330,8 +296,6 @@ class ViewController: UIViewController {
             // moving existing shape
             self.newShape.onPan { event in
                 
-                print("newShape.onPan")
-                
                 //if !self.canvasActive {
                     guard let node = event.node else { print("problem on panel pan")
                         return
@@ -347,8 +311,6 @@ class ViewController: UIViewController {
             
             // resizing existing shape
             self.newShape.onPinch { event in
-                
-                print("newShape.onPinch")
                 
                 guard let node = event.node else { print("problem on panel pinch")
                     return
@@ -370,8 +332,6 @@ class ViewController: UIViewController {
             
             self.newShape.onRotate { event in
                 
-                print("newShape.onRotate")
-                
                 guard let node = event.node else { print("problem on panel rotate")
                     return
                 }
@@ -389,7 +349,7 @@ class ViewController: UIViewController {
             self.canvasActive = false
         }
         
-        group = Group(contents: [canvas, shapesGroup])
+        group = Group(contents: [shapesGroup, canvas])
         macawView.node = group
         scrollview.bounces = false
     }
@@ -473,6 +433,7 @@ class ViewController: UIViewController {
         selectionButton.isSelected = !selectionButton.isSelected
         let first = group.contents.remove(at: 0)
         group.contents.append(first)
+        print("")
     }
     @IBAction func undoTool(_ sender: Any) {
         if let undoneNode = shapesGroup.contents.popLast() {
@@ -510,10 +471,10 @@ extension ViewController: CustomTextDelegate {
     
     func activateKeyboard(customText: CustomText, activate: Bool) {
         if activate {
-            self.inputTextField.becomeFirstResponder()
+            self.inputTextView.becomeFirstResponder()
             self.messageInputContainerView.isHidden = true
         } else {
-            self.inputTextField.becomeFirstResponder()
+            self.inputTextView.becomeFirstResponder()
             self.messageInputContainerView.isHidden = false
         }
     }

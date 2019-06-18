@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "alliage-macaw-poc/FreeDrawing.swift"
-            timestampString = "582480618.3580461"
+            timestampString = "582481241.278843"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "48"
@@ -26,43 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "alliage-macaw-poc/ViewController.swift"
-            timestampString = "582480618.35814"
+            timestampString = "582557811.300824"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "339"
-            endingLineNumber = "339"
-            landmarkName = "createCanvas()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "alliage-macaw-poc/ViewController.swift"
-            timestampString = "582480618.3587869"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "298"
-            endingLineNumber = "298"
-            landmarkName = "createCanvas()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "alliage-macaw-poc/ViewController.swift"
-            timestampString = "582480618.359242"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "392"
-            endingLineNumber = "392"
+            startingLineNumber = "341"
+            endingLineNumber = "341"
             landmarkName = "createCanvas()"
             landmarkType = "7">
          </BreakpointContent>

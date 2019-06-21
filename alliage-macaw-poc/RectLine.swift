@@ -18,29 +18,29 @@ class RectLine: Group, CustomShape {
     var isActive: Bool = false {
         didSet {
             if isActive {
-                rect.stroke = Stroke(fill: Color.blue, width: 2.0)
-                line.stroke = Stroke(fill: Color.blue, width: 2.0)
-                circle.stroke = Stroke(fill: Color.green, width: 2.0)
+                rect.stroke = Stroke(fill: Color.blue, width: 5.0)
+                line.stroke = Stroke(fill: Color.blue, width: 5.0)
+                circle.stroke = Stroke(fill: Color.green, width: 5.0)
             } else {
-                rect.stroke = Stroke(fill: Color.red, width: 2.0)
-                line.stroke = Stroke(fill: Color.red, width: 2.0)
-                circle.stroke = Stroke(fill: Color.clear, width: 2.0)
+                rect.stroke = Stroke(fill: Color.red, width: 5.0)
+                line.stroke = Stroke(fill: Color.red, width: 5.0)
+                circle.stroke = Stroke(fill: Color.clear, width: 5.0)
             }
         }
     }
     
-    required init(startPoint: Point, lastPoint: Point) {
+    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
         let locusLine = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
-        line = Shape(form: locusLine, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        line = Shape(form: locusLine, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 5.0))
         
         let width = lastPoint.x - startPoint.x
         let height = lastPoint.y - startPoint.y
         let locusRect = Rect(x: startPoint.x, y: startPoint.y, w: width, h: height)
-        rect = Shape(form: locusRect, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        rect = Shape(form: locusRect, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 5.0))
         
         let locusCircle = Circle(cx: lastPoint.x, cy: lastPoint.y, r: 15)
-        circle = Shape(form: locusCircle, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 2.0))
+        circle = Shape(form: locusCircle, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         contents = [circle, line, rect]
     }
     
@@ -54,9 +54,9 @@ class RectLine: Group, CustomShape {
         line.stroke = stroke
         rect.stroke = stroke
         if stroke.fill == Color.blue {
-            circle.stroke = Stroke(fill: Color.green, width: 2.0)
+            circle.stroke = Stroke(fill: Color.green, width: 5.0)
         } else {
-            circle.stroke = Stroke(fill: Color.clear, width: 2.0)
+            circle.stroke = Stroke(fill: Color.clear, width: 5.0)
         }
     }
     

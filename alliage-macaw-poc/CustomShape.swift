@@ -10,7 +10,7 @@ import UIKit
 import Macaw
 
 protocol CustomShape: Node {
-    init(startPoint: Point, lastPoint: Point)
+    init(startPoint: Point, lastPoint: Point, stroke: Stroke)
     var isActive: Bool { get set }
     func updateForm(startPoint: Point, lastPoint: Point)
     func updateStroke(stroke: Stroke)

@@ -16,15 +16,15 @@ class CustomLine: Group, CustomShape {
     
     var isActive: Bool = false {
         didSet {
-            line.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            line.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
         }
     }
     
-    required init(startPoint: Point, lastPoint: Point) {
+    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
         
         let lineLocus = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
-        line = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        line = Shape(form: lineLocus, fill: Color.clear, stroke: stroke)
         backgroundLine = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
         contents = [line, backgroundLine]

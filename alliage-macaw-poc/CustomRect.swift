@@ -14,18 +14,18 @@ class CustomRect: Group, CustomShape {
     var rect: Shape!
     var isActive: Bool = false {
         didSet {
-            rect.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            rect.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
         }
     }
     
-    required init(startPoint: Point, lastPoint: Point) {
+    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
         
         let width = lastPoint.x - startPoint.x
         let height = lastPoint.y - startPoint.y
         
         let rectLocus = Rect(x: startPoint.x, y: startPoint.y, w: width, h: height)
-        rect = Shape(form: rectLocus, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        rect = Shape(form: rectLocus, fill: Color.clear, stroke: stroke)
         
         contents = [rect]
     }

@@ -15,7 +15,7 @@ enum Tool {
     case line
     case ellipse
     case rect
-    case rectLine
+    case protractor
     case arrow
     case asterisk
     case none
@@ -44,7 +44,8 @@ class ViewController: UIViewController {
         return textView
     }()
     
-    let stroke = Stroke(fill: Color.red, width: 2.0)
+    let stroke = Stroke(fill: Color.red, width: 5.0)
+    let textColor = Color.red
     
     var group: Group!
     var canvas: Shape!
@@ -79,22 +80,7 @@ class ViewController: UIViewController {
         
         setupInputComponents()
         configInputNotifications()
-    }
-    
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        let customText = customTexts.last
-        customText?.setText(text: textField.text ?? "")
-    }
-    
-    @objc func textFieldBecameFirstResponder(_ textField: UITextField) {
-        let customText = customTexts.last
-        textField.text = customText?.textNode.text
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
         
-        buttonsStackView.isHidden = false
     }
     
     func setupInputComponents() {
@@ -118,15 +104,15 @@ class ViewController: UIViewController {
         if let userInfo = notification.userInfo {
             let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
             
-            isKeyboardShowing = notification.name == UIResponder.keyboardWillShowNotification
+            isKeyboardShowing = notification.name == UIResponder.keyboardWillShowNotification //storing keyboard state for future reference on text events
             
-            if !isKeyboardShowing {
+            if !isKeyboardShowing { //deactivates all text nodes if keyboard is dismissed
                 for text in self.customTexts {
                 text.isActive = false
                 }
             }
             
-            bottomConstraint?.constant = isKeyboardShowing ? -keyboardFrame.height : 0
+            bottomConstraint?.constant = isKeyboardShowing ? -keyboardFrame.height : 0 //sets inputView constraint according to keyboard height
             self.messageInputContainerView.isHidden = !self.messageInputContainerView.isHidden
 
             UIView.animate(withDuration: 0, delay: 0, options: UIView.AnimationOptions.curveEaseOut, animations: {
@@ -137,49 +123,45 @@ class ViewController: UIViewController {
     }
     
     func createCanvas() {
-        self.canvas = Shape(form: Rect(x: 0, y: 0, w: Double(image.size.width), h: Double(image.size.height)), fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        self.canvas = Shape(form: Rect(x: 0, y: 0, w: Double(image.size.width), h: Double(image.size.height)), fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0)) //creating background canvas
         
         var startPoint = Point()
         
         // creating new shape during first touch on canvas
         canvas.onTouchPressed { event in
             
-            guard let loc = event.points.first?.location(in: .scene)  else {
-                return
-            }
+            if self.selectionButton.isSelected { return }
             
-            startPoint = loc
+            guard let loc = event.points.first?.location(in: .scene)  else { return }
             
-            self.redoShapes = []
+            startPoint = loc //stores initial touch point of new shape to be referenced on subsequent events
             
+            self.redoShapes = [] //creating new shape empties redo shapes array
+            
+            //stores new shape to be referenced on subsequent events
             switch self.activeTool {
             case .freeDraw:
-                self.newShape = FreeDrawing(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = FreeDrawing(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .text:
-                return
+                return //text shape only added to canvas after touch released event
             case .line:
-                self.newShape = CustomLine(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = CustomLine(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .ellipse:
-                self.newShape = CustomEllipse(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = CustomEllipse(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .rect:
-                self.newShape = CustomRect(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = CustomRect(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .arrow:
-                self.newShape = Arrow(startPoint: startPoint, lastPoint: startPoint)
-            case .rectLine:
-                self.newShape = RectLine(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = Arrow(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
+            case .protractor:
+                self.newShape = Protractor(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .asterisk:
-                self.newShape = Asterisk(startPoint: startPoint, lastPoint: startPoint)
+                self.newShape = Asterisk(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .none:
                 return
             }
             
-            
-//            if self.activeTool == .text {
-//
-//            } else {
-                self.shapesGroup.contents.append(self.newShape)
-                //self.group.contents.append(self.newShape)
-            //}
+            self.shapesGroup.contents.append(self.newShape)
+
         }
         
         // resizing new shape when moving first touch
@@ -187,36 +169,34 @@ class ViewController: UIViewController {
                     
             //self.canvasActive = true
             
-            if self.activeTool == .none || self.activeTool == .text {
-                return
-            }
+            if self.activeTool == .none || self.activeTool == .text || self.selectionButton.isSelected { return }
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
-            self.newShape.updateForm(startPoint: startPoint, lastPoint: loc)
+            self.newShape.updateForm(startPoint: startPoint, lastPoint: loc) //updates form of newly created shape while initial touch isn't released
             
             if self.activeTool == .freeDraw {
-                startPoint = loc
+                startPoint = loc //Free Draw line creation: start point is the last touched point
             }
         }
         
         // leaving new shape on canvas when releasing first touch
         canvas.onTouchReleased { (event) in
             
-            guard self.activeTool != .none else { return }
+            if self.activeTool == .none || self.selectionButton.isSelected { return }
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
-            if self.activeTool == .text {
+            if self.activeTool == .text { //special case for text behaviour and events
                 
-                if self.isKeyboardShowing {
-                    self.inputTextView.resignFirstResponder()
-                    return
-                }
+//                if self.isKeyboardShowing {
+//                    self.inputTextView.resignFirstResponder() //resigns last responder if new text is created
+//                    return
+//                }
                 
-                let customText = CustomText(text: "", startPoint: startPoint)
-                self.customTexts.append(customText)
-                self.inputTextView.becomeFirstResponder()
+                let customText = CustomText(text: "", startPoint: startPoint, color: self.textColor)
+                self.customTexts.append(customText) //stores all created texts
+                self.inputTextView.becomeFirstResponder() //always displays keyboard after creating text
                 self.shapeTransformations[customText.hash] = (0,0, 1, 0)
                 
                 customText.onTap(f: { (event) in
@@ -233,22 +213,13 @@ class ViewController: UIViewController {
                         })
                         
                         for text in self.customTexts {
-                            //et stroke = Stroke(fill: Color.red, width: 2.0)
-                            //text.updateStroke(stroke: stroke)
-                            text.isActive = false
+                            text.isActive = false //deselects all texts except current one
                         }
                         
                         self.customTexts.append(customText)
-                        
-                        //let stroke = Stroke(fill: Color.blue, width: 2.0)
-                        //customText.updateStroke(stroke: stroke)
                         self.inputTextView.becomeFirstResponder()
-                        //self.customTextIsActive = true
 
                     } else {
-                        //let stroke = Stroke(fill: Color.red, width: 2.0)
-                        //customText.updateStroke(stroke: stroke)
-                        //self.customTextIsActive = false
                         self.inputTextView.resignFirstResponder()
                     }
                 })
@@ -264,14 +235,38 @@ class ViewController: UIViewController {
                 
                 self.shapesGroup.contents.append(customText)
                 
-                return
+                return //adds newly created text to shapes array and ignores subsequent events
                 
             } else
-            
+                
+            if let protractor = self.newShape as? Protractor { //special case for protractor behaviour and events
+                protractor.circle0.onTouchMoved { (event) in
+                    guard let loc = event.points.first?.location(in: .scene)  else {
+                        return
+                    }
+                    protractor.moveCircle(circle: .zero, toPoint: loc)
+                }
+                protractor.circle1.onTouchMoved { (event) in
+                    guard let loc = event.points.first?.location(in: .scene)  else {
+                        return
+                    }
+                    protractor.moveCircle(circle: .one, toPoint: loc)
+                }
+                protractor.circle2.onTouchMoved { (event) in
+                    guard let loc = event.points.first?.location(in: .scene)  else {
+                        return
+                    }
+                    protractor.moveCircle(circle: .two, toPoint: loc)
+                }
+                return //ignores subsequent events
+                
+            } else
+                
             if let _ = self.newShape as? FreeDrawing {
                 //let center = self.newShape.getCenter()
                 self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
-            } else {
+                return //ignores subsequent events
+            } else { //general shape creation and events
                 self.shapesGroup.contents.removeLast()
                 self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
                 self.newShape.activateCircleAction()
@@ -296,17 +291,17 @@ class ViewController: UIViewController {
             // moving existing shape
             self.newShape.onPan { event in
                 
-                //if !self.canvasActive {
-                    guard let node = event.node else { print("problem on panel pan")
-                        return
-                    }
-                    
-                    //self.scrollview.isScrollEnabled = false
-                    
-                    let transform = self.shapeTransformations[node.hash]
-                    self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: node.hash)
-                    self.updatePlace(node: node)
-                //}
+            //if !self.canvasActive {
+                guard let node = event.node else { print("problem on panel pan")
+                    return
+                }
+                
+                //self.scrollview.isScrollEnabled = false
+                
+                let transform = self.shapeTransformations[node.hash]
+                self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: node.hash)
+                self.updatePlace(node: node)
+            //}
             }
             
             // resizing existing shape
@@ -316,15 +311,11 @@ class ViewController: UIViewController {
                     return
                 }
                 
-                if let _ = node as? CustomText {
-                    return
-                }
-                
                 let transform = self.shapeTransformations[node.hash]
                 self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale * event.scale, transform!.angle), forKey: node.hash)
                 self.updatePlace(node: node)
                 
-                let newStroke = Stroke(fill: Color.red, width: self.stroke.width/(transform!.scale * event.scale))
+                let newStroke = Stroke(fill: self.stroke.fill, width: self.stroke.width/(transform!.scale * event.scale))
                 if let shape = node as? CustomShape {
                     shape.updateStroke(stroke: newStroke)
                 }
@@ -333,10 +324,6 @@ class ViewController: UIViewController {
             self.newShape.onRotate { event in
                 
                 guard let node = event.node else { print("problem on panel rotate")
-                    return
-                }
-                
-                if let _ = node as? CustomText {
                     return
                 }
                 
@@ -351,16 +338,11 @@ class ViewController: UIViewController {
         
         group = Group(contents: [shapesGroup, canvas])
         macawView.node = group
-        scrollview.bounces = false
     }
     
     func updatePlace(node: Node) {
         
         let shape = node as! CustomShape
-        
-        if let _ = shape as? FreeDrawing {
-            return
-        }
         
         let center = shape.getCenter()
         let transform = self.shapeTransformations[node.hash]
@@ -421,7 +403,7 @@ class ViewController: UIViewController {
         activeTool = .ellipse
     }
     @IBAction func activeShapeTool(_ sender: Any) {
-        activeTool = .rectLine
+        activeTool = .protractor
     }
     @IBAction func activeArrowTool(_ sender: Any) {
         activeTool = .arrow
@@ -433,7 +415,6 @@ class ViewController: UIViewController {
         selectionButton.isSelected = !selectionButton.isSelected
         let first = group.contents.remove(at: 0)
         group.contents.append(first)
-        print("")
     }
     @IBAction func undoTool(_ sender: Any) {
         if let undoneNode = shapesGroup.contents.popLast() {

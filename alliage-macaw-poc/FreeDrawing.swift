@@ -20,7 +20,7 @@ class FreeDrawing: Group, CustomShape {
         }
     }
     
-    required init(startPoint: Point, lastPoint: Point) {
+    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
         
         path = MoveTo(x: startPoint.x, y: startPoint.y)

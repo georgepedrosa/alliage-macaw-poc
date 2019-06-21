@@ -15,17 +15,17 @@ class CustomEllipse: Group, CustomShape {
     
     var isActive: Bool = false {
         didSet {
-            ellipse.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            ellipse.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
         }
     }
     
-    required init(startPoint: Point, lastPoint: Point) {
+    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
         
         let width = lastPoint.x - startPoint.x
         let height = lastPoint.y - startPoint.y
         let ellipseLocus = Ellipse(cx: startPoint.x + width/2.0, cy: startPoint.y + height/2.0, rx: width/2.0, ry: height/2.0)
-        ellipse = Shape(form: ellipseLocus, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        ellipse = Shape(form: ellipseLocus, fill: Color.clear, stroke: stroke)
         contents = [ellipse]
     }
     

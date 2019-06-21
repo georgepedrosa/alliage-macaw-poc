@@ -23,19 +23,19 @@ class CustomText: Group, CustomShape {
     
     var isActive: Bool = true {
         didSet {
-            rect.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            rect.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.clear, width: 2.0))
         }
     }
     
     var delegate: CustomTextDelegate!
     
-    required init(startPoint: Point, lastPoint: Point) {
+    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         
     }
     
-    init(text: String, startPoint: Point) {
+    init(text: String, startPoint: Point, color: Color) {
         super.init()
-        textNode = Text(text: text, fill: Color.white, place: .move(startPoint.x, startPoint.y))
+        textNode = Text(text: text, fill: color, place: .move(startPoint.x, startPoint.y))
         let rectLocus = Rect(x: 0, y: 0, w: 30, h: textNode.bounds.h)
         rect = Shape(form: rectLocus, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0), place: .move(startPoint.x, startPoint.y))
         

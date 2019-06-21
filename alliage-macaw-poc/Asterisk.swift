@@ -23,14 +23,14 @@ class Asterisk: Group, CustomShape {
     
     var isActive: Bool = false {
         didSet {
-            line1.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
-            line2.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
-            line3.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
-            line4.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            line1.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
+            line2.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
+            line3.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
+            line4.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
         }
     }
     
-    required init(startPoint: Point, lastPoint: Point) {
+    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
 
         let x1 = startPoint.x
@@ -61,19 +61,19 @@ class Asterisk: Group, CustomShape {
         let y8 = ( -(x2 - cx) * sin(2.36) + (y2 - cy) * cos(2.36) ) + cy
         
         let lineLocus1 = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
-        line1 = Shape(form: lineLocus1, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        line1 = Shape(form: lineLocus1, fill: Color.clear, stroke: stroke)
         backgroundLine1 = Shape(form: lineLocus1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
         let lineLocus2 = Line(x3, y3, x4, y4)
-        line2 = Shape(form: lineLocus2, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        line2 = Shape(form: lineLocus2, fill: Color.clear, stroke: stroke)
         backgroundLine2 = Shape(form: lineLocus2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
         let lineLocus3 = Line(x5, y5, x6, y6)
-        line3 = Shape(form: lineLocus3, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        line3 = Shape(form: lineLocus3, fill: Color.clear, stroke: stroke)
         backgroundLine3 = Shape(form: lineLocus3, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
         let lineLocus4 = Line(x7, y7, x8, y8)
-        line4 = Shape(form: lineLocus4, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0))
+        line4 = Shape(form: lineLocus4, fill: Color.clear, stroke: stroke)
         backgroundLine4 = Shape(form: lineLocus4, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
         contents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4]

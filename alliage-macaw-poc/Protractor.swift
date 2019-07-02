@@ -27,6 +27,7 @@ class Protractor: Group, CustomShape {
     var y2: Double!
     
     let degreesPerRadian: Double = 57.2958
+    let protractorAngle = Double.pi/4
 
     var isActive: Bool = false
 
@@ -46,8 +47,8 @@ class Protractor: Group, CustomShape {
         
         let angle = atan2(y1 - y0, x1 - x0)
         
-        x2 = x0 + d * cos(angle + Double.pi/4)
-        y2 = y0 + d * sin(angle + Double.pi/4)
+        x2 = x0 + d * cos(angle + protractorAngle)
+        y2 = y0 + d * sin(angle + protractorAngle)
         
         let locusLine1 = Line(x0, y0, x1, y1)
         let locusLine2 = Line(x0, y0, x2, y2)
@@ -87,8 +88,8 @@ class Protractor: Group, CustomShape {
         
         let angle = atan2(lastPoint.y - startPoint.y, lastPoint.x - startPoint.x)
         
-        x2 = startPoint.x + d * cos(angle + Double.pi/4)
-        y2 = startPoint.y + d * sin(angle + Double.pi/4)
+        x2 = startPoint.x + d * cos(angle + protractorAngle)
+        y2 = startPoint.y + d * sin(angle + protractorAngle)
         
         self.line1.form = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
         self.x1 = lastPoint.x
@@ -112,7 +113,7 @@ class Protractor: Group, CustomShape {
 //        print("a) " + String(Double.pi * (3/4)))
 //        print("b) " + String(theta2 - theta1))
         
-        if theta2 >= -Double.pi && theta2 <= -Double.pi * (3/4) && theta1 <= Double.pi && theta1 >= Double.pi * (3/4) {
+        if theta2 >= -Double.pi && theta2 <= -(Double.pi - protractorAngle) && theta1 <= Double.pi && theta1 >= Double.pi - protractorAngle {
             angleText = Double.pi + angleText
         }
         
@@ -155,7 +156,7 @@ class Protractor: Group, CustomShape {
             
             var angleText = theta1 + ((theta2 - theta1)/2)
             
-            if theta2 >= -Double.pi && theta2 <= -Double.pi * (3/4) && theta1 <= Double.pi && theta1 >= Double.pi * (3/4) {
+            if theta2 >= -Double.pi && theta2 <= -(Double.pi - angleText) && theta1 <= Double.pi && theta1 >= Double.pi - angleText {
                 angleText = Double.pi + angleText
             }
             
@@ -187,7 +188,7 @@ class Protractor: Group, CustomShape {
             
             var angleText = theta1 + ((theta2 - theta1)/2)
             
-            if theta2 >= -Double.pi && theta2 <= -Double.pi * (3/4) && theta1 <= Double.pi && theta1 >= Double.pi * (3/4) {
+            if theta2 >= -Double.pi && theta2 <= -(Double.pi - angleText) && theta1 <= Double.pi && theta1 >= Double.pi - angleText {
                 angleText = Double.pi + angleText
             }
             
@@ -219,7 +220,7 @@ class Protractor: Group, CustomShape {
             
             var angleText = theta1 + ((theta2 - theta1)/2)
             
-            if theta2 >= -Double.pi && theta2 <= -Double.pi * (3/4) && theta1 <= Double.pi && theta1 >= Double.pi * (3/4) {
+            if theta2 >= -Double.pi && theta2 <= -(Double.pi - angleText) && theta1 <= Double.pi && theta1 >= Double.pi - angleText {
                 angleText = Double.pi + angleText
             }
             

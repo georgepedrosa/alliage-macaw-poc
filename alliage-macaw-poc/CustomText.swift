@@ -9,12 +9,6 @@
 import UIKit
 import Macaw
 
-protocol CustomTextDelegate {
-    
-    func activateKeyboard(customText: CustomText, activate: Bool)
-    
-}
-
 class CustomText: Group, CustomShape {
     
     public var active: Bool = false
@@ -26,8 +20,6 @@ class CustomText: Group, CustomShape {
             rect.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.clear, width: 2.0))
         }
     }
-    
-    var delegate: CustomTextDelegate!
     
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         

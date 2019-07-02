@@ -29,9 +29,22 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var buttonsStackView: UIStackView!
     @IBOutlet weak var scrollview: UIScrollView!
+    
+    @IBOutlet weak var freeButton: UIButton!
+    @IBOutlet weak var textButton: UIButton!
+    @IBOutlet weak var lineButton: UIButton!
+    @IBOutlet weak var rectButton: UIButton!
+    @IBOutlet weak var circleButton: UIButton!
+    @IBOutlet weak var protractorButton: UIButton!
+    @IBOutlet weak var arcButton: UIButton!
+    @IBOutlet weak var arrowButton: UIButton!
+    @IBOutlet weak var asteriskButton: UIButton!
     @IBOutlet weak var selectionButton: UIButton!
+    @IBOutlet weak var handButton: UIButton!
     
     var macawView = MacawView()
+    
+    var lastSelectedButton: UIButton!
     
     let messageInputContainerView: UIView = {
         let view = UIView()
@@ -397,6 +410,23 @@ class ViewController: UIViewController {
             self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale, transform!.angle + event.angle), forKey: line.hash)
             self.updatePlace(node: line)
         }
+        
+        line.backgroundLine.onPinch { (event) in
+            guard let _ = event.node else { print("problem on line pinch")
+                return
+            }
+            
+            let transform = self.shapeTransformations[line.hash]
+            self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale * event.scale, transform!.angle), forKey: line.hash)
+            self.updatePlace(node: line)
+            
+            let newStroke = Stroke(fill: self.stroke.fill, width: self.stroke.width/(transform!.scale * event.scale))
+            let newCircleStroke = Stroke(fill: Color.clear, width: self.stroke.width/(transform!.scale * event.scale))
+            
+            line.updateStroke(stroke: newStroke)
+            line.updateCircleStroke(stroke: newCircleStroke)
+            line.updateSize(scale: transform!.scale * event.scale)
+        }
     }
     
     func setTextEvents(startPoint: Point) {
@@ -508,35 +538,98 @@ class ViewController: UIViewController {
     
     @IBAction func freeDrawingTool(_ sender: UIButton) {
         activeTool = .freeDraw
+        if lastSelectedButton != freeButton {
+            if lastSelectedButton != nil {
+                lastSelectedButton.isSelected = false
+            }
+            freeButton.isSelected = true
+            lastSelectedButton = freeButton
+        }
     }
     
     @IBAction func textTool(_ sender: UIButton) {
         activeTool = .text
+        if lastSelectedButton != textButton {
+            if lastSelectedButton != nil {
+                lastSelectedButton.isSelected = false
+            }
+            textButton.isSelected = true
+            lastSelectedButton = textButton
+        }
     }
     
     @IBAction func activeLineTool(_ sender: UIButton) {
         activeTool = .line
+        if lastSelectedButton != lineButton {
+            if lastSelectedButton != nil {
+                lastSelectedButton.isSelected = false
+            }
+            lineButton.isSelected = true
+            lastSelectedButton = lineButton
+        }
     }
+    
     @IBAction func activeRectTool(_ sender: UIButton) {
         activeTool = .rect
+        if lastSelectedButton != rectButton {
+            if lastSelectedButton != nil {
+                lastSelectedButton.isSelected = false
+            }
+            rectButton.isSelected = true
+            lastSelectedButton = rectButton
+        }
     }
+    
     @IBAction func activeCircleTool(_ sender: Any) {
         activeTool = .ellipse
+        if lastSelectedButton != circleButton {
+            if lastSelectedButton != nil {
+                lastSelectedButton.isSelected = false
+            }
+            circleButton.isSelected = true
+            lastSelectedButton = circleButton
+        }
     }
+    
     @IBAction func activeShapeTool(_ sender: Any) {
         activeTool = .protractor
+        if lastSelectedButton != protractorButton {
+            if lastSelectedButton != nil {
+                lastSelectedButton.isSelected = false
+            }
+            protractorButton.isSelected = true
+            lastSelectedButton = protractorButton
+        }
     }
+    
     @IBAction func activeArrowTool(_ sender: Any) {
         activeTool = .arrow
+        if lastSelectedButton != arrowButton {
+            if lastSelectedButton != nil {
+                lastSelectedButton.isSelected = false
+            }
+            arrowButton.isSelected = true
+            lastSelectedButton = arrowButton
+        }
     }
+    
     @IBAction func activeAsteriskTool(_ sender: Any) {
         activeTool = .asterisk
+        if lastSelectedButton != asteriskButton {
+            if lastSelectedButton != nil {
+                lastSelectedButton.isSelected = false
+            }
+            asteriskButton.isSelected = true
+            lastSelectedButton = asteriskButton
+        }
     }
+    
     @IBAction func activateSelectionTool(_ sender: Any) {
         selectionButton.isSelected = !selectionButton.isSelected
         let first = group.contents.remove(at: 0)
         group.contents.append(first)
     }
+    
     @IBAction func undoTool(_ sender: Any) {
         if let undoneNode = shapesGroup.contents.popLast() {
             if let freeDrawing = undoneNode as? FreeDrawing {

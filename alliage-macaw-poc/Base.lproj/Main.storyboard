@@ -133,9 +133,19 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="arcButton" destination="kM8-rP-Vo2" id="EZD-zj-F7b"/>
+                        <outlet property="arrowButton" destination="gn3-hU-KTO" id="FXM-uN-jfo"/>
+                        <outlet property="asteriskButton" destination="kAX-CW-OT2" id="jDa-f9-Vfy"/>
                         <outlet property="buttonsStackView" destination="7JC-yd-ygI" id="Wda-Ii-2ko"/>
+                        <outlet property="circleButton" destination="ctm-vA-tLO" id="15t-mW-Ztp"/>
+                        <outlet property="freeButton" destination="V68-iO-gAn" id="j0p-s9-P4j"/>
+                        <outlet property="handButton" destination="PMz-9r-nNa" id="faj-2b-jVc"/>
+                        <outlet property="lineButton" destination="TSP-ah-PlD" id="4iQ-Jh-wsn"/>
+                        <outlet property="protractorButton" destination="1tb-89-E0c" id="y5G-7X-Jcb"/>
+                        <outlet property="rectButton" destination="sTw-eg-CJO" id="eIC-PY-DHb"/>
                         <outlet property="scrollview" destination="6hA-cc-iSh" id="UsG-Ug-ugN"/>
                         <outlet property="selectionButton" destination="bAU-70-Kf3" id="Q3W-wK-FSm"/>
+                        <outlet property="textButton" destination="mv1-sv-Fzz" id="WFJ-IL-r6Z"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

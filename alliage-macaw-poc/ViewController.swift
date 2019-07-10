@@ -18,6 +18,7 @@ enum Tool {
     case protractor
     case arrow
     case asterisk
+    case arc
     case none
 }
 
@@ -26,6 +27,10 @@ class ViewController: UIViewController {
     var shapeActive: Bool = false
     
     var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] = [:]
+    
+    var transformHistory: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] = [:]
+    
+    var macawActions: [MacawAction] = []
     
     @IBOutlet weak var buttonsStackView: UIStackView!
     @IBOutlet weak var scrollview: UIScrollView!
@@ -171,12 +176,12 @@ class ViewController: UIViewController {
                 self.newShape = Protractor(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .asterisk:
                 self.newShape = Asterisk(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
+            case .arc:
+                self.newShape = CustomArc(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .none:
                 return
             }
-            
             self.shapesGroup.contents.append(self.newShape)
-
         }
         
         // resizing new shape when moving first touch
@@ -205,13 +210,25 @@ class ViewController: UIViewController {
                 self.setProtractorEvents(protractor: protractor)
                 return //ignores subsequent events
             } else
+            if let arc = self.newShape as? CustomArc {
+                self.shapesGroup.contents.removeLast()
+                self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
+                self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
+                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
+                arc.p0 = startPoint
+                arc.p1 = Point((loc.x + startPoint.x)/2, (loc.y + startPoint.y)/2)
+                arc.p2 = loc
+                self.shapesGroup.contents.append(arc)
+                self.setArcEvents(arc: arc)
+                return
+            }
+            else
             if let _ = self.newShape as? FreeDrawing {
                 self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
                 return //ignores subsequent events
             } else if let line = self.newShape as? CustomLine {
                 self.shapesGroup.contents.removeLast()
                 self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-                self.newShape.activateCircleAction()
                 self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
                 self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
                 line.startPoint = startPoint
@@ -238,6 +255,8 @@ class ViewController: UIViewController {
                 let transform = self.shapeTransformations[node.hash]
                 self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: node.hash)
                 self.updatePlace(node: node)
+                
+                //self.macawActions.append(MacawAction(nodeHash: node.hash, type: .pan, transformation: transform))
                 //}
             }
             
@@ -276,6 +295,232 @@ class ViewController: UIViewController {
         group = Group(contents: [shapesGroup, canvas])
         macawView.node = group
     }
+    
+    
+    func setArcEvents(arc: CustomArc) {
+        
+        var p0 = Point()
+        var p1 = Point(x: 0, y: 0)
+        var p2 = Point(x: 0, y: 0)
+        var tempArc: CustomArc!
+        
+        arc.circle0.onTouchPressed { (event) in
+            
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            
+            let transform = self.shapeTransformations[arc.hash]
+            
+            let center = arc.getCenter()
+            
+            p1 = Point(x: arc.p1.x - arc.p0.x, y: arc.p1.y - arc.p0.y)
+            
+            let p1Aux = Shape(form: Point(x: 0, y: 0))
+            
+            p1Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p1.x, dy: p1.y)
+            
+            p1 = Point(x: p1Aux.place.dx, y: p1Aux.place.dy)
+            
+            p2 = Point(x: arc.p2.x - arc.p0.x, y: arc.p2.y - arc.p0.y)
+            
+            let p2Aux = Shape(form: Point(x: 0, y: 0))
+            
+            p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
+            
+            p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
+            
+            tempArc = CustomArc(p0: loc, p1: p1, p2: p2)
+            
+            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == arc.hash
+            })
+            
+            self.shapesGroup.contents[index!] = tempArc
+        }
+        
+        arc.circle1.onTouchPressed { (event) in
+            
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            
+            let transform = self.shapeTransformations[arc.hash]
+            
+            let center = arc.getCenter()
+            
+            let p0Aux = Shape(form: Point(x: 0, y: 0))
+            
+            p0Aux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
+            
+            p0 = Point(x: p0Aux.place.dx, y: p0Aux.place.dy)
+            
+            p2 = Point(x: arc.p2.x - arc.p0.x, y: arc.p2.y - arc.p0.y)
+            
+            let p2Aux = Shape(form: Point(x: 0, y: 0))
+            
+            p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
+            
+            p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
+            
+            tempArc = CustomArc(p0: p0, p1: loc, p2: p2)
+            
+            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == arc.hash
+            })
+            
+            self.shapesGroup.contents[index!] = tempArc
+        }
+        
+        arc.circle2.onTouchPressed { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            
+            let transform = self.shapeTransformations[arc.hash]
+            
+            let center = arc.getCenter()
+            
+            let p0Aux = Shape(form: Point(x: 0, y: 0))
+            
+            p0Aux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
+            
+            p0 = Point(x: p0Aux.place.dx, y: p0Aux.place.dy)
+            
+            p1 = Point(x: arc.p1.x - arc.p0.x, y: arc.p1.y - arc.p0.y)
+            
+            let p1Aux = Shape(form: Point(x: 0, y: 0))
+            
+            p1Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p1.x, dy: p1.y)
+            
+            p1 = Point(x: p1Aux.place.dx, y: p1Aux.place.dy)
+            
+            tempArc = CustomArc(p0: p0, p1: p1, p2: loc)
+            
+            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == arc.hash
+            })
+            
+            self.shapesGroup.contents[index!] = tempArc
+        }
+        
+        
+        arc.circle0.onTouchMoved { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else {
+                return
+            }
+            tempArc.updateForm(p0: loc, p1: tempArc.p1, p2: tempArc.p2)
+            //arc.moveCircle(circle: .zero, toPoint: loc)
+        }
+        arc.circle1.onTouchMoved { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else {
+                return
+            }
+            tempArc.updateForm(p0: tempArc.p0, p1: loc, p2: tempArc.p2)
+            //arc.moveCircle(circle: .one, toPoint: loc)
+        }
+        arc.circle2.onTouchMoved { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else {
+                return
+            }
+            tempArc.updateForm(p0: tempArc.p0, p1: tempArc.p1, p2: loc)
+            //arc.moveCircle(circle: .two, toPoint: loc)
+        }
+        
+        arc.circle0.onTouchReleased { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            
+            let x1 = tempArc.p1.x - loc.x
+            let y1 = tempArc.p1.y - loc.y
+            
+            let x2 = tempArc.p2.x - loc.x
+            let y2 = tempArc.p2.y - loc.y
+            
+            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2))
+            
+            newArc.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
+            
+            newArc.p0 = loc
+            newArc.p1 = tempArc.p1
+            newArc.p2 = tempArc.p2
+            
+            self.shapeTransformations[newArc.hash] = (loc.x, loc.y, 1, 0)
+            
+            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == tempArc.hash
+            })
+            
+            self.shapesGroup.contents[index!] = newArc
+            
+            self.setArcEvents(arc: newArc)
+        }
+        
+        arc.circle1.onTouchReleased { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            
+            let x1 = loc.x - p0.x
+            let y1 = loc.y - p0.y
+            
+            let x2 = p2.x - p0.x
+            let y2 = p2.y - p0.y
+            
+            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2))
+
+            newArc.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
+            
+            newArc.p0 = p0
+            newArc.p1 = loc
+            newArc.p2 = p2
+            
+            self.shapeTransformations[newArc.hash] = (p0.x,p0.y, 1, 0)
+            
+            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == tempArc.hash
+            })
+            
+            self.shapesGroup.contents[index!] = newArc
+            
+            self.setArcEvents(arc: newArc)
+        }
+        
+        arc.circle2.onTouchReleased { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            
+            let x1 = p1.x - p0.x
+            let y1 = p1.y - p0.y
+            
+            let x2 = loc.x - p0.x
+            let y2 = loc.y - p0.y
+            
+            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2))
+            
+            //let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y), stroke: self.stroke)
+            
+            //newLine.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
+            newArc.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
+            
+            newArc.p0 = p0
+            newArc.p1 = p1
+            newArc.p2 = loc
+            
+            self.shapeTransformations[newArc.hash] = (p0.x,p0.y, 1, 0)
+            
+            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == tempArc.hash
+            })
+            
+            self.shapesGroup.contents[index!] = newArc
+            
+            self.setArcEvents(arc: newArc)
+        }
+        
+        arc.backgroundDrawing.onTap { (event) in
+            arc.isActive = !arc.isActive
+        }
+        arc.backgroundDrawing.onPan { (event) in
+            guard let _ = event.node else { print("problem on line pan")
+                return
+            }
+            let transform = self.shapeTransformations[arc.hash]
+            self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: arc.hash)
+            self.updatePlace(node: arc)
+        }
+    }
+    
     
     func setLineEvents(line: CustomLine) {
         var startPoint = Point()
@@ -353,7 +598,6 @@ class ViewController: UIViewController {
             
             let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(x: x, y: y), stroke: self.stroke)
             
-            newLine.activateCircleAction()
             newLine.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
             
             newLine.startPoint = loc
@@ -375,7 +619,6 @@ class ViewController: UIViewController {
             
             let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y), stroke: self.stroke)
             //newLine.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-            newLine.activateCircleAction()
             newLine.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
             
             newLine.startPoint = startPoint
@@ -489,7 +732,7 @@ class ViewController: UIViewController {
             protractor.moveCircle(circle: .two, toPoint: loc)
         }
     }
-    
+
     func updatePlace(node: Node) {
         
         let shape = node as! CustomShape
@@ -630,7 +873,42 @@ class ViewController: UIViewController {
         group.contents.append(first)
     }
     
+    @IBAction func activateArcTool(_ sender: UIButton) {
+//        let arc = CustomArc(p0: Point(x: 400, y: 400), p1: Point(x: 600, y: 200), p2: Point(x: 700, y: 300), stroke: self.stroke)
+//        group.contents.append(arc)
+        
+        activeTool = .arc
+        if lastSelectedButton != arcButton {
+            if lastSelectedButton != nil {
+                lastSelectedButton.isSelected = false
+            }
+            arcButton.isSelected = true
+            lastSelectedButton = arcButton
+        }
+    }
+    
     @IBAction func undoTool(_ sender: Any) {
+//        if let undoneAction = macawActions.popLast() {
+//            let node = group.contents.first { (node) -> Bool in
+//                node.hash == undoneAction.nodeHash
+//            }
+//
+//            if node != nil {
+//
+//                let shape = node as! CustomShape
+//
+//                if undoneAction.type == ActionType.create {
+//
+//                } else {
+//
+//                    let transformation = (dx: -undoneAction.transformation!.dx, dy: -undoneAction.transformation!.dy, scale: undoneAction.transformation!.scale, angle: undoneAction.transformation!.scale)
+//                    shapeTransformations[shape.hash] = transformation
+//                    updatePlace(node: shape)
+//                }
+//            }
+//        }
+        
+        
         if let undoneNode = shapesGroup.contents.popLast() {
             if let freeDrawing = undoneNode as? FreeDrawing {
                 freeDrawing.deleteShape()

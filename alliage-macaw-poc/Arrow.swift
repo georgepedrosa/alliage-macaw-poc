@@ -6,6 +6,8 @@
 //  Copyright © 2019 Vitor Muniz. All rights reserved.
 //
 
+// Arrow calculations: https://math.stackexchange.com/questions/1314006/drawing-an-arrow
+
 import UIKit
 import Macaw
 

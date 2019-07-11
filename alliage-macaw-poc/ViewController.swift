@@ -77,7 +77,6 @@ class ViewController: UIViewController {
     var customTexts: [CustomText] = []
     var isKeyboardShowing: Bool = false
     
-    var canvasActive: Bool = false
     var activeTool: Tool = .none
     let image = #imageLiteral(resourceName: "Medical_X-Ray_imaging_AAR02_nevit")
     var backgroundView = UIView()
@@ -250,11 +249,12 @@ class ViewController: UIViewController {
                 guard let node = event.node else { print("problem on panel pan")
                     return
                 }
-                //self.scrollview.isScrollEnabled = false
+                self.activateScrollView(enable: false)
                 
                 let transform = self.shapeTransformations[node.hash]
                 self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: node.hash)
                 self.updatePlace(node: node)
+                self.activateScrollView(enable: true)
                 
                 //self.macawActions.append(MacawAction(nodeHash: node.hash, type: .pan, transformation: transform))
                 //}
@@ -267,6 +267,8 @@ class ViewController: UIViewController {
                     return
                 }
                 
+                self.activateScrollView(enable: false)
+                
                 let transform = self.shapeTransformations[node.hash]
                 self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale * event.scale, transform!.angle), forKey: node.hash)
                 self.updatePlace(node: node)
@@ -275,6 +277,7 @@ class ViewController: UIViewController {
                 if let shape = node as? CustomShape {
                     shape.updateStroke(stroke: newStroke)
                 }
+                self.activateScrollView(enable: true)
             }
             
             self.newShape.onRotate { event in
@@ -282,14 +285,15 @@ class ViewController: UIViewController {
                 guard let node = event.node else { print("problem on panel rotate")
                     return
                 }
+                self.activateScrollView(enable: false)
                 
                 let transform = self.shapeTransformations[node.hash]
                 self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale, transform!.angle + event.angle), forKey: node.hash)
                 self.updatePlace(node: node)
+                self.activateScrollView(enable: true)
             }
             
             self.shapesGroup.contents.append(self.newShape)
-            self.canvasActive = false
         }
         
         group = Group(contents: [shapesGroup, canvas])
@@ -305,29 +309,20 @@ class ViewController: UIViewController {
         var tempArc: CustomArc!
         
         arc.circle0.onTouchPressed { (event) in
-            
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
+            self.activateScrollView(enable: false)
+            
             let transform = self.shapeTransformations[arc.hash]
-            
             let center = arc.getCenter()
-            
             p1 = Point(x: arc.p1.x - arc.p0.x, y: arc.p1.y - arc.p0.y)
-            
             let p1Aux = Shape(form: Point(x: 0, y: 0))
-            
             p1Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p1.x, dy: p1.y)
-            
             p1 = Point(x: p1Aux.place.dx, y: p1Aux.place.dy)
-            
             p2 = Point(x: arc.p2.x - arc.p0.x, y: arc.p2.y - arc.p0.y)
-            
             let p2Aux = Shape(form: Point(x: 0, y: 0))
-            
             p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
-            
             p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
-            
             tempArc = CustomArc(p0: loc, p1: p1, p2: p2)
             
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
@@ -338,27 +333,19 @@ class ViewController: UIViewController {
         }
         
         arc.circle1.onTouchPressed { (event) in
-            
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
+            self.activateScrollView(enable: false)
+            
             let transform = self.shapeTransformations[arc.hash]
-            
             let center = arc.getCenter()
-            
             let p0Aux = Shape(form: Point(x: 0, y: 0))
-            
             p0Aux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
-            
             p0 = Point(x: p0Aux.place.dx, y: p0Aux.place.dy)
-            
             p2 = Point(x: arc.p2.x - arc.p0.x, y: arc.p2.y - arc.p0.y)
-            
             let p2Aux = Shape(form: Point(x: 0, y: 0))
-            
             p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
-            
             p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
-            
             tempArc = CustomArc(p0: p0, p1: loc, p2: p2)
             
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
@@ -371,24 +358,17 @@ class ViewController: UIViewController {
         arc.circle2.onTouchPressed { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
+            self.activateScrollView(enable: false)
+            
             let transform = self.shapeTransformations[arc.hash]
-            
             let center = arc.getCenter()
-            
             let p0Aux = Shape(form: Point(x: 0, y: 0))
-            
             p0Aux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
-            
             p0 = Point(x: p0Aux.place.dx, y: p0Aux.place.dy)
-            
             p1 = Point(x: arc.p1.x - arc.p0.x, y: arc.p1.y - arc.p0.y)
-            
             let p1Aux = Shape(form: Point(x: 0, y: 0))
-            
             p1Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p1.x, dy: p1.y)
-            
             p1 = Point(x: p1Aux.place.dx, y: p1Aux.place.dy)
-            
             tempArc = CustomArc(p0: p0, p1: p1, p2: loc)
             
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
@@ -397,8 +377,6 @@ class ViewController: UIViewController {
             
             self.shapesGroup.contents[index!] = tempArc
         }
-        
-        
         arc.circle0.onTouchMoved { (event) in
             guard let loc = event.points.first?.location(in: .scene) else {
                 return
@@ -420,24 +398,21 @@ class ViewController: UIViewController {
             tempArc.updateForm(p0: tempArc.p0, p1: tempArc.p1, p2: loc)
             //arc.moveCircle(circle: .two, toPoint: loc)
         }
-        
         arc.circle0.onTouchReleased { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
+            self.activateScrollView(enable: true)
+            
             let x1 = tempArc.p1.x - loc.x
             let y1 = tempArc.p1.y - loc.y
-            
             let x2 = tempArc.p2.x - loc.x
             let y2 = tempArc.p2.y - loc.y
-            
+    
             let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2))
-            
             newArc.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
-            
             newArc.p0 = loc
             newArc.p1 = tempArc.p1
             newArc.p2 = tempArc.p2
-            
             self.shapeTransformations[newArc.hash] = (loc.x, loc.y, 1, 0)
             
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
@@ -445,27 +420,23 @@ class ViewController: UIViewController {
             })
             
             self.shapesGroup.contents[index!] = newArc
-            
             self.setArcEvents(arc: newArc)
         }
-        
         arc.circle1.onTouchReleased { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
+            self.activateScrollView(enable: true)
+            
             let x1 = loc.x - p0.x
             let y1 = loc.y - p0.y
-            
             let x2 = p2.x - p0.x
             let y2 = p2.y - p0.y
             
             let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2))
-
             newArc.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
-            
             newArc.p0 = p0
             newArc.p1 = loc
             newArc.p2 = p2
-            
             self.shapeTransformations[newArc.hash] = (p0.x,p0.y, 1, 0)
             
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
@@ -473,30 +444,23 @@ class ViewController: UIViewController {
             })
             
             self.shapesGroup.contents[index!] = newArc
-            
             self.setArcEvents(arc: newArc)
         }
-        
         arc.circle2.onTouchReleased { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
+            self.activateScrollView(enable: true)
+            
             let x1 = p1.x - p0.x
             let y1 = p1.y - p0.y
-            
             let x2 = loc.x - p0.x
             let y2 = loc.y - p0.y
             
             let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2))
-            
-            //let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y), stroke: self.stroke)
-            
-            //newLine.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
             newArc.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
-            
             newArc.p0 = p0
             newArc.p1 = p1
             newArc.p2 = loc
-            
             self.shapeTransformations[newArc.hash] = (p0.x,p0.y, 1, 0)
             
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
@@ -504,10 +468,8 @@ class ViewController: UIViewController {
             })
             
             self.shapesGroup.contents[index!] = newArc
-            
             self.setArcEvents(arc: newArc)
         }
-        
         arc.backgroundDrawing.onTap { (event) in
             arc.isActive = !arc.isActive
         }
@@ -515,12 +477,14 @@ class ViewController: UIViewController {
             guard let _ = event.node else { print("problem on line pan")
                 return
             }
+            self.activateScrollView(enable: false)
+            
             let transform = self.shapeTransformations[arc.hash]
             self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: arc.hash)
             self.updatePlace(node: arc)
+            self.activateScrollView(enable: true)
         }
     }
-    
     
     func setLineEvents(line: CustomLine) {
         var startPoint = Point()
@@ -528,52 +492,36 @@ class ViewController: UIViewController {
         var tempLine: CustomLine!
         
         line.circle2.onTouchPressed { (event) in
-            
             guard let loc = event.points.first?.location(in: .scene) else { return }
+            self.activateScrollView(enable: false)
             
             let transform = self.shapeTransformations[line.hash]
-            
             let center = line.getCenter()
-            
             lastPoint = Point(x: line.lastPoint.x - line.startPoint.x, y: line.lastPoint.y - line.startPoint.y)
-            
             let lastPointAux = Shape(form: Point(x: 0, y: 0))
-
             lastPointAux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: lastPoint.x, dy: lastPoint.y)
-
             lastPoint = Point(x: lastPointAux.place.dx, y: lastPointAux.place.dy)
-            
             tempLine = CustomLine(startPoint: loc, lastPoint: lastPoint, stroke: self.stroke)
-            
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == line.hash
             })
-            
             self.shapesGroup.contents[index!] = tempLine
-        
         }
         
         line.circle.onTouchPressed { (event) in
-            
             guard let loc = event.points.first?.location(in: .scene) else { return }
+            self.activateScrollView(enable: false)
+            
             let transform = self.shapeTransformations[line.hash]
-            
             let pointAux = Shape(form: Point(x: 0, y: 0))
-            
             let center = line.getCenter()
-            
             pointAux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
-            
             startPoint = Point(x: pointAux.place.dx, y: pointAux.place.dy)
-        
             tempLine = CustomLine(startPoint: startPoint, lastPoint: loc, stroke: self.stroke)
-            
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == line.hash
             })
-            
             self.shapesGroup.contents[index!] = tempLine
-            
         }
         
         line.circle2.onTouchMoved { (event) in
@@ -595,23 +543,18 @@ class ViewController: UIViewController {
             
             let x = tempLine.lastPoint.x - loc.x
             let y = tempLine.lastPoint.y - loc.y
-            
             let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(x: x, y: y), stroke: self.stroke)
-            
             newLine.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
-            
             newLine.startPoint = loc
             newLine.lastPoint = tempLine.lastPoint
-            
             self.shapeTransformations[newLine.hash] = (loc.x, loc.y, 1, 0)
             
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == tempLine.hash
             })
-            
             self.shapesGroup.contents[index!] = newLine
-            
             self.setLineEvents(line: newLine)
+            self.activateScrollView(enable: true)
         }
         
         line.circle.onTouchReleased { (event) in
@@ -620,55 +563,54 @@ class ViewController: UIViewController {
             let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y), stroke: self.stroke)
             //newLine.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
             newLine.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-            
             newLine.startPoint = startPoint
             newLine.lastPoint = loc
-            
             self.shapeTransformations[newLine.hash] = (startPoint.x,startPoint.y, 1, 0)
-            
             let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == tempLine.hash
             })
-            
             self.shapesGroup.contents[index!] = newLine
-            
             self.setLineEvents(line: newLine)
+            self.activateScrollView(enable: true)
         }
         
         line.backgroundLine.onPan { (event) in
             guard let _ = event.node else { print("problem on line pan")
                 return
             }
+            self.activateScrollView(enable: false)
             let transform = self.shapeTransformations[line.hash]
             self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: line.hash)
             self.updatePlace(node: line)
+            self.activateScrollView(enable: true)
         }
         
         line.backgroundLine.onRotate { (event) in
             guard let _ = event.node else { print("problem on line rotate")
                 return
             }
-            
+            self.activateScrollView(enable: false)
             let transform = self.shapeTransformations[line.hash]
             self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale, transform!.angle + event.angle), forKey: line.hash)
             self.updatePlace(node: line)
+            self.activateScrollView(enable: true)
         }
         
         line.backgroundLine.onPinch { (event) in
             guard let _ = event.node else { print("problem on line pinch")
                 return
             }
-            
+            self.activateScrollView(enable: false)
             let transform = self.shapeTransformations[line.hash]
             self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale * event.scale, transform!.angle), forKey: line.hash)
             self.updatePlace(node: line)
             
             let newStroke = Stroke(fill: self.stroke.fill, width: self.stroke.width/(transform!.scale * event.scale))
             let newCircleStroke = Stroke(fill: Color.clear, width: self.stroke.width/(transform!.scale * event.scale))
-            
             line.updateStroke(stroke: newStroke)
             line.updateCircleStroke(stroke: newCircleStroke)
             line.updateSize(scale: transform!.scale * event.scale)
+            self.activateScrollView(enable: true)
         }
     }
     
@@ -679,7 +621,6 @@ class ViewController: UIViewController {
         self.shapeTransformations[customText.hash] = (0,0, 1, 0)
         
         customText.onTap(f: { (event) in
-            
             if self.isKeyboardShowing && !customText.isActive {
                 self.inputTextView.resignFirstResponder()
                 return
@@ -689,11 +630,9 @@ class ViewController: UIViewController {
                 self.customTexts.removeAll(where: { (text) -> Bool in
                     text == customText
                 })
-                
                 for text in self.customTexts {
                     text.isActive = false //deselects all texts except current one
                 }
-                
                 self.customTexts.append(customText)
                 self.inputTextView.becomeFirstResponder()
                 
@@ -704,11 +643,12 @@ class ViewController: UIViewController {
         
         customText.onPan { event in
             //self.scrollview.isScrollEnabled = false
+            self.activateScrollView(enable: false)
             let transform = self.shapeTransformations[customText.hash]
             self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: customText.hash)
             self.updatePlace(node: customText)
+            self.activateScrollView(enable: true)
         }
-        
         self.shapesGroup.contents.append(customText)
     }
     
@@ -717,38 +657,42 @@ class ViewController: UIViewController {
             guard let loc = event.points.first?.location(in: .scene)  else {
                 return
             }
+            self.activateScrollView(enable: false)
             protractor.moveCircle(circle: .zero, toPoint: loc)
+            self.activateScrollView(enable: true)
         }
         protractor.circle1.onTouchMoved { (event) in
             guard let loc = event.points.first?.location(in: .scene)  else {
                 return
             }
+            self.activateScrollView(enable: false)
             protractor.moveCircle(circle: .one, toPoint: loc)
+            self.activateScrollView(enable: true)
         }
         protractor.circle2.onTouchMoved { (event) in
             guard let loc = event.points.first?.location(in: .scene)  else {
                 return
             }
+            self.activateScrollView(enable: false)
             protractor.moveCircle(circle: .two, toPoint: loc)
+            self.activateScrollView(enable: true)
         }
     }
 
     func updatePlace(node: Node) {
-        
         let shape = node as! CustomShape
-        
         let center = shape.getCenter()
         let transform = self.shapeTransformations[node.hash]
-        
         node.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
     }
 
-    
     func configMacawView(){
         
-        scrollview.isScrollEnabled = false
+        activateScrollView(enable: false)
+        scrollview.delegate = self
         scrollview.bounces = false
-        //scrollview.delegate = self
+        scrollview.bouncesZoom = false
+        scrollview.minimumZoomScale = 1.0
         
         scrollview.addSubview(backgroundView)
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
@@ -760,7 +704,7 @@ class ViewController: UIViewController {
         let imageView = UIImageView()
         imageView.image = image
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        scrollview.contentSize = image.size
+        scrollview.contentSize = CGSize(width: backgroundView.frame.width, height: backgroundView.frame.height)
 
         backgroundView.addSubview(imageView)
         
@@ -779,7 +723,13 @@ class ViewController: UIViewController {
         macawView.heightAnchor.constraint(equalTo:imageView.heightAnchor).isActive = true
     }
     
+    func activateScrollView(enable: Bool) {
+        scrollview.isScrollEnabled = enable
+        scrollview.pinchGestureRecognizer?.isEnabled = enable
+    }
+    
     @IBAction func freeDrawingTool(_ sender: UIButton) {
+        activateScrollView(enable: false)
         activeTool = .freeDraw
         if lastSelectedButton != freeButton {
             if lastSelectedButton != nil {
@@ -791,6 +741,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func textTool(_ sender: UIButton) {
+        activateScrollView(enable: false)
         activeTool = .text
         if lastSelectedButton != textButton {
             if lastSelectedButton != nil {
@@ -802,6 +753,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func activeLineTool(_ sender: UIButton) {
+        activateScrollView(enable: false)
         activeTool = .line
         if lastSelectedButton != lineButton {
             if lastSelectedButton != nil {
@@ -813,6 +765,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func activeRectTool(_ sender: UIButton) {
+        activateScrollView(enable: false)
         activeTool = .rect
         if lastSelectedButton != rectButton {
             if lastSelectedButton != nil {
@@ -824,6 +777,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func activeCircleTool(_ sender: Any) {
+        activateScrollView(enable: false)
         activeTool = .ellipse
         if lastSelectedButton != circleButton {
             if lastSelectedButton != nil {
@@ -835,6 +789,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func activeShapeTool(_ sender: Any) {
+        activateScrollView(enable: false)
         activeTool = .protractor
         if lastSelectedButton != protractorButton {
             if lastSelectedButton != nil {
@@ -846,6 +801,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func activeArrowTool(_ sender: Any) {
+        activateScrollView(enable: false)
         activeTool = .arrow
         if lastSelectedButton != arrowButton {
             if lastSelectedButton != nil {
@@ -857,6 +813,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func activeAsteriskTool(_ sender: Any) {
+        activateScrollView(enable: false)
         activeTool = .asterisk
         if lastSelectedButton != asteriskButton {
             if lastSelectedButton != nil {
@@ -867,16 +824,8 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func activateSelectionTool(_ sender: Any) {
-        selectionButton.isSelected = !selectionButton.isSelected
-        let first = group.contents.remove(at: 0)
-        group.contents.append(first)
-    }
-    
     @IBAction func activateArcTool(_ sender: UIButton) {
-//        let arc = CustomArc(p0: Point(x: 400, y: 400), p1: Point(x: 600, y: 200), p2: Point(x: 700, y: 300), stroke: self.stroke)
-//        group.contents.append(arc)
-        
+        activateScrollView(enable: false)
         activeTool = .arc
         if lastSelectedButton != arcButton {
             if lastSelectedButton != nil {
@@ -887,6 +836,13 @@ class ViewController: UIViewController {
         }
     }
     
+    @IBAction func activateSelectionTool(_ sender: Any) {
+        selectionButton.isSelected = !selectionButton.isSelected
+        activateScrollView(enable: selectionButton.isSelected)
+        let first = group.contents.remove(at: 0)
+        group.contents.append(first)
+    }
+
     @IBAction func undoTool(_ sender: Any) {
 //        if let undoneAction = macawActions.popLast() {
 //            let node = group.contents.first { (node) -> Bool in
@@ -934,11 +890,11 @@ class ViewController: UIViewController {
     
 }
 
-//extension ViewController: UIScrollViewDelegate {
-//    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-//        return backgroundView
-//    }
-//}
+extension ViewController: UIScrollViewDelegate {
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        return backgroundView
+    }
+}
 
 extension ViewController: UITextViewDelegate {
     

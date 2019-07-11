@@ -262,9 +262,3 @@ class CustomArc: Group, CustomShape {
     }
     
 }
-
-enum ArcCircle{
-    case zero
-    case one
-    case two
-}

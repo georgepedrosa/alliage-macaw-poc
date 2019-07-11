@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "alliage-macaw-poc/ViewController.swift"
-            timestampString = "584474581.20982"
+            timestampString = "584553521.8833309"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "309"
-            endingLineNumber = "309"
+            startingLineNumber = "312"
+            endingLineNumber = "312"
             landmarkName = "setArcEvents(arc:)"
             landmarkType = "7">
          </BreakpointContent>

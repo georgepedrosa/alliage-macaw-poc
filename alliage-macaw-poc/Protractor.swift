@@ -13,6 +13,8 @@ class Protractor: Group, CustomShape {
     
     var line1: Shape!
     var line2: Shape!
+    var backgroundLine1: Shape!
+    var backgroundLine2: Shape!
     var circle0: Shape!
     var circle1: Shape!
     var circle2: Shape!
@@ -55,6 +57,8 @@ class Protractor: Group, CustomShape {
         
         line1 = Shape(form: locusLine1, fill: Color.clear, stroke: stroke)
         line2 = Shape(form: locusLine2, fill: Color.clear, stroke: stroke)
+        backgroundLine1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        backgroundLine2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
         let locusCircle0 = Circle(cx: x0, cy: y0, r: 15)
         circle0 = Shape(form: locusCircle0, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
@@ -76,7 +80,7 @@ class Protractor: Group, CustomShape {
         
         text = Text(text: String(format: "%.2f", angleInDegrees) + "º", fill: Color.blue, place: .move(x0, y0))
         
-        contents = [arc, line1, line2, circle0, circle1, circle2, text]
+        contents = [arc, line1, line2, backgroundLine1, backgroundLine2, circle0, circle1, circle2, text]
     }
 
     func updateForm(startPoint: Point, lastPoint: Point) {
@@ -91,22 +95,24 @@ class Protractor: Group, CustomShape {
         x2 = startPoint.x + d * cos(angle + protractorAngle)
         y2 = startPoint.y + d * sin(angle + protractorAngle)
         
-        self.line1.form = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
+        line1.form = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
+        backgroundLine1.form = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
         self.x1 = lastPoint.x
         self.y1 = lastPoint.y
-        self.line2.form = Line(startPoint.x, startPoint.y, x2, y2)
+        line2.form = Line(startPoint.x, startPoint.y, x2, y2)
+        backgroundLine2.form = Line(startPoint.x, startPoint.y, x2, y2)
         self.x2 = x2
         self.y2 = y2
         
-        self.circle1.form = Circle(cx: lastPoint.x, cy: lastPoint.y, r: 15)
-        self.circle2.form = Circle(cx: x2, cy: y2, r: 15)
+        circle1.form = Circle(cx: lastPoint.x, cy: lastPoint.y, r: 15)
+        circle2.form = Circle(cx: x2, cy: y2, r: 15)
         
         let ellipseLocus = Ellipse(cx: x0, cy: y0, rx: 40, ry: 40)
         
         let theta1 = atan2(y1 - y0, x1 - x0)
         let theta2 = atan2(y2 - y0, x2 - x0)
 
-        self.arc.form = Arc(ellipse: ellipseLocus, shift: theta1, extent: theta2 - theta1)
+        arc.form = Arc(ellipse: ellipseLocus, shift: theta1, extent: theta2 - theta1)
         
         var angleText = theta1 + ((theta2 - theta1)/2)
         
@@ -122,7 +128,7 @@ class Protractor: Group, CustomShape {
         let textX = distanceText * cos(angleText) + x0
         let textY = distanceText * sin(angleText) + y0
         
-        self.text.place = .move(dx: textX, dy: textY)
+        text.place = .move(dx: textX, dy: textY)
         
         //print("theta1: " + String(theta1*degreesPerRadian))
         //print("theta2: " + String(theta2*degreesPerRadian))
@@ -136,7 +142,9 @@ class Protractor: Group, CustomShape {
         case .zero:
             circle0.form = Circle(cx: loc.x, cy: loc.y, r: 15)
             line1.form = Line(loc.x, loc.y, x1, y1)
+            backgroundLine1.form = Line(loc.x, loc.y, x1, y1)
             line2.form = Line(loc.x, loc.y, x2, y2)
+            backgroundLine2.form = Line(loc.x, loc.y, x1, y1)
             x0 = loc.x
             y0 = loc.y
             
@@ -169,6 +177,7 @@ class Protractor: Group, CustomShape {
 
         case .one:
             line1.form = Line(x0, y0, loc.x, loc.y)
+            backgroundLine1.form = Line(x0, y0, loc.x, loc.y)
             circle1.form = Circle(cx: loc.x, cy: loc.y, r: 15)
             x1 = loc.x
             y1 = loc.y
@@ -201,6 +210,7 @@ class Protractor: Group, CustomShape {
             
         case .two:
             line2.form = Line(x0, y0, loc.x, loc.y)
+            backgroundLine2.form = Line(x0, y0, loc.x, loc.y)
             circle2.form = Circle(cx: loc.x, cy: loc.y, r: 15)
             x2 = loc.x
             y2 = loc.y

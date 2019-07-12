@@ -19,6 +19,8 @@ enum Tool {
     case arrow
     case asterisk
     case arc
+    case delete
+    case selection
     case none
 }
 
@@ -46,6 +48,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var asteriskButton: UIButton!
     @IBOutlet weak var selectionButton: UIButton!
     @IBOutlet weak var handButton: UIButton!
+    @IBOutlet weak var deleteButton: UIButton!
     
     var macawView = MacawView()
     
@@ -77,7 +80,42 @@ class ViewController: UIViewController {
     var customTexts: [CustomText] = []
     var isKeyboardShowing: Bool = false
     
-    var activeTool: Tool = .none
+    var drawingActive: Bool = true {
+        didSet {
+            if oldValue != drawingActive {
+                let first = group.contents.remove(at: 0)
+                group.contents.append(first)
+            }
+        }
+        willSet {
+            if !newValue {
+                //selectionButton.isSelected = true
+                activateScrollView(enable: true)
+            } else {
+                //selectionButton.isSelected = false
+                activateScrollView(enable: false)
+            }
+        }
+    }
+    
+    var activeTool: Tool = .none {
+        willSet {
+            if newValue == .none {
+                freeButton.isSelected = false
+                textButton.isSelected = false
+                lineButton.isSelected = false
+                rectButton.isSelected = false
+                circleButton.isSelected = false
+                protractorButton.isSelected = false
+                arcButton.isSelected = false
+                arrowButton.isSelected = false
+                asteriskButton.isSelected = false
+                selectionButton.isSelected = false
+                handButton.isSelected = false
+                deleteButton.isSelected = false
+            }
+        }
+    }
     let image = #imageLiteral(resourceName: "Medical_X-Ray_imaging_AAR02_nevit")
     var backgroundView = UIView()
     
@@ -177,6 +215,10 @@ class ViewController: UIViewController {
                 self.newShape = Asterisk(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .arc:
                 self.newShape = CustomArc(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
+            case .selection:
+                return
+            case .delete:
+                return
             case .none:
                 return
             }
@@ -186,7 +228,7 @@ class ViewController: UIViewController {
         // resizing new shape when moving first touch
         canvas.onTouchMoved { (event) in
             //self.canvasActive = true
-            if self.activeTool == .none || self.activeTool == .text || self.selectionButton.isSelected { return }
+            if self.activeTool == .none || self.activeTool == .delete || self.activeTool == .text || self.selectionButton.isSelected { return }
             guard let loc = event.points.first?.location(in: .scene) else { return }
             self.newShape.updateForm(startPoint: startPoint, lastPoint: loc) //updates form of newly created shape while initial touch isn't released
             if self.activeTool == .freeDraw {
@@ -197,7 +239,7 @@ class ViewController: UIViewController {
         // leaving new shape on canvas when releasing first touch
         canvas.onTouchReleased { (event) in
             
-            if self.activeTool == .none || self.selectionButton.isSelected { return }
+            if self.activeTool == .none || self.activeTool == .delete || self.selectionButton.isSelected { return }
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
@@ -243,9 +285,14 @@ class ViewController: UIViewController {
                 self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
             }
             
+            self.setDeleteEvent(node: self.newShape)
+            
             // moving existing shape
             self.newShape.onPan { event in
                 //if !self.canvasActive {
+                
+                if self.activeTool == .none { return }
+                
                 guard let node = event.node else { print("problem on panel pan")
                     return
                 }
@@ -262,6 +309,8 @@ class ViewController: UIViewController {
             
             // resizing existing shape
             self.newShape.onPinch { event in
+                
+                if self.activeTool == .none { return }
                 
                 guard let node = event.node else { print("problem on panel pinch")
                     return
@@ -281,6 +330,8 @@ class ViewController: UIViewController {
             }
             
             self.newShape.onRotate { event in
+                
+                if self.activeTool == .none { return }
                 
                 guard let node = event.node else { print("problem on panel rotate")
                     return
@@ -470,11 +521,21 @@ class ViewController: UIViewController {
             self.shapesGroup.contents[index!] = newArc
             self.setArcEvents(arc: newArc)
         }
-        arc.backgroundDrawing.onTap { (event) in
-            arc.isActive = !arc.isActive
+        arc.onTap { (event) in
+            guard let _ = event.node else { print("problem on arc tap")
+                return
+            }
+            
+            if self.activeTool == .delete {
+                self.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
+                    shape.hash == arc.hash
+                })
+            } else {
+                arc.isActive = !arc.isActive
+            }
         }
         arc.backgroundDrawing.onPan { (event) in
-            guard let _ = event.node else { print("problem on line pan")
+            guard let _ = event.node else { print("problem on arc pan")
                 return
             }
             self.activateScrollView(enable: false)
@@ -612,6 +673,7 @@ class ViewController: UIViewController {
             line.updateSize(scale: transform!.scale * event.scale)
             self.activateScrollView(enable: true)
         }
+        setDeleteEvent(node: line)
     }
     
     func setTextEvents(startPoint: Point) {
@@ -621,6 +683,14 @@ class ViewController: UIViewController {
         self.shapeTransformations[customText.hash] = (0,0, 1, 0)
         
         customText.onTap(f: { (event) in
+            
+            if self.activeTool == .delete {
+                self.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
+                    shape.hash == customText.hash
+                })
+                return
+            }
+            
             if self.isKeyboardShowing && !customText.isActive {
                 self.inputTextView.resignFirstResponder()
                 return
@@ -677,6 +747,21 @@ class ViewController: UIViewController {
             protractor.moveCircle(circle: .two, toPoint: loc)
             self.activateScrollView(enable: true)
         }
+        setDeleteEvent(node: protractor)
+    }
+    
+    func setDeleteEvent(node: CustomShape) {
+        node.onTap(f: { (event) in
+            if self.activeTool == .none { return }
+            guard let node = event.node else { print("problem on panel pan")
+                return
+            }
+            if self.activeTool == .delete {
+                self.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
+                    shape.hash == node.hash
+                })
+            }
+        })
     }
 
     func updatePlace(node: Node) {
@@ -730,117 +815,116 @@ class ViewController: UIViewController {
     
     @IBAction func freeDrawingTool(_ sender: UIButton) {
         activateScrollView(enable: false)
+        activeTool = .none
         activeTool = .freeDraw
-        if lastSelectedButton != freeButton {
-            if lastSelectedButton != nil {
-                lastSelectedButton.isSelected = false
-            }
-            freeButton.isSelected = true
-            lastSelectedButton = freeButton
-        }
+        freeButton.isSelected = true
+        drawingActive = true
+//        if lastSelectedButton != freeButton {
+//            if lastSelectedButton != nil {
+//                lastSelectedButton.isSelected = false
+//            }
+//            freeButton.isSelected = true
+//            lastSelectedButton = freeButton
+//        }
     }
     
     @IBAction func textTool(_ sender: UIButton) {
         activateScrollView(enable: false)
+        activeTool = .none
         activeTool = .text
-        if lastSelectedButton != textButton {
-            if lastSelectedButton != nil {
-                lastSelectedButton.isSelected = false
-            }
-            textButton.isSelected = true
-            lastSelectedButton = textButton
-        }
+        textButton.isSelected = true
+        drawingActive = true
+//        if lastSelectedButton != textButton {
+//            if lastSelectedButton != nil {
+//                lastSelectedButton.isSelected = false
+//            }
+//            textButton.isSelected = true
+//            lastSelectedButton = textButton
+//        }
     }
     
     @IBAction func activeLineTool(_ sender: UIButton) {
         activateScrollView(enable: false)
+        activeTool = .none
         activeTool = .line
-        if lastSelectedButton != lineButton {
-            if lastSelectedButton != nil {
-                lastSelectedButton.isSelected = false
-            }
-            lineButton.isSelected = true
-            lastSelectedButton = lineButton
-        }
+        lineButton.isSelected = true
+        drawingActive = true
+//        if lastSelectedButton != lineButton {
+//            if lastSelectedButton != nil {
+//                lastSelectedButton.isSelected = false
+//            }
+//            lineButton.isSelected = true
+//            lastSelectedButton = lineButton
+//        }
     }
     
     @IBAction func activeRectTool(_ sender: UIButton) {
         activateScrollView(enable: false)
+        activeTool = .none
         activeTool = .rect
-        if lastSelectedButton != rectButton {
-            if lastSelectedButton != nil {
-                lastSelectedButton.isSelected = false
-            }
-            rectButton.isSelected = true
-            lastSelectedButton = rectButton
-        }
+        rectButton.isSelected = true
+        drawingActive = true
+//        if lastSelectedButton != rectButton {
+//            if lastSelectedButton != nil {
+//                lastSelectedButton.isSelected = false
+//            }
+//            rectButton.isSelected = true
+//            lastSelectedButton = rectButton
+//        }
     }
     
     @IBAction func activeCircleTool(_ sender: Any) {
         activateScrollView(enable: false)
+        activeTool = .none
         activeTool = .ellipse
-        if lastSelectedButton != circleButton {
-            if lastSelectedButton != nil {
-                lastSelectedButton.isSelected = false
-            }
-            circleButton.isSelected = true
-            lastSelectedButton = circleButton
-        }
+        circleButton.isSelected = true
+        drawingActive = true
+//        if lastSelectedButton != circleButton {
+//            if lastSelectedButton != nil {
+//                lastSelectedButton.isSelected = false
+//            }
+//            circleButton.isSelected = true
+//            lastSelectedButton = circleButton
+//        }
     }
     
     @IBAction func activeShapeTool(_ sender: Any) {
         activateScrollView(enable: false)
+        activeTool = .none
         activeTool = .protractor
-        if lastSelectedButton != protractorButton {
-            if lastSelectedButton != nil {
-                lastSelectedButton.isSelected = false
-            }
-            protractorButton.isSelected = true
-            lastSelectedButton = protractorButton
-        }
+        protractorButton.isSelected = true
+        drawingActive = true
     }
     
     @IBAction func activeArrowTool(_ sender: Any) {
         activateScrollView(enable: false)
+        activeTool = .none
         activeTool = .arrow
-        if lastSelectedButton != arrowButton {
-            if lastSelectedButton != nil {
-                lastSelectedButton.isSelected = false
-            }
-            arrowButton.isSelected = true
-            lastSelectedButton = arrowButton
-        }
+        arrowButton.isSelected = true
+        drawingActive = true
     }
     
     @IBAction func activeAsteriskTool(_ sender: Any) {
         activateScrollView(enable: false)
+        activeTool = .none
         activeTool = .asterisk
-        if lastSelectedButton != asteriskButton {
-            if lastSelectedButton != nil {
-                lastSelectedButton.isSelected = false
-            }
-            asteriskButton.isSelected = true
-            lastSelectedButton = asteriskButton
-        }
+        asteriskButton.isSelected = true
+        drawingActive = true
     }
     
     @IBAction func activateArcTool(_ sender: UIButton) {
         activateScrollView(enable: false)
+        activeTool = .none
         activeTool = .arc
-        if lastSelectedButton != arcButton {
-            if lastSelectedButton != nil {
-                lastSelectedButton.isSelected = false
-            }
-            arcButton.isSelected = true
-            lastSelectedButton = arcButton
-        }
+        arcButton.isSelected = true
+        drawingActive = true
     }
     
     @IBAction func activateSelectionTool(_ sender: Any) {
-        selectionButton.isSelected = !selectionButton.isSelected
-        activateScrollView(enable: selectionButton.isSelected)
-        let first = group.contents.remove(at: 0)
-        group.contents.append(first)
+        activeTool = .none
+        drawingActive = false
+        activeTool = .selection
+        selectionButton.isSelected = true
     }
 
     @IBAction func undoTool(_ sender: Any) {
@@ -888,6 +972,12 @@ class ViewController: UIViewController {
         }
     }
     
+    @IBAction func deleteTool(_ sender: UIButton) {
+        activeTool = .none
+        drawingActive = false
+        activeTool = .delete
+        deleteButton.isSelected = true
+    }
 }
 
 extension ViewController: UIScrollViewDelegate {

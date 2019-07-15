@@ -27,6 +27,8 @@ class CustomLine: Group, CustomShape {
         }
     }
     
+    var delegate: MacawViewDelegate!
+    
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
         
@@ -82,5 +84,144 @@ class CustomLine: Group, CustomShape {
     
     func activateCircleAction() {
         
+    }
+    
+    func setLineEvents() {
+        var startPoint = Point()
+        var lastPoint = Point(x: 0, y: 0)
+        var tempLine: CustomLine!
+        
+        self.circle2.onTouchPressed { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate.activateScrollView(enable: false)
+            
+            let transform = self.delegate.shapeTransformations[self.hash]
+            let center = self.getCenter()
+            lastPoint = Point(x: self.lastPoint.x - self.startPoint.x, y: self.lastPoint.y - self.startPoint.y)
+            let lastPointAux = Shape(form: Point(x: 0, y: 0))
+            lastPointAux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: lastPoint.x, dy: lastPoint.y)
+            lastPoint = Point(x: lastPointAux.place.dx, y: lastPointAux.place.dy)
+            tempLine = CustomLine(startPoint: loc, lastPoint: lastPoint, stroke: self.delegate.stroke)
+            tempLine.delegate = self.delegate
+            let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == self.hash
+            })
+            self.delegate.shapesGroup.contents[index!] = tempLine
+        }
+        
+        self.circle.onTouchPressed { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate.activateScrollView(enable: false)
+            
+            let transform = self.delegate.shapeTransformations[self.hash]
+            let pointAux = Shape(form: Point(x: 0, y: 0))
+            let center = self.getCenter()
+            pointAux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
+            startPoint = Point(x: pointAux.place.dx, y: pointAux.place.dy)
+            tempLine = CustomLine(startPoint: startPoint, lastPoint: loc, stroke: self.delegate.stroke)
+            tempLine.delegate = self.delegate
+            let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == self.hash
+            })
+            self.delegate.shapesGroup.contents[index!] = tempLine
+        }
+        
+        self.circle2.onTouchMoved { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            tempLine.updateForm(startPoint: loc, lastPoint: tempLine.lastPoint)
+        }
+        
+        self.circle.onTouchMoved({ (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            tempLine.updateForm(startPoint: tempLine.startPoint, lastPoint: loc)
+        })
+        
+        self.circle2.onTouchReleased { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            
+            let x = tempLine.lastPoint.x - loc.x
+            let y = tempLine.lastPoint.y - loc.y
+            let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(x: x, y: y), stroke: self.delegate.stroke)
+            newLine.delegate = self.delegate
+            newLine.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
+            newLine.startPoint = loc
+            newLine.lastPoint = tempLine.lastPoint
+            self.delegate.shapeTransformations[newLine.hash] = (loc.x, loc.y, 1, 0)
+            
+            let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == tempLine.hash
+            })
+            self.delegate.shapesGroup.contents[index!] = newLine
+            newLine.setLineEvents()
+            self.delegate.activateScrollView(enable: true)
+        }
+        
+        self.circle.onTouchReleased { (event) in
+            guard let loc = event.points.first?.location(in: .scene) else { return }
+            
+            let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y), stroke: self.delegate.stroke)
+            newLine.delegate = self.delegate
+            //newLine.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
+            newLine.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
+            newLine.startPoint = startPoint
+            newLine.lastPoint = loc
+            self.delegate.shapeTransformations[newLine.hash] = (startPoint.x,startPoint.y, 1, 0)
+            let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
+                node.hash == tempLine.hash
+            })
+            self.delegate.shapesGroup.contents[index!] = newLine
+            newLine.setLineEvents()
+            self.delegate.activateScrollView(enable: true)
+        }
+        
+        self.backgroundLine.onPan { (event) in
+            guard let _ = event.node else { print("problem on line pan")
+                return
+            }
+            self.delegate.activateScrollView(enable: false)
+            let transform = self.delegate.shapeTransformations[self.hash]
+            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
+            self.delegate.updatePlace(node: self)
+            self.delegate.activateScrollView(enable: true)
+        }
+        
+        self.backgroundLine.onRotate { (event) in
+            guard let _ = event.node else { print("problem on line rotate")
+                return
+            }
+            self.delegate.activateScrollView(enable: false)
+            let transform = self.delegate.shapeTransformations[self.hash]
+            self.delegate.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale, transform!.angle + event.angle), forKey: self.hash)
+            self.delegate.updatePlace(node: self)
+            self.delegate.activateScrollView(enable: true)
+        }
+        
+        self.backgroundLine.onPinch { (event) in
+            guard let _ = event.node else { print("problem on line pinch")
+                return
+            }
+            self.delegate.activateScrollView(enable: false)
+            let transform = self.delegate.shapeTransformations[self.hash]
+            self.delegate.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale * event.scale, transform!.angle), forKey: self.hash)
+            self.delegate.updatePlace(node: self)
+            
+            let newStroke = Stroke(fill: self.delegate.stroke.fill, width: self.delegate.stroke.width/(transform!.scale * event.scale))
+            let newCircleStroke = Stroke(fill: Color.clear, width: self.delegate.stroke.width/(transform!.scale * event.scale))
+            self.updateStroke(stroke: newStroke)
+            self.updateCircleStroke(stroke: newCircleStroke)
+            self.updateSize(scale: transform!.scale * event.scale)
+            self.delegate.activateScrollView(enable: true)
+        }
+        self.onTap(f: { (event) in
+            if self.delegate.activeTool == .none { return }
+            guard let node = event.node else { print("problem on panel pan")
+                return
+            }
+            if self.delegate.activeTool == .delete {
+                self.delegate.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
+                    shape.hash == node.hash
+                })
+            }
+        })
     }
 }

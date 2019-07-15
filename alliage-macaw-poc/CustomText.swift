@@ -11,6 +11,8 @@ import Macaw
 
 class CustomText: Group, CustomShape {
     
+    var delegate: MacawViewDelegate!
+    
     public var active: Bool = false
     public var rect: Shape!
     var textNode: Text!
@@ -69,6 +71,48 @@ class CustomText: Group, CustomShape {
     
     func redoShape() {
         contents = [rect, textNode]
+    }
+    
+    func setTextEvents(startPoint: Point) {
+        
+        self.onTap(f: { (event) in
+            
+            if self.delegate.activeTool == .delete {
+                self.delegate.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
+                    shape.hash == self.hash
+                })
+                return
+            }
+            
+            if self.delegate.isKeyboardShowing && !self.isActive {
+                self.delegate.inputTextView.resignFirstResponder()
+                return
+            }
+            self.isActive = !self.isActive
+            if self.isActive {
+                self.delegate.customTexts.removeAll(where: { (text) -> Bool in
+                    text == self
+                })
+                for text in self.delegate.customTexts {
+                    text.isActive = false //deselects all texts except current one
+                }
+                self.delegate.customTexts.append(self)
+                self.delegate.inputTextView.becomeFirstResponder()
+                
+            } else {
+                self.delegate.inputTextView.resignFirstResponder()
+            }
+        })
+        
+        self.onPan { event in
+            //self.scrollview.isScrollEnabled = false
+            self.delegate.activateScrollView(enable: false)
+            let transform = self.delegate.shapeTransformations[self.hash]
+            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
+            self.delegate.updatePlace(node: self)
+            self.delegate.activateScrollView(enable: true)
+        }
+        self.delegate.shapesGroup.contents.append(self)
     }
 
 }

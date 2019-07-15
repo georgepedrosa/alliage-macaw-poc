@@ -24,7 +24,20 @@ enum Tool {
     case none
 }
 
-class ViewController: UIViewController {
+protocol MacawViewDelegate: UIViewController {
+    var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] { get set }
+    func activateScrollView(enable: Bool)
+    func updatePlace(node: Node)
+    var shapesGroup: Group { get set }
+    var activeTool: Tool { get set }
+    var stroke: Stroke { get }
+    var textColor: Color { get }
+    var inputTextView: UITextView { get }
+    var customTexts: [CustomText] { get set }
+    var isKeyboardShowing: Bool { get set }
+}
+
+class ViewController: UIViewController, MacawViewDelegate {
     
     var shapeActive: Bool = false
     
@@ -179,6 +192,12 @@ class ViewController: UIViewController {
         }
     }
     
+    func distance(_ a: Point, _ b: Point) -> Double {
+        let xDist = a.x - b.x
+        let yDist = a.y - b.y
+        return Double(sqrt(xDist * xDist + yDist * yDist))
+    }
+    
     func createCanvas() {
         self.canvas = Shape(form: Rect(x: 0, y: 0, w: Double(image.size.width), h: Double(image.size.height)), fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0)) //creating background canvas
         
@@ -244,45 +263,57 @@ class ViewController: UIViewController {
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
             if self.activeTool == .text { //special case for text behaviour and events
-                self.setTextEvents(startPoint: startPoint)
+//                self.setTextEvents(startPoint: startPoint)
+                
+                let customText = CustomText(text: "", startPoint: startPoint, color: self.textColor)
+                customText.delegate = self
+                self.customTexts.append(customText) //stores all created texts
+                self.inputTextView.becomeFirstResponder() //always displays keyboard after creating text
+                self.shapeTransformations[customText.hash] = (0,0, 1, 0)
+                
+                customText.setTextEvents(startPoint: startPoint)
+                
                 return //adds newly created text to shapes array and ignores subsequent events
             } else
             if let protractor = self.newShape as? Protractor { //special case for protractor behaviour and events
-                self.setProtractorEvents(protractor: protractor)
+                self.recreateShape(shape: protractor, startPoint: startPoint, loc: loc)
+                protractor.p0 = startPoint
+                protractor.p1 = loc
+                let d = self.distance(startPoint, loc)
+                let angle = atan2(loc.y - startPoint.y, loc.x - startPoint.x)
+                let x2 = startPoint.x + d * cos(angle + Double.pi/4)
+                let y2 = startPoint.y + d * sin(angle + Double.pi/4)
+                protractor.p2 = Point(x: x2, y: y2)
+                protractor.delegate = self
+                protractor.setProtractorEvents()
                 return //ignores subsequent events
             } else
             if let arc = self.newShape as? CustomArc {
-                self.shapesGroup.contents.removeLast()
-                self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-                self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
+                self.recreateShape(shape: arc, startPoint: startPoint, loc: loc)
                 arc.p0 = startPoint
                 arc.p1 = Point((loc.x + startPoint.x)/2, (loc.y + startPoint.y)/2)
                 arc.p2 = loc
-                self.shapesGroup.contents.append(arc)
-                self.setArcEvents(arc: arc)
+                arc.delegate = self
+                arc.setArcEvents()
+                //self.setArcEvents(arc: arc)
                 return
-            }
-            else
+            } else
             if let _ = self.newShape as? FreeDrawing {
-                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
-                return //ignores subsequent events
+                self.shapeTransformations[self.newShape.hash] = (0,0, 1, 0)
+                //self.setDeleteEvent(node: freeDrawing)
+                //return //ignores subsequent events
             } else if let line = self.newShape as? CustomLine {
-                self.shapesGroup.contents.removeLast()
-                self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-                self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
+                self.recreateShape(shape: line, startPoint: startPoint, loc: loc)
                 line.startPoint = startPoint
                 line.lastPoint = loc
-                self.shapesGroup.contents.append(line)
-                self.setLineEvents(line: line)
+                line.delegate = self
+                line.setLineEvents()
+                //self.setLineEvents(line: line)
                 return
+            } else if let _ = self.newShape as? Asterisk {
+                self.shapeTransformations[self.newShape.hash] = (0,0,1,0)
             } else { //general shape creation and events
-                self.shapesGroup.contents.removeLast()
-                self.newShape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-                self.newShape.activateCircleAction()
-                self.newShape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-                self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
+                self.recreateShape(shape: self.newShape, startPoint: startPoint, loc: loc)
             }
             
             self.setDeleteEvent(node: self.newShape)
@@ -290,14 +321,11 @@ class ViewController: UIViewController {
             // moving existing shape
             self.newShape.onPan { event in
                 //if !self.canvasActive {
-                
                 if self.activeTool == .none { return }
-                
                 guard let node = event.node else { print("problem on panel pan")
                     return
                 }
                 self.activateScrollView(enable: false)
-                
                 let transform = self.shapeTransformations[node.hash]
                 self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: node.hash)
                 self.updatePlace(node: node)
@@ -305,6 +333,14 @@ class ViewController: UIViewController {
                 
                 //self.macawActions.append(MacawAction(nodeHash: node.hash, type: .pan, transformation: transform))
                 //}
+            }
+            
+            if let _ = self.newShape as? Asterisk {
+                return
+            }
+            
+            if let _ = self.newShape as? FreeDrawing {
+                return
             }
             
             // resizing existing shape
@@ -343,411 +379,18 @@ class ViewController: UIViewController {
                 self.updatePlace(node: node)
                 self.activateScrollView(enable: true)
             }
-            
-            self.shapesGroup.contents.append(self.newShape)
         }
         
         group = Group(contents: [shapesGroup, canvas])
         macawView.node = group
     }
     
-    
-    func setArcEvents(arc: CustomArc) {
-        
-        var p0 = Point()
-        var p1 = Point(x: 0, y: 0)
-        var p2 = Point(x: 0, y: 0)
-        var tempArc: CustomArc!
-        
-        arc.circle0.onTouchPressed { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            self.activateScrollView(enable: false)
-            
-            let transform = self.shapeTransformations[arc.hash]
-            let center = arc.getCenter()
-            p1 = Point(x: arc.p1.x - arc.p0.x, y: arc.p1.y - arc.p0.y)
-            let p1Aux = Shape(form: Point(x: 0, y: 0))
-            p1Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p1.x, dy: p1.y)
-            p1 = Point(x: p1Aux.place.dx, y: p1Aux.place.dy)
-            p2 = Point(x: arc.p2.x - arc.p0.x, y: arc.p2.y - arc.p0.y)
-            let p2Aux = Shape(form: Point(x: 0, y: 0))
-            p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
-            p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
-            tempArc = CustomArc(p0: loc, p1: p1, p2: p2)
-            
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == arc.hash
-            })
-            
-            self.shapesGroup.contents[index!] = tempArc
-        }
-        
-        arc.circle1.onTouchPressed { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            self.activateScrollView(enable: false)
-            
-            let transform = self.shapeTransformations[arc.hash]
-            let center = arc.getCenter()
-            let p0Aux = Shape(form: Point(x: 0, y: 0))
-            p0Aux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
-            p0 = Point(x: p0Aux.place.dx, y: p0Aux.place.dy)
-            p2 = Point(x: arc.p2.x - arc.p0.x, y: arc.p2.y - arc.p0.y)
-            let p2Aux = Shape(form: Point(x: 0, y: 0))
-            p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
-            p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
-            tempArc = CustomArc(p0: p0, p1: loc, p2: p2)
-            
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == arc.hash
-            })
-            
-            self.shapesGroup.contents[index!] = tempArc
-        }
-        
-        arc.circle2.onTouchPressed { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            self.activateScrollView(enable: false)
-            
-            let transform = self.shapeTransformations[arc.hash]
-            let center = arc.getCenter()
-            let p0Aux = Shape(form: Point(x: 0, y: 0))
-            p0Aux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
-            p0 = Point(x: p0Aux.place.dx, y: p0Aux.place.dy)
-            p1 = Point(x: arc.p1.x - arc.p0.x, y: arc.p1.y - arc.p0.y)
-            let p1Aux = Shape(form: Point(x: 0, y: 0))
-            p1Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p1.x, dy: p1.y)
-            p1 = Point(x: p1Aux.place.dx, y: p1Aux.place.dy)
-            tempArc = CustomArc(p0: p0, p1: p1, p2: loc)
-            
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == arc.hash
-            })
-            
-            self.shapesGroup.contents[index!] = tempArc
-        }
-        arc.circle0.onTouchMoved { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else {
-                return
-            }
-            tempArc.updateForm(p0: loc, p1: tempArc.p1, p2: tempArc.p2)
-            //arc.moveCircle(circle: .zero, toPoint: loc)
-        }
-        arc.circle1.onTouchMoved { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else {
-                return
-            }
-            tempArc.updateForm(p0: tempArc.p0, p1: loc, p2: tempArc.p2)
-            //arc.moveCircle(circle: .one, toPoint: loc)
-        }
-        arc.circle2.onTouchMoved { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else {
-                return
-            }
-            tempArc.updateForm(p0: tempArc.p0, p1: tempArc.p1, p2: loc)
-            //arc.moveCircle(circle: .two, toPoint: loc)
-        }
-        arc.circle0.onTouchReleased { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            self.activateScrollView(enable: true)
-            
-            let x1 = tempArc.p1.x - loc.x
-            let y1 = tempArc.p1.y - loc.y
-            let x2 = tempArc.p2.x - loc.x
-            let y2 = tempArc.p2.y - loc.y
-    
-            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2))
-            newArc.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
-            newArc.p0 = loc
-            newArc.p1 = tempArc.p1
-            newArc.p2 = tempArc.p2
-            self.shapeTransformations[newArc.hash] = (loc.x, loc.y, 1, 0)
-            
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == tempArc.hash
-            })
-            
-            self.shapesGroup.contents[index!] = newArc
-            self.setArcEvents(arc: newArc)
-        }
-        arc.circle1.onTouchReleased { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            self.activateScrollView(enable: true)
-            
-            let x1 = loc.x - p0.x
-            let y1 = loc.y - p0.y
-            let x2 = p2.x - p0.x
-            let y2 = p2.y - p0.y
-            
-            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2))
-            newArc.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
-            newArc.p0 = p0
-            newArc.p1 = loc
-            newArc.p2 = p2
-            self.shapeTransformations[newArc.hash] = (p0.x,p0.y, 1, 0)
-            
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == tempArc.hash
-            })
-            
-            self.shapesGroup.contents[index!] = newArc
-            self.setArcEvents(arc: newArc)
-        }
-        arc.circle2.onTouchReleased { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            self.activateScrollView(enable: true)
-            
-            let x1 = p1.x - p0.x
-            let y1 = p1.y - p0.y
-            let x2 = loc.x - p0.x
-            let y2 = loc.y - p0.y
-            
-            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2))
-            newArc.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
-            newArc.p0 = p0
-            newArc.p1 = p1
-            newArc.p2 = loc
-            self.shapeTransformations[newArc.hash] = (p0.x,p0.y, 1, 0)
-            
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == tempArc.hash
-            })
-            
-            self.shapesGroup.contents[index!] = newArc
-            self.setArcEvents(arc: newArc)
-        }
-        arc.onTap { (event) in
-            guard let _ = event.node else { print("problem on arc tap")
-                return
-            }
-            
-            if self.activeTool == .delete {
-                self.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
-                    shape.hash == arc.hash
-                })
-            } else {
-                arc.isActive = !arc.isActive
-            }
-        }
-        arc.backgroundDrawing.onPan { (event) in
-            guard let _ = event.node else { print("problem on arc pan")
-                return
-            }
-            self.activateScrollView(enable: false)
-            
-            let transform = self.shapeTransformations[arc.hash]
-            self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: arc.hash)
-            self.updatePlace(node: arc)
-            self.activateScrollView(enable: true)
-        }
-    }
-    
-    func setLineEvents(line: CustomLine) {
-        var startPoint = Point()
-        var lastPoint = Point(x: 0, y: 0)
-        var tempLine: CustomLine!
-        
-        line.circle2.onTouchPressed { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self.activateScrollView(enable: false)
-            
-            let transform = self.shapeTransformations[line.hash]
-            let center = line.getCenter()
-            lastPoint = Point(x: line.lastPoint.x - line.startPoint.x, y: line.lastPoint.y - line.startPoint.y)
-            let lastPointAux = Shape(form: Point(x: 0, y: 0))
-            lastPointAux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: lastPoint.x, dy: lastPoint.y)
-            lastPoint = Point(x: lastPointAux.place.dx, y: lastPointAux.place.dy)
-            tempLine = CustomLine(startPoint: loc, lastPoint: lastPoint, stroke: self.stroke)
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == line.hash
-            })
-            self.shapesGroup.contents[index!] = tempLine
-        }
-        
-        line.circle.onTouchPressed { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self.activateScrollView(enable: false)
-            
-            let transform = self.shapeTransformations[line.hash]
-            let pointAux = Shape(form: Point(x: 0, y: 0))
-            let center = line.getCenter()
-            pointAux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
-            startPoint = Point(x: pointAux.place.dx, y: pointAux.place.dy)
-            tempLine = CustomLine(startPoint: startPoint, lastPoint: loc, stroke: self.stroke)
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == line.hash
-            })
-            self.shapesGroup.contents[index!] = tempLine
-        }
-        
-        line.circle2.onTouchMoved { (event) in
-            guard let loc = event.points.first?.location(in: .scene)  else {
-                return
-            }
-            tempLine.updateForm(startPoint: loc, lastPoint: tempLine.lastPoint)
-        }
-        
-        line.circle.onTouchMoved({ (event) in
-            guard let loc = event.points.first?.location(in: .scene)  else {
-                return
-            }
-            tempLine.updateForm(startPoint: tempLine.startPoint, lastPoint: loc)
-        })
-        
-        line.circle2.onTouchReleased { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            let x = tempLine.lastPoint.x - loc.x
-            let y = tempLine.lastPoint.y - loc.y
-            let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(x: x, y: y), stroke: self.stroke)
-            newLine.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
-            newLine.startPoint = loc
-            newLine.lastPoint = tempLine.lastPoint
-            self.shapeTransformations[newLine.hash] = (loc.x, loc.y, 1, 0)
-            
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == tempLine.hash
-            })
-            self.shapesGroup.contents[index!] = newLine
-            self.setLineEvents(line: newLine)
-            self.activateScrollView(enable: true)
-        }
-        
-        line.circle.onTouchReleased { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y), stroke: self.stroke)
-            //newLine.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-            newLine.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-            newLine.startPoint = startPoint
-            newLine.lastPoint = loc
-            self.shapeTransformations[newLine.hash] = (startPoint.x,startPoint.y, 1, 0)
-            let index = self.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == tempLine.hash
-            })
-            self.shapesGroup.contents[index!] = newLine
-            self.setLineEvents(line: newLine)
-            self.activateScrollView(enable: true)
-        }
-        
-        line.backgroundLine.onPan { (event) in
-            guard let _ = event.node else { print("problem on line pan")
-                return
-            }
-            self.activateScrollView(enable: false)
-            let transform = self.shapeTransformations[line.hash]
-            self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: line.hash)
-            self.updatePlace(node: line)
-            self.activateScrollView(enable: true)
-        }
-        
-        line.backgroundLine.onRotate { (event) in
-            guard let _ = event.node else { print("problem on line rotate")
-                return
-            }
-            self.activateScrollView(enable: false)
-            let transform = self.shapeTransformations[line.hash]
-            self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale, transform!.angle + event.angle), forKey: line.hash)
-            self.updatePlace(node: line)
-            self.activateScrollView(enable: true)
-        }
-        
-        line.backgroundLine.onPinch { (event) in
-            guard let _ = event.node else { print("problem on line pinch")
-                return
-            }
-            self.activateScrollView(enable: false)
-            let transform = self.shapeTransformations[line.hash]
-            self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale * event.scale, transform!.angle), forKey: line.hash)
-            self.updatePlace(node: line)
-            
-            let newStroke = Stroke(fill: self.stroke.fill, width: self.stroke.width/(transform!.scale * event.scale))
-            let newCircleStroke = Stroke(fill: Color.clear, width: self.stroke.width/(transform!.scale * event.scale))
-            line.updateStroke(stroke: newStroke)
-            line.updateCircleStroke(stroke: newCircleStroke)
-            line.updateSize(scale: transform!.scale * event.scale)
-            self.activateScrollView(enable: true)
-        }
-        setDeleteEvent(node: line)
-    }
-    
-    func setTextEvents(startPoint: Point) {
-        let customText = CustomText(text: "", startPoint: startPoint, color: self.textColor)
-        self.customTexts.append(customText) //stores all created texts
-        self.inputTextView.becomeFirstResponder() //always displays keyboard after creating text
-        self.shapeTransformations[customText.hash] = (0,0, 1, 0)
-        
-        customText.onTap(f: { (event) in
-            
-            if self.activeTool == .delete {
-                self.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
-                    shape.hash == customText.hash
-                })
-                return
-            }
-            
-            if self.isKeyboardShowing && !customText.isActive {
-                self.inputTextView.resignFirstResponder()
-                return
-            }
-            customText.isActive = !customText.isActive
-            if customText.isActive {
-                self.customTexts.removeAll(where: { (text) -> Bool in
-                    text == customText
-                })
-                for text in self.customTexts {
-                    text.isActive = false //deselects all texts except current one
-                }
-                self.customTexts.append(customText)
-                self.inputTextView.becomeFirstResponder()
-                
-            } else {
-                self.inputTextView.resignFirstResponder()
-            }
-        })
-        
-        customText.onPan { event in
-            //self.scrollview.isScrollEnabled = false
-            self.activateScrollView(enable: false)
-            let transform = self.shapeTransformations[customText.hash]
-            self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: customText.hash)
-            self.updatePlace(node: customText)
-            self.activateScrollView(enable: true)
-        }
-        self.shapesGroup.contents.append(customText)
-    }
-    
-    func setProtractorEvents(protractor: Protractor) {
-        protractor.circle0.onTouchMoved { (event) in
-            guard let loc = event.points.first?.location(in: .scene)  else {
-                return
-            }
-            self.activateScrollView(enable: false)
-            protractor.moveCircle(circle: .zero, toPoint: loc)
-            self.activateScrollView(enable: true)
-        }
-        protractor.circle1.onTouchMoved { (event) in
-            guard let loc = event.points.first?.location(in: .scene)  else {
-                return
-            }
-            self.activateScrollView(enable: false)
-            protractor.moveCircle(circle: .one, toPoint: loc)
-            self.activateScrollView(enable: true)
-        }
-        protractor.circle2.onTouchMoved { (event) in
-            guard let loc = event.points.first?.location(in: .scene)  else {
-                return
-            }
-            self.activateScrollView(enable: false)
-            protractor.moveCircle(circle: .two, toPoint: loc)
-            self.activateScrollView(enable: true)
-        }
-        setDeleteEvent(node: protractor)
+    func recreateShape(shape: CustomShape, startPoint: Point, loc: Point) {
+        self.shapesGroup.contents.removeLast()
+        shape.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
+        shape.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
+        self.shapeTransformations[self.newShape.hash] = (startPoint.x,startPoint.y, 1, 0)
+        self.shapesGroup.contents.append(shape)
     }
     
     func setDeleteEvent(node: CustomShape) {
@@ -849,13 +492,6 @@ class ViewController: UIViewController {
         activeTool = .line
         lineButton.isSelected = true
         drawingActive = true
-//        if lastSelectedButton != lineButton {
-//            if lastSelectedButton != nil {
-//                lastSelectedButton.isSelected = false
-//            }
-//            lineButton.isSelected = true
-//            lastSelectedButton = lineButton
-//        }
     }
     
     @IBAction func activeRectTool(_ sender: UIButton) {
@@ -864,13 +500,6 @@ class ViewController: UIViewController {
         activeTool = .rect
         rectButton.isSelected = true
         drawingActive = true
-//        if lastSelectedButton != rectButton {
-//            if lastSelectedButton != nil {
-//                lastSelectedButton.isSelected = false
-//            }
-//            rectButton.isSelected = true
-//            lastSelectedButton = rectButton
-//        }
     }
     
     @IBAction func activeCircleTool(_ sender: Any) {
@@ -879,13 +508,6 @@ class ViewController: UIViewController {
         activeTool = .ellipse
         circleButton.isSelected = true
         drawingActive = true
-//        if lastSelectedButton != circleButton {
-//            if lastSelectedButton != nil {
-//                lastSelectedButton.isSelected = false
-//            }
-//            circleButton.isSelected = true
-//            lastSelectedButton = circleButton
-//        }
     }
     
     @IBAction func activeShapeTool(_ sender: Any) {

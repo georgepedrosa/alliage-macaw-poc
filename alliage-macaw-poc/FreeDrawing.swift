@@ -12,6 +12,7 @@ import Macaw
 class FreeDrawing: Group, CustomShape {
     
     var drawing: Shape!
+    var backgroundDrawing: Shape!
     var path: PathBuilder!
     
     var isActive: Bool = false {
@@ -35,12 +36,22 @@ class FreeDrawing: Group, CustomShape {
             )
         )
         
-        contents = [drawing]
+        backgroundDrawing = Shape(
+            form: path.build(),
+            stroke: Stroke(
+                fill: Color.clear,
+                width: 30,
+                cap: .round
+            )
+        )
+        
+        contents = [drawing, backgroundDrawing]
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
         path = path.lineTo(x: lastPoint.x, y: lastPoint.y)
         self.drawing.form = path.build()
+        self.backgroundDrawing.form = path.build()
     }
     
     func updateStroke(stroke: Stroke) {
@@ -56,7 +67,7 @@ class FreeDrawing: Group, CustomShape {
     }
     
     func getCenter() -> Point? {
-        return nil
+        return self.bounds?.center()
     }
     
     func activateCircleAction() {

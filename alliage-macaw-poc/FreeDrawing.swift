@@ -30,8 +30,8 @@ class FreeDrawing: Group, CustomShape {
         drawing = Shape(
             form: path.build(),
             stroke: Stroke(
-                fill: Color.red,
-                width: 4,
+                fill: stroke.fill,
+                width: stroke.width,
                 cap: .round
             )
         )

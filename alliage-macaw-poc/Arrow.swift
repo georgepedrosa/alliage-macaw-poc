@@ -11,9 +11,6 @@
 import UIKit
 import Macaw
 
-import UIKit
-import Macaw
-
 class Arrow: Group, CustomShape {
 
     var line: Shape!
@@ -23,17 +20,20 @@ class Arrow: Group, CustomShape {
     var backgroundHeadLeft: Shape!
     var backgroundHeadRight: Shape!
     
+    var stroke: Stroke!
+    
     var isActive: Bool = false {
         didSet {
-            line.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
-            headLeft.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
-            headRight.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
+            line.stroke = (isActive ? Stroke(fill: Color.blue, width: self.stroke.width) : self.stroke)
+            headLeft.stroke = (isActive ? Stroke(fill: Color.blue, width: self.stroke.width) : self.stroke)
+            headRight.stroke = (isActive ? Stroke(fill: Color.blue, width: self.stroke.width) : self.stroke)
         }
     }
     
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
-
+        
+        self.stroke = stroke
         
         let x1 = startPoint.x
         let y1 = startPoint.y
@@ -99,6 +99,7 @@ class Arrow: Group, CustomShape {
     }
     
     func updateStroke(stroke: Stroke) {
+        self.stroke = stroke
         line.stroke = stroke
         headLeft.stroke = stroke
         headRight.stroke = stroke

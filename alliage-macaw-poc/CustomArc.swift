@@ -30,6 +30,8 @@ class CustomArc: Group, CustomShape {
     
     var delegate: MacawViewDelegate!
     
+    var stroke: Stroke!
+    
     var isActive: Bool = true {
         didSet {
             if isActive {
@@ -39,57 +41,12 @@ class CustomArc: Group, CustomShape {
             }
         }
     }
-    
-    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
-        super.init()
-        p0 = startPoint
-        let x = (lastPoint.x + startPoint.x)/2
-        let y = (lastPoint.y + startPoint.y)/2
-        p1 = Point(x,y)
-        p2 = lastPoint
-        
-        //let lineLocus = Line(x1: startPoint.x, y1: startPoint.y, x2: lastPoint.x, y2: lastPoint.y)
-        //tempLine = Shape(form: lineLocus, fill: Color.clear, stroke: stroke)
-        
-        let locusCircle0 = Circle(cx: p0.x, cy: p0.y, r: 15)
-        circle0 = Shape(form: locusCircle0, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        let locusCircle1 = Circle(cx: p1.x, cy: p1.y, r: 15)
-        circle1 = Shape(form: locusCircle1, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        let locusCircle2 = Circle(cx: p2.x, cy: p2.y, r: 15)
-        circle2 = Shape(form: locusCircle2, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        
-        let locusLine1 = Line(x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y)
-        line1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
-        let locusLine2 = Line(x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y)
-        line2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
-        
-        let path = MoveTo(x: p0.x, y: p0.y)
-        
-        drawing = Shape(
-            form: path.build(),
-            stroke: Stroke(
-                fill: Color.red,
-                width: 4,
-                cap: .round
-            )
-        )
-        
-        backgroundDrawing = Shape(
-            form: path.build(),
-            stroke: Stroke(
-                fill: Color.clear,
-                width: 30,
-                cap: .round
-            )
-        )
-        
-        contents = [line1, line2, drawing, backgroundDrawing, circle0, circle1, circle2]
-    }
-    
-    init(p0: Point, p1: Point, p2: Point, delegate: MacawViewDelegate) {
+
+    init(p0: Point, p1: Point, p2: Point, delegate: MacawViewDelegate, stroke: Stroke) {
         super.init()
         
         self.delegate = delegate
+        self.stroke = stroke
         
         self.p0 = p0
         self.p1 = p1
@@ -120,8 +77,8 @@ class CustomArc: Group, CustomShape {
         drawing = Shape(
             form: path.build(),
             stroke: Stroke(
-                fill: Color.red,
-                width: 4,
+                fill: stroke.fill,
+                width: stroke.width,
                 cap: .round
             )
         )
@@ -161,7 +118,7 @@ class CustomArc: Group, CustomShape {
             let p2Aux = Shape(form: Point(x: 0, y: 0))
             p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
             p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
-            tempArc = CustomArc(p0: loc, p1: p1, p2: p2, delegate: self.delegate)
+            tempArc = CustomArc(p0: loc, p1: p1, p2: p2, delegate: self.delegate, stroke: self.stroke)
             
             let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == self.hash
@@ -184,7 +141,7 @@ class CustomArc: Group, CustomShape {
             let p2Aux = Shape(form: Point(x: 0, y: 0))
             p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
             p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
-            tempArc = CustomArc(p0: p0, p1: loc, p2: p2, delegate: self.delegate)
+            tempArc = CustomArc(p0: p0, p1: loc, p2: p2, delegate: self.delegate, stroke: self.stroke)
             
             let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == self.hash
@@ -207,7 +164,7 @@ class CustomArc: Group, CustomShape {
             let p1Aux = Shape(form: Point(x: 0, y: 0))
             p1Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p1.x, dy: p1.y)
             p1 = Point(x: p1Aux.place.dx, y: p1Aux.place.dy)
-            tempArc = CustomArc(p0: p0, p1: p1, p2: loc, delegate: self.delegate)
+            tempArc = CustomArc(p0: p0, p1: p1, p2: loc, delegate: self.delegate, stroke: self.stroke)
             
             let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == self.hash
@@ -240,7 +197,7 @@ class CustomArc: Group, CustomShape {
             let x2 = tempArc.p2.x - loc.x
             let y2 = tempArc.p2.y - loc.y
             
-            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate)
+            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate, stroke: self.stroke)
             newArc.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
             newArc.p0 = loc
             newArc.p1 = tempArc.p1
@@ -264,7 +221,7 @@ class CustomArc: Group, CustomShape {
             let x2 = p2.x - p0.x
             let y2 = p2.y - p0.y
             
-            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate)
+            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate, stroke: self.stroke)
             newArc.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
             newArc.p0 = p0
             newArc.p1 = loc
@@ -288,7 +245,7 @@ class CustomArc: Group, CustomShape {
             let x2 = loc.x - p0.x
             let y2 = loc.y - p0.y
             
-            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate)
+            let newArc = CustomArc(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate, stroke: self.stroke)
             newArc.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
             newArc.p0 = p0
             newArc.p1 = p1

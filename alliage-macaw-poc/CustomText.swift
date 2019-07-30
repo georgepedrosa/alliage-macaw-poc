@@ -23,10 +23,6 @@ class CustomText: Group, CustomShape {
         }
     }
     
-    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
-        
-    }
-    
     init(text: String, startPoint: Point, color: Color) {
         super.init()
         textNode = Text(text: text, fill: color, place: .move(startPoint.x, startPoint.y))

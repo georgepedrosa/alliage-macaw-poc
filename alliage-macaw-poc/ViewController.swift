@@ -19,12 +19,13 @@ enum Tool {
     case arrow
     case asterisk
     case arc
+    case multiline
     case delete
     case selection
     case none
 }
 
-protocol MacawViewDelegate: UIViewController {
+protocol MacawViewDelegate {
     var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] { get set }
     func activateScrollView(enable: Bool)
     func updatePlace(node: Node)
@@ -38,6 +39,8 @@ protocol MacawViewDelegate: UIViewController {
 }
 
 class ViewController: UIViewController, MacawViewDelegate {
+    
+    var isNewShape: Bool = true
     
     var shapeActive: Bool = false
     
@@ -59,6 +62,7 @@ class ViewController: UIViewController, MacawViewDelegate {
     @IBOutlet weak var arcButton: UIButton!
     @IBOutlet weak var arrowButton: UIButton!
     @IBOutlet weak var asteriskButton: UIButton!
+    @IBOutlet weak var multilineButton: UIButton!
     @IBOutlet weak var selectionButton: UIButton!
     @IBOutlet weak var handButton: UIButton!
     @IBOutlet weak var deleteButton: UIButton!
@@ -78,7 +82,7 @@ class ViewController: UIViewController, MacawViewDelegate {
         return textView
     }()
     
-    let stroke = Stroke(fill: Color.red, width: 5.0)
+    let stroke = Stroke(fill: Color.red, width: 4.0)
     let textColor = Color.red
     
     var group: Group!
@@ -114,6 +118,7 @@ class ViewController: UIViewController, MacawViewDelegate {
     var activeTool: Tool = .none {
         willSet {
             if newValue == .none {
+                isNewShape = true
                 freeButton.isSelected = false
                 textButton.isSelected = false
                 lineButton.isSelected = false
@@ -123,12 +128,14 @@ class ViewController: UIViewController, MacawViewDelegate {
                 arcButton.isSelected = false
                 arrowButton.isSelected = false
                 asteriskButton.isSelected = false
+                multilineButton.isSelected = false
                 selectionButton.isSelected = false
                 handButton.isSelected = false
                 deleteButton.isSelected = false
             }
         }
     }
+    
     let image = #imageLiteral(resourceName: "Medical_X-Ray_imaging_AAR02_nevit")
     var backgroundView = UIView()
     
@@ -229,11 +236,21 @@ class ViewController: UIViewController, MacawViewDelegate {
             case .arrow:
                 self.newShape = Arrow(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .protractor:
-                self.newShape = Protractor(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
+                self.newShape = Protractor(p0: startPoint, p1: startPoint, p2: startPoint, delegate: self, stroke: self.stroke)
+                    //Protractor(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .asterisk:
                 self.newShape = Asterisk(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .arc:
-                self.newShape = CustomArc(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
+                self.newShape = CustomArc(p0: startPoint, p1: startPoint, p2: startPoint, delegate: self, stroke: self.stroke)
+            case .multiline:
+                if self.isNewShape {
+                    self.newShape = Multiline(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
+                } else {
+                    if let multiline = self.newShape as? Multiline {
+                        multiline.newPoint(point: startPoint)
+                    }
+                    return
+                }
             case .selection:
                 return
             case .delete:
@@ -247,7 +264,7 @@ class ViewController: UIViewController, MacawViewDelegate {
         // resizing new shape when moving first touch
         canvas.onTouchMoved { (event) in
             //self.canvasActive = true
-            if self.activeTool == .none || self.activeTool == .delete || self.activeTool == .text || self.selectionButton.isSelected { return }
+            if self.activeTool == .none || self.activeTool == .delete || self.activeTool == .text || self.activeTool == .multiline || self.selectionButton.isSelected { return }
             guard let loc = event.points.first?.location(in: .scene) else { return }
             self.newShape.updateForm(startPoint: startPoint, lastPoint: loc) //updates form of newly created shape while initial touch isn't released
             if self.activeTool == .freeDraw {
@@ -312,9 +329,37 @@ class ViewController: UIViewController, MacawViewDelegate {
                 return
             } else if let _ = self.newShape as? Asterisk {
                 self.shapeTransformations[self.newShape.hash] = (0,0,1,0)
+                
+            } else if let _ = self.newShape as? Multiline {
+                if self.isNewShape {
+                    self.shapeTransformations[self.newShape.hash] = (0,0,1,0)
+//                    self.newShape.onPan { event in
+//                        //if !self.canvasActive {
+//                        if self.activeTool == .none { return }
+//                        guard let node = event.node else { print("problem on panel pan")
+//                            return
+//                        }
+//                        self.activateScrollView(enable: false)
+//                        let transform = self.shapeTransformations[node.hash]
+//                        self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: node.hash)
+//                        self.updatePlace(node: node)
+//                        self.activateScrollView(enable: true)
+//                        //self.macawActions.append(MacawAction(nodeHash: node.hash, type: .pan, transformation: transform))
+//                        //}
+//                    }
+                } else {
+                    return
+                }
+                
             } else { //general shape creation and events
                 self.recreateShape(shape: self.newShape, startPoint: startPoint, loc: loc)
             }
+            
+//            if let _ = self.newShape as? Multiline {
+//                if !self.isNewShape {
+//                    return
+//                }
+//            }
             
             self.setDeleteEvent(node: self.newShape)
             
@@ -335,6 +380,11 @@ class ViewController: UIViewController, MacawViewDelegate {
                 //}
             }
             
+            if let _ = self.newShape as? Multiline {
+                self.isNewShape = false
+                return
+            }
+            
             if let _ = self.newShape as? Asterisk {
                 return
             }
@@ -346,7 +396,7 @@ class ViewController: UIViewController, MacawViewDelegate {
             // resizing existing shape
             self.newShape.onPinch { event in
                 
-                if self.activeTool == .none { return }
+                if self.activeTool == .none || self.activeTool == .multiline { return }
                 
                 guard let node = event.node else { print("problem on panel pinch")
                     return
@@ -367,7 +417,7 @@ class ViewController: UIViewController, MacawViewDelegate {
             
             self.newShape.onRotate { event in
                 
-                if self.activeTool == .none { return }
+                if self.activeTool == .none || self.activeTool == .multiline { return }
                 
                 guard let node = event.node else { print("problem on panel rotate")
                     return
@@ -432,6 +482,7 @@ class ViewController: UIViewController, MacawViewDelegate {
         let imageView = UIImageView()
         imageView.image = image
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        
         scrollview.contentSize = CGSize(width: backgroundView.frame.width, height: backgroundView.frame.height)
 
         backgroundView.addSubview(imageView)
@@ -457,11 +508,10 @@ class ViewController: UIViewController, MacawViewDelegate {
     }
     
     @IBAction func freeDrawingTool(_ sender: UIButton) {
-        activateScrollView(enable: false)
-        activeTool = .none
+        toolSelected()
         activeTool = .freeDraw
         freeButton.isSelected = true
-        drawingActive = true
+
 //        if lastSelectedButton != freeButton {
 //            if lastSelectedButton != nil {
 //                lastSelectedButton.isSelected = false
@@ -472,11 +522,9 @@ class ViewController: UIViewController, MacawViewDelegate {
     }
     
     @IBAction func textTool(_ sender: UIButton) {
-        activateScrollView(enable: false)
-        activeTool = .none
+        toolSelected()
         activeTool = .text
         textButton.isSelected = true
-        drawingActive = true
 //        if lastSelectedButton != textButton {
 //            if lastSelectedButton != nil {
 //                lastSelectedButton.isSelected = false
@@ -487,59 +535,52 @@ class ViewController: UIViewController, MacawViewDelegate {
     }
     
     @IBAction func activeLineTool(_ sender: UIButton) {
-        activateScrollView(enable: false)
-        activeTool = .none
+        toolSelected()
         activeTool = .line
         lineButton.isSelected = true
-        drawingActive = true
+
     }
     
     @IBAction func activeRectTool(_ sender: UIButton) {
-        activateScrollView(enable: false)
-        activeTool = .none
+        toolSelected()
         activeTool = .rect
         rectButton.isSelected = true
-        drawingActive = true
     }
     
     @IBAction func activeCircleTool(_ sender: Any) {
-        activateScrollView(enable: false)
-        activeTool = .none
+        toolSelected()
         activeTool = .ellipse
         circleButton.isSelected = true
-        drawingActive = true
     }
     
     @IBAction func activeShapeTool(_ sender: Any) {
-        activateScrollView(enable: false)
-        activeTool = .none
+        toolSelected()
         activeTool = .protractor
         protractorButton.isSelected = true
-        drawingActive = true
     }
     
     @IBAction func activeArrowTool(_ sender: Any) {
-        activateScrollView(enable: false)
-        activeTool = .none
+        toolSelected()
         activeTool = .arrow
         arrowButton.isSelected = true
-        drawingActive = true
     }
     
     @IBAction func activeAsteriskTool(_ sender: Any) {
-        activateScrollView(enable: false)
-        activeTool = .none
+        toolSelected()
         activeTool = .asterisk
         asteriskButton.isSelected = true
-        drawingActive = true
     }
     
     @IBAction func activateArcTool(_ sender: UIButton) {
-        activateScrollView(enable: false)
-        activeTool = .none
+        toolSelected()
         activeTool = .arc
         arcButton.isSelected = true
-        drawingActive = true
+    }
+    
+    @IBAction func activateMultilineTool(_ sender: UIButton) {
+        toolSelected()
+        activeTool = .multiline
+        multilineButton.isSelected = true
     }
     
     @IBAction func activateSelectionTool(_ sender: Any) {
@@ -570,7 +611,7 @@ class ViewController: UIViewController, MacawViewDelegate {
 //            }
 //        }
         
-        
+        isNewShape = true
         if let undoneNode = shapesGroup.contents.popLast() {
             if let freeDrawing = undoneNode as? FreeDrawing {
                 freeDrawing.deleteShape()
@@ -583,6 +624,7 @@ class ViewController: UIViewController, MacawViewDelegate {
     }
     
     @IBAction func redoTool(_ sender: Any) {
+        isNewShape = true
         if let redoneNode = redoShapes.popLast() {
             if let freeDrawing = redoneNode as? FreeDrawing {
                 freeDrawing.redoShape()
@@ -599,6 +641,12 @@ class ViewController: UIViewController, MacawViewDelegate {
         drawingActive = false
         activeTool = .delete
         deleteButton.isSelected = true
+    }
+    
+    func toolSelected() {
+        activateScrollView(enable: false)
+        activeTool = .none
+        drawingActive = true
     }
 }
 

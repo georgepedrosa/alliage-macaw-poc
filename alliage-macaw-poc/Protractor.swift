@@ -31,57 +31,62 @@ class Protractor: Group, CustomShape {
     var isActive: Bool = false
     
     var delegate: MacawViewDelegate!
-
-    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
-        super.init()
-        
-        p0 = startPoint
-        p1 = lastPoint
-        
-        let d = distance(startPoint, lastPoint)
-        
-        let angle = atan2(p1.y - p0.y, p1.x - p0.x)
-        
-        let x2 = p0.x + d * cos(angle + protractorAngle)
-        let y2 = p0.y + d * sin(angle + protractorAngle)
-        
-        p2 = Point(x: x2, y: y2)
-        
-        let locusLine1 = Line(p0.x, p0.y, p1.x, p1.y)
-        let locusLine2 = Line(p0.x, p0.y, x2, y2)
-        
-        line1 = Shape(form: locusLine1, fill: Color.clear, stroke: stroke)
-        line2 = Shape(form: locusLine2, fill: Color.clear, stroke: stroke)
-        backgroundLine1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        backgroundLine2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        
-        let locusCircle0 = Circle(cx: p0.x, cy: p0.y, r: 15)
-        circle0 = Shape(form: locusCircle0, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        let locusCircle1 = Circle(cx: p1.x, cy: p1.y, r: 15)
-        circle1 = Shape(form: locusCircle1, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        let locusCircle2 = Circle(cx: p2.x, cy: p2.y, r: 15)
-        circle2 = Shape(form: locusCircle2, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        
-        let ellipseLocus = Ellipse(cx: p0.x, cy: p0.y, rx: 40, ry: 40)
-        
-        let theta1 = atan2(p1.y - p0.y, p1.x - p0.x)
-        let theta2 = atan2(p2.y - p0.y, p2.x - p0.x)
-        
-        let arcLocus = Arc(ellipse: ellipseLocus, shift: theta1, extent: theta2 - theta1)
-        
-        arc = Shape(form: arcLocus, fill: Color.clear, stroke: Stroke(fill: Color.orange, width: 5.0))
-        
-        let angleInDegrees = (Double.pi/4)*degreesPerRadian
-        
-        text = Text(text: String(format: "%.2f", angleInDegrees) + "º", fill: Color.blue, place: .move(p0.x, p0.y))
-        
-        contents = [arc, line1, line2, backgroundLine1, backgroundLine2, circle0, circle1, circle2, text]
-    }
     
-    init(p0: Point, p1: Point, p2: Point, delegate: MacawViewDelegate) {
+    var stroke: Stroke!
+
+//    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
+//        super.init()
+//
+//        self.stroke = stroke
+//
+//        p0 = startPoint
+//        p1 = lastPoint
+//
+//        let d = distance(startPoint, lastPoint)
+//
+//        let angle = atan2(p1.y - p0.y, p1.x - p0.x)
+//
+//        let x2 = p0.x + d * cos(angle + protractorAngle)
+//        let y2 = p0.y + d * sin(angle + protractorAngle)
+//
+//        p2 = Point(x: x2, y: y2)
+//
+//        let locusLine1 = Line(p0.x, p0.y, p1.x, p1.y)
+//        let locusLine2 = Line(p0.x, p0.y, x2, y2)
+//
+//        line1 = Shape(form: locusLine1, fill: Color.clear, stroke: stroke)
+//        line2 = Shape(form: locusLine2, fill: Color.clear, stroke: stroke)
+//        backgroundLine1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+//        backgroundLine2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+//
+//        let locusCircle0 = Circle(cx: p0.x, cy: p0.y, r: 15)
+//        circle0 = Shape(form: locusCircle0, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+//        let locusCircle1 = Circle(cx: p1.x, cy: p1.y, r: 15)
+//        circle1 = Shape(form: locusCircle1, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+//        let locusCircle2 = Circle(cx: p2.x, cy: p2.y, r: 15)
+//        circle2 = Shape(form: locusCircle2, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+//
+//        let ellipseLocus = Ellipse(cx: p0.x, cy: p0.y, rx: 40, ry: 40)
+//
+//        let theta1 = atan2(p1.y - p0.y, p1.x - p0.x)
+//        let theta2 = atan2(p2.y - p0.y, p2.x - p0.x)
+//
+//        let arcLocus = Arc(ellipse: ellipseLocus, shift: theta1, extent: theta2 - theta1)
+//
+//        arc = Shape(form: arcLocus, fill: Color.clear, stroke: Stroke(fill: Color.orange, width: 5.0))
+//
+//        let angleInDegrees = (Double.pi/4)*degreesPerRadian
+//
+//        text = Text(text: String(format: "%.2f", angleInDegrees) + "º", fill: Color.blue, place: .move(p0.x, p0.y))
+//
+//        contents = [arc, line1, line2, backgroundLine1, backgroundLine2, circle0, circle1, circle2, text]
+//    }
+    
+    init(p0: Point, p1: Point, p2: Point, delegate: MacawViewDelegate, stroke: Stroke) {
         super.init()
         self.delegate = delegate
-        
+        self.stroke = stroke
+
         self.p0 = p0
         self.p1 = p1
         
@@ -92,8 +97,8 @@ class Protractor: Group, CustomShape {
         let locusLine1 = Line(p0.x, p0.y, p1.x, p1.y)
         let locusLine2 = Line(p0.x, p0.y, p2.x, p2.y)
         
-        line1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 5.0))
-        line2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.red, width: 5.0))
+        line1 = Shape(form: locusLine1, fill: Color.clear, stroke: self.stroke)
+        line2 = Shape(form: locusLine2, fill: Color.clear, stroke: self.stroke)
         backgroundLine1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         backgroundLine2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
@@ -116,7 +121,7 @@ class Protractor: Group, CustomShape {
 
         let arcLocus = Arc(ellipse: ellipseLocus, shift: theta1, extent: theta2 - theta1)
         
-        arc = Shape(form: arcLocus, fill: Color.clear, stroke: Stroke(fill: Color.orange, width: 5.0))
+        arc = Shape(form: arcLocus, fill: Color.clear, stroke: Stroke(fill: Color.orange, width: self.stroke.width))
         
         text = Text(text: String(format: "%.2f", angleInDegrees) + "º", fill: Color.blue, place: .move(p0.x, p0.y))
         
@@ -139,16 +144,14 @@ class Protractor: Group, CustomShape {
     func updateForm(startPoint: Point, lastPoint: Point) {
         
         let d = distance(startPoint, lastPoint)
-        
         let angle = atan2(lastPoint.y - startPoint.y, lastPoint.x - startPoint.x)
         
         self.p2 = Point(x: startPoint.x + d * cos(angle + protractorAngle), y: startPoint.y + d * sin(angle + protractorAngle))
-        
         self.p0 = startPoint
+        self.p1 = lastPoint
         
         line1.form = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
         backgroundLine1.form = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
-        self.p1 = lastPoint
 
         line2.form = Line(startPoint.x, startPoint.y, p2.x, p2.y)
         backgroundLine2.form = Line(startPoint.x, startPoint.y, p2.x, p2.y)
@@ -174,6 +177,8 @@ class Protractor: Group, CustomShape {
         
         let textX = distanceText * cos(angleText) + p0.x
         let textY = distanceText * sin(angleText) + p0.y
+        
+        text.text = "45º"
         
         text.place = .move(dx: textX, dy: textY)
         
@@ -242,7 +247,7 @@ class Protractor: Group, CustomShape {
             let p2Aux = Shape(form: Point(x: 0, y: 0))
             p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
             p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
-            tempProtractor = Protractor(p0: loc, p1: p1, p2: p2, delegate: self.delegate)
+            tempProtractor = Protractor(p0: loc, p1: p1, p2: p2, delegate: self.delegate, stroke: self.stroke)
             
             let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == self.hash
@@ -265,7 +270,7 @@ class Protractor: Group, CustomShape {
             let p2Aux = Shape(form: Point(x: 0, y: 0))
             p2Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p2.x, dy: p2.y)
             p2 = Point(x: p2Aux.place.dx, y: p2Aux.place.dy)
-            tempProtractor = Protractor(p0: p0, p1: loc, p2: p2, delegate: self.delegate)
+            tempProtractor = Protractor(p0: p0, p1: loc, p2: p2, delegate: self.delegate, stroke: self.stroke)
             
             let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == self.hash
@@ -288,7 +293,7 @@ class Protractor: Group, CustomShape {
             let p1Aux = Shape(form: Point(x: 0, y: 0))
             p1Aux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: p1.x, dy: p1.y)
             p1 = Point(x: p1Aux.place.dx, y: p1Aux.place.dy)
-            tempProtractor = Protractor(p0: p0, p1: p1, p2: loc, delegate: self.delegate)
+            tempProtractor = Protractor(p0: p0, p1: p1, p2: loc, delegate: self.delegate, stroke: self.stroke)
             
             let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
                 node.hash == self.hash
@@ -327,7 +332,7 @@ class Protractor: Group, CustomShape {
             let x2 = tempProtractor.p2.x - loc.x
             let y2 = tempProtractor.p2.y - loc.y
             
-            let newProtractor = Protractor(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate)
+            let newProtractor = Protractor(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate, stroke: self.stroke)
             newProtractor.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
             newProtractor.p0 = loc
             newProtractor.p1 = tempProtractor.p1
@@ -351,7 +356,7 @@ class Protractor: Group, CustomShape {
             let x2 = p2.x - p0.x
             let y2 = p2.y - p0.y
             
-            let newProtractor = Protractor(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate)
+            let newProtractor = Protractor(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate, stroke: self.stroke)
             newProtractor.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
             newProtractor.p0 = p0
             newProtractor.p1 = loc
@@ -375,7 +380,7 @@ class Protractor: Group, CustomShape {
             let x2 = loc.x - p0.x
             let y2 = loc.y - p0.y
             
-            let newProtractor = Protractor(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate)
+            let newProtractor = Protractor(p0: Point(0, 0), p1: Point(x: x1, y: y1), p2: Point(x: x2, y: y2), delegate: self.delegate, stroke: self.stroke)
             newProtractor.place = Transform.move(dx: p0.x, dy: p0.y).scale(sx: 1, sy: 1)
             newProtractor.p0 = p0
             newProtractor.p1 = p1
@@ -530,6 +535,7 @@ class Protractor: Group, CustomShape {
     }
 
     func updateStroke(stroke: Stroke) {
+        self.stroke = stroke
         line1.stroke = stroke
         line2.stroke = stroke
     }

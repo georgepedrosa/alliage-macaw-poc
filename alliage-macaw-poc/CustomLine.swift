@@ -21,9 +21,11 @@ class CustomLine: Group, CustomShape {
     
     var radius: Double = 20
     
+    var stroke: Stroke!
+    
     var isActive: Bool = false {
         didSet {
-            line.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
+            line.stroke = (isActive ? Stroke(fill: Color.blue, width: self.stroke.width) : self.stroke)
         }
     }
     
@@ -31,6 +33,8 @@ class CustomLine: Group, CustomShape {
     
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
+        
+        self.stroke = stroke
         
         self.startPoint = startPoint
         self.lastPoint = lastPoint

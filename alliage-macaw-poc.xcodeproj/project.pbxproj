@@ -20,6 +20,7 @@
 		AD138C1F22A994A7007D92B6 /* CustomLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD138C1E22A994A7007D92B6 /* CustomLine.swift */; };
 		AD138C2122A999F9007D92B6 /* CustomRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD138C2022A999F9007D92B6 /* CustomRect.swift */; };
 		AD18F3E622CFD5ED00496337 /* MacawAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD18F3E522CFD5ED00496337 /* MacawAction.swift */; };
+		AD1BD73322E6187B00A5C519 /* Multiline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1BD73222E6187B00A5C519 /* Multiline.swift */; };
 		AD24A39522B7FB0000184D93 /* Protractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD24A39422B7FB0000184D93 /* Protractor.swift */; };
 		AD28D6DF22D3DFDF00785CC3 /* CustomArc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD28D6DE22D3DFDF00785CC3 /* CustomArc.swift */; };
 		ADEBECA522A81CF40016B427 /* RectLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADEBECA422A81CF40016B427 /* RectLine.swift */; };
@@ -44,6 +45,7 @@
 		AD138C1E22A994A7007D92B6 /* CustomLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomLine.swift; sourceTree = "<group>"; };
 		AD138C2022A999F9007D92B6 /* CustomRect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomRect.swift; sourceTree = "<group>"; };
 		AD18F3E522CFD5ED00496337 /* MacawAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacawAction.swift; sourceTree = "<group>"; };
+		AD1BD73222E6187B00A5C519 /* Multiline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Multiline.swift; sourceTree = "<group>"; };
 		AD24A39422B7FB0000184D93 /* Protractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protractor.swift; sourceTree = "<group>"; };
 		AD28D6DE22D3DFDF00785CC3 /* CustomArc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomArc.swift; sourceTree = "<group>"; };
 		ADEBECA422A81CF40016B427 /* RectLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectLine.swift; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 				AD24A39422B7FB0000184D93 /* Protractor.swift */,
 				AD28D6DE22D3DFDF00785CC3 /* CustomArc.swift */,
 				AD18F3E522CFD5ED00496337 /* MacawAction.swift */,
+				AD1BD73222E6187B00A5C519 /* Multiline.swift */,
 			);
 			path = "alliage-macaw-poc";
 			sourceTree = "<group>";
@@ -250,6 +253,7 @@
 				1055C3A322A0561500C40F60 /* ViewController.swift in Sources */,
 				1055C3A122A0561500C40F60 /* AppDelegate.swift in Sources */,
 				AD24A39522B7FB0000184D93 /* Protractor.swift in Sources */,
+				AD1BD73322E6187B00A5C519 /* Multiline.swift in Sources */,
 				AD138C1D22A9787A007D92B6 /* CustomShape.swift in Sources */,
 				AD111CA122AAF9D5005D02E8 /* FreeDrawing.swift in Sources */,
 				ADEBECA922A86A1C0016B427 /* Asterisk.swift in Sources */,

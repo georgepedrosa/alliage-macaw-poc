@@ -23,9 +23,15 @@ class CustomLine: Group, CustomShape {
     
     var stroke: Stroke!
     
-    var isActive: Bool = false {
+    var isActive: Bool = true {
         didSet {
-            line.stroke = (isActive ? Stroke(fill: Color.blue, width: self.stroke.width) : self.stroke)
+            if isActive {
+                line.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
+                contents = [line, backgroundLine, circle, circle2]
+            } else {
+                line.stroke = self.stroke
+                contents = [line, backgroundLine]
+            }
         }
     }
     
@@ -35,14 +41,13 @@ class CustomLine: Group, CustomShape {
         super.init()
         
         self.stroke = stroke
-        
         self.startPoint = startPoint
         self.lastPoint = lastPoint
         
-        let circleStroke = Stroke(fill: Color.clear)
+        let circleStroke = Stroke(fill: Color.green, width: 5.0)
         
         let lineLocus = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
-        line = Shape(form: lineLocus, fill: Color.clear, stroke: stroke)
+        line = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
         backgroundLine = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
         let circleLocus = Circle(cx: lastPoint.x, cy: lastPoint.y, r: radius)
@@ -90,7 +95,7 @@ class CustomLine: Group, CustomShape {
         
     }
     
-    func setLineEvents() {
+    func setTransformEvents() {
         var startPoint = Point()
         var lastPoint = Point(x: 0, y: 0)
         var tempLine: CustomLine!
@@ -156,7 +161,7 @@ class CustomLine: Group, CustomShape {
                 node.hash == tempLine.hash
             })
             self.delegate.shapesGroup.contents[index!] = newLine
-            newLine.setLineEvents()
+            newLine.setTransformEvents()
             self.delegate.activateScrollView(enable: true)
         }
         
@@ -174,7 +179,7 @@ class CustomLine: Group, CustomShape {
                 node.hash == tempLine.hash
             })
             self.delegate.shapesGroup.contents[index!] = newLine
-            newLine.setLineEvents()
+            newLine.setTransformEvents()
             self.delegate.activateScrollView(enable: true)
         }
         
@@ -182,38 +187,13 @@ class CustomLine: Group, CustomShape {
             guard let _ = event.node else { print("problem on line pan")
                 return
             }
+            if !self.isActive {
+                return
+            }
             self.delegate.activateScrollView(enable: false)
             let transform = self.delegate.shapeTransformations[self.hash]
             self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
             self.delegate.updatePlace(node: self)
-            self.delegate.activateScrollView(enable: true)
-        }
-        
-        self.backgroundLine.onRotate { (event) in
-            guard let _ = event.node else { print("problem on line rotate")
-                return
-            }
-            self.delegate.activateScrollView(enable: false)
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale, transform!.angle + event.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
-            self.delegate.activateScrollView(enable: true)
-        }
-        
-        self.backgroundLine.onPinch { (event) in
-            guard let _ = event.node else { print("problem on line pinch")
-                return
-            }
-            self.delegate.activateScrollView(enable: false)
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale * event.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
-            
-            let newStroke = Stroke(fill: self.delegate.stroke.fill, width: self.delegate.stroke.width/(transform!.scale * event.scale))
-            let newCircleStroke = Stroke(fill: Color.clear, width: self.delegate.stroke.width/(transform!.scale * event.scale))
-            self.updateStroke(stroke: newStroke)
-            self.updateCircleStroke(stroke: newCircleStroke)
-            self.updateSize(scale: transform!.scale * event.scale)
             self.delegate.activateScrollView(enable: true)
         }
         self.onTap(f: { (event) in
@@ -225,6 +205,8 @@ class CustomLine: Group, CustomShape {
                 self.delegate.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
                     shape.hash == node.hash
                 })
+            } else {
+                self.isActive = !self.isActive
             }
         })
     }

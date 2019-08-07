@@ -10,7 +10,7 @@ import UIKit
 import Macaw
 
 class Multiline: Group, CustomShape {
-    
+    var delegate: MacawViewDelegate!
     var drawing: Shape!
     var backgroundDrawing: Shape!
     var points: [Point] = []
@@ -104,5 +104,21 @@ class Multiline: Group, CustomShape {
     
     func getCenter() -> Point? {
         return Point()
+    }
+    
+    
+    func setTransformEvents() {
+        self.onPan { (event) in
+            guard let _ = event.node else { print("problem on pan")
+                return
+            }
+            if !self.isActive { return }
+            self.delegate.activateScrollView(enable: false)
+            
+            let transform = self.delegate.shapeTransformations[self.hash]
+            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
+            self.delegate.updatePlace(node: self)
+            self.delegate.activateScrollView(enable: true)
+        }
     }
 }

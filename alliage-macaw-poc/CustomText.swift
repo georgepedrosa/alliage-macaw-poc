@@ -10,7 +10,6 @@ import UIKit
 import Macaw
 
 class CustomText: Group, CustomShape {
-    
     var delegate: MacawViewDelegate!
     
     public var active: Bool = false
@@ -69,7 +68,7 @@ class CustomText: Group, CustomShape {
         contents = [rect, textNode]
     }
     
-    func setTextEvents(startPoint: Point) {
+    func setTransformEvents(startPoint: Point) {
         
         self.onTap(f: { (event) in
             
@@ -109,6 +108,10 @@ class CustomText: Group, CustomShape {
             self.delegate.activateScrollView(enable: true)
         }
         self.delegate.shapesGroup.contents.append(self)
+    }
+    
+    func setTransformEvents() {
+        
     }
 
 }

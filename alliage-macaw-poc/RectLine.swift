@@ -10,7 +10,7 @@ import UIKit
 import Macaw
 
 class RectLine: Group, CustomShape {
-    
+    var delegate: MacawViewDelegate!
     var line: Shape!
     var rect: Shape!
     var circle: Shape!
@@ -64,7 +64,7 @@ class RectLine: Group, CustomShape {
         return rect.bounds?.center()
     }
     
-    func activateCircleAction() {
+    func setTransformEvents() {
 //        circle.onTap { (event) in
 //            self.place = Transform.scale(sx: 3, sy: 1)
 //        }

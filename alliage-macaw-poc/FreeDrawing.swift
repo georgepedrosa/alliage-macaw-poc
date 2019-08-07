@@ -10,19 +10,23 @@ import UIKit
 import Macaw
 
 class FreeDrawing: Group, CustomShape {
+    var delegate: MacawViewDelegate!
+    var stroke: Stroke!
     
     var drawing: Shape!
     var backgroundDrawing: Shape!
     var path: PathBuilder!
+    var backgroundRect: Shape!
     
     var isActive: Bool = false {
         didSet {
-            drawing.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.red, width: 2.0))
+            contents = (isActive ? [backgroundRect, drawing, backgroundDrawing] : [drawing, backgroundDrawing])
         }
     }
     
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
+        self.stroke = stroke
         
         path = MoveTo(x: startPoint.x, y: startPoint.y)
         path = path.lineTo(x: startPoint.x, y: startPoint.y)
@@ -45,13 +49,15 @@ class FreeDrawing: Group, CustomShape {
             )
         )
         
+        backgroundRect = Shape(form: drawing.form.bounds(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: stroke.width))
         contents = [drawing, backgroundDrawing]
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
         path = path.lineTo(x: lastPoint.x, y: lastPoint.y)
-        self.drawing.form = path.build()
-        self.backgroundDrawing.form = path.build()
+        drawing.form = path.build()
+        backgroundDrawing.form = path.build()
+        backgroundRect.form = drawing.form.bounds()
     }
     
     func updateStroke(stroke: Stroke) {
@@ -64,14 +70,25 @@ class FreeDrawing: Group, CustomShape {
     
     func redoShape() {
         contents = [drawing]
+        isActive = false
     }
     
     func getCenter() -> Point? {
         return self.bounds?.center()
     }
     
-    func activateCircleAction() {
-        
+    func setTransformEvents() {
+        backgroundDrawing.onPan { (event) in
+            guard let _ = event.node else { print("problem on pan")
+                return
+            }
+            if !self.isActive { return }
+            self.delegate.activateScrollView(enable: false)
+            
+            let transform = self.delegate.shapeTransformations[self.hash]
+            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
+            self.delegate.updatePlace(node: self)
+            self.delegate.activateScrollView(enable: true)
+        }
     }
-    
 }

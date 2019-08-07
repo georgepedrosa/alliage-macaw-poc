@@ -28,7 +28,19 @@ class Protractor: Group, CustomShape {
     let degreesPerRadian: Double = 57.2958
     let protractorAngle = Double.pi/4
 
-    var isActive: Bool = false
+    var isActive: Bool = true {
+        didSet {
+            if isActive {
+                contents = [arc, line1, line2, backgroundLine1, backgroundLine2, circle0, circle1, circle2, text]
+                line1.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
+                line2.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
+            } else {
+                contents = [arc, line1, line2, backgroundLine1, backgroundLine2, text]
+                line1.stroke = stroke
+                line2.stroke = stroke
+            }
+        }
+    }
     
     var delegate: MacawViewDelegate!
     
@@ -97,8 +109,8 @@ class Protractor: Group, CustomShape {
         let locusLine1 = Line(p0.x, p0.y, p1.x, p1.y)
         let locusLine2 = Line(p0.x, p0.y, p2.x, p2.y)
         
-        line1 = Shape(form: locusLine1, fill: Color.clear, stroke: self.stroke)
-        line2 = Shape(form: locusLine2, fill: Color.clear, stroke: self.stroke)
+        line1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
+        line2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
         backgroundLine1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         backgroundLine2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
@@ -225,7 +237,7 @@ class Protractor: Group, CustomShape {
         text.place = .move(dx: textX, dy: textY)
     }
     
-    func setProtractorEvents() {
+    func setTransformEvents() {
         
         var p0 = Point()
         var p1 = Point(x: 0, y: 0)
@@ -344,7 +356,7 @@ class Protractor: Group, CustomShape {
             })
             
             self.delegate.shapesGroup.contents[index!] = newProtractor
-            newProtractor.setProtractorEvents()
+            newProtractor.setTransformEvents()
         }
         self.circle1.onTouchReleased { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
@@ -368,7 +380,7 @@ class Protractor: Group, CustomShape {
             })
             
             self.delegate.shapesGroup.contents[index!] = newProtractor
-            newProtractor.setProtractorEvents()
+            newProtractor.setTransformEvents()
         }
         self.circle2.onTouchReleased { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
@@ -392,12 +404,15 @@ class Protractor: Group, CustomShape {
             })
             
             self.delegate.shapesGroup.contents[index!] = newProtractor
-            newProtractor.setProtractorEvents()
+            newProtractor.setTransformEvents()
         }
         self.backgroundLine1.onPan { (event) in
             guard let _ = event.node else { print("problem on arc pan")
                 return
             }
+            
+            if !self.isActive { return }
+            
             self.delegate.activateScrollView(enable: false)
             
             let transform = self.delegate.shapeTransformations[self.hash]
@@ -409,6 +424,9 @@ class Protractor: Group, CustomShape {
             guard let _ = event.node else { print("problem on arc pan")
                 return
             }
+            
+            if !self.isActive { return }
+            
             self.delegate.activateScrollView(enable: false)
             
             let transform = self.delegate.shapeTransformations[self.hash]
@@ -424,6 +442,8 @@ class Protractor: Group, CustomShape {
                 self.delegate.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
                     shape.hash == self.hash
                 })
+            } else {
+                self.isActive = !self.isActive
             }
         }
     }

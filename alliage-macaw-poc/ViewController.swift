@@ -237,7 +237,6 @@ class ViewController: UIViewController, MacawViewDelegate {
                 self.newShape = Arrow(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .protractor:
                 self.newShape = Protractor(p0: startPoint, p1: startPoint, p2: startPoint, delegate: self, stroke: self.stroke)
-                    //Protractor(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .asterisk:
                 self.newShape = Asterisk(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .arc:
@@ -280,19 +279,14 @@ class ViewController: UIViewController, MacawViewDelegate {
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
             if self.activeTool == .text { //special case for text behaviour and events
-//                self.setTextEvents(startPoint: startPoint)
-                
                 let customText = CustomText(text: "", startPoint: startPoint, color: self.textColor)
                 customText.delegate = self
                 self.customTexts.append(customText) //stores all created texts
                 self.inputTextView.becomeFirstResponder() //always displays keyboard after creating text
                 self.shapeTransformations[customText.hash] = (0,0, 1, 0)
-                
-                customText.setTextEvents(startPoint: startPoint)
-                
+                customText.setTransformEvents(startPoint: startPoint)
                 return //adds newly created text to shapes array and ignores subsequent events
-            } else
-            if let protractor = self.newShape as? Protractor { //special case for protractor behaviour and events
+            } else if let protractor = self.newShape as? Protractor { //special case for protractor behaviour and events
                 self.recreateShape(shape: protractor, startPoint: startPoint, loc: loc)
                 protractor.p0 = startPoint
                 protractor.p1 = loc
@@ -302,132 +296,31 @@ class ViewController: UIViewController, MacawViewDelegate {
                 let y2 = startPoint.y + d * sin(angle + Double.pi/4)
                 protractor.p2 = Point(x: x2, y: y2)
                 protractor.delegate = self
-                protractor.setProtractorEvents()
+                protractor.setTransformEvents()
                 return //ignores subsequent events
-            } else
-            if let arc = self.newShape as? CustomArc {
-                self.recreateShape(shape: arc, startPoint: startPoint, loc: loc)
-                arc.p0 = startPoint
-                arc.p1 = Point((loc.x + startPoint.x)/2, (loc.y + startPoint.y)/2)
-                arc.p2 = loc
-                arc.delegate = self
-                arc.setArcEvents()
-                //self.setArcEvents(arc: arc)
-                return
-            } else
-            if let _ = self.newShape as? FreeDrawing {
-                self.shapeTransformations[self.newShape.hash] = (0,0, 1, 0)
-                //self.setDeleteEvent(node: freeDrawing)
-                //return //ignores subsequent events
             } else if let line = self.newShape as? CustomLine {
                 self.recreateShape(shape: line, startPoint: startPoint, loc: loc)
                 line.startPoint = startPoint
                 line.lastPoint = loc
                 line.delegate = self
-                line.setLineEvents()
-                //self.setLineEvents(line: line)
+                line.setTransformEvents()
                 return
-            } else if let _ = self.newShape as? Asterisk {
-                self.shapeTransformations[self.newShape.hash] = (0,0,1,0)
-                
-            } else if let _ = self.newShape as? Multiline {
+            } else if let multiline = self.newShape as? Multiline {
                 if self.isNewShape {
                     self.shapeTransformations[self.newShape.hash] = (0,0,1,0)
-//                    self.newShape.onPan { event in
-//                        //if !self.canvasActive {
-//                        if self.activeTool == .none { return }
-//                        guard let node = event.node else { print("problem on panel pan")
-//                            return
-//                        }
-//                        self.activateScrollView(enable: false)
-//                        let transform = self.shapeTransformations[node.hash]
-//                        self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: node.hash)
-//                        self.updatePlace(node: node)
-//                        self.activateScrollView(enable: true)
-//                        //self.macawActions.append(MacawAction(nodeHash: node.hash, type: .pan, transformation: transform))
-//                        //}
-//                    }
+                    multiline.delegate = self
+                    multiline.setTransformEvents()
+                    self.setDeleteEvent(node: self.newShape)
+                    self.isNewShape = false
                 } else {
                     return
                 }
-                
             } else { //general shape creation and events
-                self.recreateShape(shape: self.newShape, startPoint: startPoint, loc: loc)
-            }
-            
-//            if let _ = self.newShape as? Multiline {
-//                if !self.isNewShape {
-//                    return
-//                }
-//            }
-            
-            self.setDeleteEvent(node: self.newShape)
-            
-            // moving existing shape
-            self.newShape.onPan { event in
-                //if !self.canvasActive {
-                if self.activeTool == .none { return }
-                guard let node = event.node else { print("problem on panel pan")
-                    return
-                }
-                self.activateScrollView(enable: false)
-                let transform = self.shapeTransformations[node.hash]
-                self.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: node.hash)
-                self.updatePlace(node: node)
-                self.activateScrollView(enable: true)
-                
-                //self.macawActions.append(MacawAction(nodeHash: node.hash, type: .pan, transformation: transform))
-                //}
-            }
-            
-            if let _ = self.newShape as? Multiline {
-                self.isNewShape = false
+                self.shapeTransformations[self.newShape.hash] = (0,0, 1, 0)
+                self.newShape.delegate = self
+                self.newShape.setTransformEvents()
+                self.setDeleteEvent(node: self.newShape)
                 return
-            }
-            
-            if let _ = self.newShape as? Asterisk {
-                return
-            }
-            
-            if let _ = self.newShape as? FreeDrawing {
-                return
-            }
-            
-            // resizing existing shape
-            self.newShape.onPinch { event in
-                
-                if self.activeTool == .none || self.activeTool == .multiline { return }
-                
-                guard let node = event.node else { print("problem on panel pinch")
-                    return
-                }
-                
-                self.activateScrollView(enable: false)
-                
-                let transform = self.shapeTransformations[node.hash]
-                self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale * event.scale, transform!.angle), forKey: node.hash)
-                self.updatePlace(node: node)
-                
-                let newStroke = Stroke(fill: self.stroke.fill, width: self.stroke.width/(transform!.scale * event.scale))
-                if let shape = node as? CustomShape {
-                    shape.updateStroke(stroke: newStroke)
-                }
-                self.activateScrollView(enable: true)
-            }
-            
-            self.newShape.onRotate { event in
-                
-                if self.activeTool == .none || self.activeTool == .multiline { return }
-                
-                guard let node = event.node else { print("problem on panel rotate")
-                    return
-                }
-                self.activateScrollView(enable: false)
-                
-                let transform = self.shapeTransformations[node.hash]
-                self.shapeTransformations.updateValue((transform!.dx, transform!.dy, transform!.scale, transform!.angle + event.angle), forKey: node.hash)
-                self.updatePlace(node: node)
-                self.activateScrollView(enable: true)
             }
         }
         
@@ -446,13 +339,15 @@ class ViewController: UIViewController, MacawViewDelegate {
     func setDeleteEvent(node: CustomShape) {
         node.onTap(f: { (event) in
             if self.activeTool == .none { return }
-            guard let node = event.node else { print("problem on panel pan")
+            guard let node = event.node as? CustomShape else { print("problem on panel pan")
                 return
             }
             if self.activeTool == .delete {
                 self.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
                     shape.hash == node.hash
                 })
+            } else {
+                node.isActive = !node.isActive
             }
         })
     }

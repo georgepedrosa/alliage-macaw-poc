@@ -10,8 +10,10 @@ import UIKit
 import Macaw
 
 protocol CustomShape: Node {
+    var delegate: MacawViewDelegate! { get set }
     var isActive: Bool { get set }
     func updateForm(startPoint: Point, lastPoint: Point)
     func updateStroke(stroke: Stroke)
     func getCenter() -> Point?
+    func setTransformEvents()
 }

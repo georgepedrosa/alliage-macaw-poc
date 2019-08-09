@@ -29,17 +29,20 @@ class Arrow: Group, CustomShape {
     var circle0: Shape!
     var circle1: Shape!
     
+    var anchor0: Shape!
+    var anchor1: Shape!
+    
     var isActive: Bool = true {
         didSet {
             if isActive {
-                line.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
-                headLeft.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
-                headRight.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
-                contents = [line, backgroundLine, headLeft, backgroundHeadLeft, headRight, backgroundHeadRight, circle0, circle1]
+                //line.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
+                //headLeft.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
+                //headRight.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
+                contents = [line, backgroundLine, headLeft, backgroundHeadLeft, headRight, backgroundHeadRight, anchor0, anchor1, circle0, circle1]
             } else {
-                line.stroke = self.stroke
-                headLeft.stroke = self.stroke
-                headRight.stroke = self.stroke
+                //line.stroke = self.stroke
+                //headLeft.stroke = self.stroke
+                //headRight.stroke = self.stroke
                 contents = [line, backgroundLine, headLeft, backgroundHeadLeft, headRight, backgroundHeadRight]
             }
         }
@@ -75,20 +78,26 @@ class Arrow: Group, CustomShape {
         let headLeftLocus = Line(x1: x2, y1: y2, x2: x3, y2: y3)
         let headRightLocus = Line(x1: x2, y1: y2, x2: x4, y2: y4)
         
-        line = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
+        line = Shape(form: lineLocus, fill: Color.clear, stroke: stroke)
         backgroundLine = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        headLeft = Shape(form: headLeftLocus, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
+        headLeft = Shape(form: headLeftLocus, fill: Color.clear, stroke: stroke)
         backgroundHeadLeft = Shape(form: headLeftLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        headRight = Shape(form: headRightLocus, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
+        headRight = Shape(form: headRightLocus, fill: Color.clear, stroke: stroke)
         backgroundHeadRight = Shape(form: headRightLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
         let circleLocus = Circle(cx: startPoint.x, cy: startPoint.y, r: 20)
-        circle0 = Shape(form: circleLocus, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        circle0 = Shape(form: circleLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         
         let circleLocus2 = Circle(cx: lastPoint.x, cy: lastPoint.y, r: 20)
-        circle1 = Shape(form: circleLocus2, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        circle1 = Shape(form: circleLocus2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         
-        contents = [line, backgroundLine, headLeft, backgroundHeadLeft, headRight, backgroundHeadRight, circle0, circle1]
+        let anchor0Locus = Circle(cx: startPoint.x, cy: startPoint.y, r: 2)
+        anchor0 = Shape(form: anchor0Locus, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        
+        let anchor1Locus = Circle(cx: lastPoint.x, cy: lastPoint.y, r: 2)
+        anchor1 = Shape(form: anchor1Locus, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        
+        contents = [line, backgroundLine, headLeft, backgroundHeadLeft, headRight, backgroundHeadRight, anchor0, anchor1, circle0, circle1]
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
@@ -163,6 +172,8 @@ class Arrow: Group, CustomShape {
         backgroundHeadRight.form = headRightLocus
         circle0.form = Circle(cx: p0.x, cy: p0.y, r: 20)
         circle1.form = Circle(cx: p1.x, cy: p1.y, r: 20)
+        anchor0.form = Circle(cx: p0.x, cy: p0.y, r: 2)
+        anchor1.form = Circle(cx: p1.x, cy: p1.y, r: 2)
     }
     
     func updateStroke(stroke: Stroke) {

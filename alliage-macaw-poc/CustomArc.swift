@@ -21,6 +21,10 @@ class CustomArc: Group, CustomShape {
     var line1: Shape!
     var line2: Shape!
     
+    var anchor0: Shape!
+    var anchor1: Shape!
+    var anchor2: Shape!
+    
     var p0: Point!
     var p1: Point!
     var p2: Point!
@@ -32,7 +36,7 @@ class CustomArc: Group, CustomShape {
     var isActive: Bool = true {
         didSet {
             if isActive {
-                contents = [line1, line2, drawing, backgroundDrawing, circle0, circle1, circle2]
+                contents = [line1, line2, drawing, backgroundDrawing, anchor0, anchor1, anchor2, circle0, circle1, circle2]
             } else {
                 contents = [drawing, backgroundDrawing]
             }
@@ -50,17 +54,24 @@ class CustomArc: Group, CustomShape {
         self.p2 = p2
         
         let locusCircle0 = Circle(cx: p0.x, cy: p0.y, r: 15)
-        circle0 = Shape(form: locusCircle0, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        circle0 = Shape(form: locusCircle0, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         let locusCircle1 = Circle(cx: p1.x, cy: p1.y, r: 15)
-        circle1 = Shape(form: locusCircle1, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        circle1 = Shape(form: locusCircle1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         let locusCircle2 = Circle(cx: p2.x, cy: p2.y, r: 15)
-        circle2 = Shape(form: locusCircle2, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        circle2 = Shape(form: locusCircle2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        
+        let locusAnchor0 = Circle(cx: p0.x, cy: p0.y, r: 2)
+        anchor0 = Shape(form: locusAnchor0, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        let locusAnchor1 = Circle(cx: p1.x, cy: p1.y, r: 2)
+        anchor1 = Shape(form: locusAnchor1, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        let locusAnchor2 = Circle(cx: p2.x, cy: p2.y, r: 2)
+        anchor2 = Shape(form: locusAnchor2, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
         
         let locusLine1 = Line(x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y)
         line1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
         let locusLine2 = Line(x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y)
         line2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
-        
+
         var path: PathBuilder = MoveTo(x: p0.x, y: p0.y)
         
         for index in 1...100 {
@@ -89,9 +100,8 @@ class CustomArc: Group, CustomShape {
             )
         )
         
-        contents = [line1, line2, drawing, backgroundDrawing, circle0, circle1, circle2]
+        contents = [line1, line2, drawing, backgroundDrawing, anchor0, anchor1, anchor2, circle0, circle1, circle2]
     }
-    
     
     func setTransformEvents() {
         self.circle0.onTouchMoved { (event) in
@@ -141,39 +151,7 @@ class CustomArc: Group, CustomShape {
         p1 = Point((lastPoint.x + startPoint.x)/2, (lastPoint.y + startPoint.y)/2)
         p2 = lastPoint
         
-        var newPath: PathBuilder!
-        newPath = MoveTo(x: p0.x, y: p0.y)
-        newPath = newPath.lineTo(x: p2.x, y: p2.y)
-        
-        drawing.form = newPath.build()
-        backgroundDrawing.form = newPath.build()
-        circle0.form = Circle(cx: p0.x, cy: p0.y, r: 15)
-        circle1.form = Circle(cx: p1.x, cy: p1.y, r: 15)
-        circle2.form = Circle(cx: p2.x, cy: p2.y, r: 15)
-        line1.form = Line(x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y)
-        line2.form = Line(x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y)
-    }
-    
-    func updateForm(p0: Point, p1: Point, p2: Point) {
-        var newPath: PathBuilder!
-        
-        newPath = MoveTo(x: p0.x, y: p0.y)
-        
-        for index in 1...100 {
-            let t: Double = Double(index)/100
-            let x = pow((1.0-t), 2.0)*p0.x + 2*(1.0-t)*t*p1.x + pow(t, 2.0)*p2.x
-            let y = pow((1.0-t), 2.0)*p0.y + 2*(1.0-t)*t*p1.y + pow(t, 2.0)*p2.y
-            
-            newPath = newPath.lineTo(x: x, y: y)
-        }
-        
-        drawing.form = newPath.build()
-        backgroundDrawing.form = newPath.build()
-        circle0.form = Circle(cx: p0.x, cy: p0.y, r: 15)
-        circle1.form = Circle(cx: p1.x, cy: p1.y, r: 15)
-        circle2.form = Circle(cx: p2.x, cy: p2.y, r: 15)
-        line1.form = Line(x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y)
-        line2.form = Line(x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y)
+        updateFormFromPoints()
     }
     
     func updateFormFromPoints() {
@@ -194,6 +172,9 @@ class CustomArc: Group, CustomShape {
         circle0.form = Circle(cx: p0.x, cy: p0.y, r: 15)
         circle1.form = Circle(cx: p1.x, cy: p1.y, r: 15)
         circle2.form = Circle(cx: p2.x, cy: p2.y, r: 15)
+        anchor0.form = Circle(cx: p0.x, cy: p0.y, r: 2)
+        anchor1.form = Circle(cx: p1.x, cy: p1.y, r: 2)
+        anchor2.form = Circle(cx: p2.x, cy: p2.y, r: 2)
         line1.form = Line(x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y)
         line2.form = Line(x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y)
     }

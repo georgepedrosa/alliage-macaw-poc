@@ -136,11 +136,6 @@
                                         </constraints>
                                     </stackView>
                                 </subviews>
-                                <constraints>
-                                    <constraint firstItem="6hA-cc-iSh" firstAttribute="top" secondItem="7Ya-dJ-Ka4" secondAttribute="top" id="W8v-To-aGm"/>
-                                    <constraint firstItem="6hA-cc-iSh" firstAttribute="leading" secondItem="7Ya-dJ-Ka4" secondAttribute="leading" id="aVM-ey-f0o"/>
-                                    <constraint firstAttribute="trailing" secondItem="6hA-cc-iSh" secondAttribute="trailing" id="gAh-ao-akZ"/>
-                                </constraints>
                             </stackView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

@@ -11,6 +11,8 @@ import Macaw
 
 class Asterisk: Group, CustomShape {
     var delegate: MacawViewDelegate!
+    var stroke: Stroke!
+    
     var line1: Shape!
     var line2: Shape!
     var line3: Shape!
@@ -21,17 +23,22 @@ class Asterisk: Group, CustomShape {
     var backgroundLine3: Shape!
     var backgroundLine4: Shape!
     
+    var backgroundRect: Shape!
+    
     var isActive: Bool = true {
         didSet {
-            line1.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
-            line2.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
-            line3.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
-            line4.stroke = (isActive ? Stroke(fill: Color.blue, width: 5.0) : Stroke(fill: Color.red, width: 5.0))
+            if isActive {
+                contents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4, backgroundRect]
+            } else {
+                contents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4]
+            }
         }
     }
     
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
+        
+        self.stroke = stroke
 
         let x1 = startPoint.x
         let y1 = startPoint.y
@@ -77,6 +84,11 @@ class Asterisk: Group, CustomShape {
         backgroundLine4 = Shape(form: lineLocus4, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
         contents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4]
+        
+        backgroundRect = Shape(form: self.bounds!, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
+        
+        contents.append(backgroundRect)
+
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
@@ -94,7 +106,7 @@ class Asterisk: Group, CustomShape {
     }
     
     func setTransformEvents() {
-        self.onPan { (event) in
+        backgroundRect.onPan { (event) in
             guard let _ = event.node else { print("problem on arc pan")
                 return
             }

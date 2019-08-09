@@ -11,6 +11,7 @@ import Macaw
 
 class CustomText: Group, CustomShape {
     var delegate: MacawViewDelegate!
+    var stroke: Stroke!
     
     public var active: Bool = false
     public var rect: Shape!

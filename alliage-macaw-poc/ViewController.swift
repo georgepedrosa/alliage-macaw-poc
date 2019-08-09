@@ -90,9 +90,8 @@ class ViewController: UIViewController, MacawViewDelegate {
     var shapesGroup: Group = Group()
     var redoShapes: [Node] = []
     
-    var tempShapes: [Node] = []
-    
     var newShape: CustomShape!
+    var lastActiveShape: CustomShape?
     
     var customTexts: [CustomText] = []
     var isKeyboardShowing: Bool = false
@@ -106,10 +105,8 @@ class ViewController: UIViewController, MacawViewDelegate {
         }
         willSet {
             if !newValue {
-                //selectionButton.isSelected = true
                 activateScrollView(enable: true)
             } else {
-                //selectionButton.isSelected = false
                 activateScrollView(enable: false)
             }
         }
@@ -157,7 +154,6 @@ class ViewController: UIViewController, MacawViewDelegate {
         
         setupInputComponents()
         configInputNotifications()
-        
     }
     
     func setupInputComponents() {
@@ -198,13 +194,7 @@ class ViewController: UIViewController, MacawViewDelegate {
             }
         }
     }
-    
-    func distance(_ a: Point, _ b: Point) -> Double {
-        let xDist = a.x - b.x
-        let yDist = a.y - b.y
-        return Double(sqrt(xDist * xDist + yDist * yDist))
-    }
-    
+
     func createCanvas() {
         self.canvas = Shape(form: Rect(x: 0, y: 0, w: Double(image.size.width), h: Double(image.size.height)), fill: Color.clear, stroke: Stroke(fill: Color.red, width: 2.0)) //creating background canvas
         
@@ -213,7 +203,12 @@ class ViewController: UIViewController, MacawViewDelegate {
         // creating new shape during first touch on canvas
         canvas.onTouchPressed { event in
             
-            if self.selectionButton.isSelected { return }
+            if self.selectionButton.isSelected {
+                if self.lastActiveShape != nil {
+                    self.lastActiveShape?.isActive = false
+                    self.lastActiveShape = nil
+                }
+            }
             
             guard let loc = event.points.first?.location(in: .scene)  else { return }
             
@@ -223,6 +218,8 @@ class ViewController: UIViewController, MacawViewDelegate {
             
             //stores new shape to be referenced on subsequent events
             switch self.activeTool {
+            case .selection, .delete, .none:
+                return
             case .freeDraw:
                 self.newShape = FreeDrawing(startPoint: startPoint, lastPoint: startPoint, stroke: self.stroke)
             case .text:
@@ -250,19 +247,13 @@ class ViewController: UIViewController, MacawViewDelegate {
                     }
                     return
                 }
-            case .selection:
-                return
-            case .delete:
-                return
-            case .none:
-                return
             }
+            self.setNewShape(shape: self.newShape)
             self.shapesGroup.contents.append(self.newShape)
         }
         
         // resizing new shape when moving first touch
         canvas.onTouchMoved { (event) in
-            //self.canvasActive = true
             if self.activeTool == .none || self.activeTool == .delete || self.activeTool == .text || self.activeTool == .multiline || self.selectionButton.isSelected { return }
             guard let loc = event.points.first?.location(in: .scene) else { return }
             self.newShape.updateForm(startPoint: startPoint, lastPoint: loc) //updates form of newly created shape while initial touch isn't released
@@ -274,52 +265,35 @@ class ViewController: UIViewController, MacawViewDelegate {
         // leaving new shape on canvas when releasing first touch
         canvas.onTouchReleased { (event) in
             
-            if self.activeTool == .none || self.activeTool == .delete || self.selectionButton.isSelected { return }
-            
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            if self.activeTool == .text { //special case for text behaviour and events
+            switch self.activeTool {
+            case .none, .delete, .selection:
+                return
+            case .text:
                 let customText = CustomText(text: "", startPoint: startPoint, color: self.textColor)
                 customText.delegate = self
                 self.customTexts.append(customText) //stores all created texts
                 self.inputTextView.becomeFirstResponder() //always displays keyboard after creating text
                 self.shapeTransformations[customText.hash] = (0,0, 1, 0)
                 customText.setTransformEvents(startPoint: startPoint)
+                //self.setNewShape(shape: customText)
                 return //adds newly created text to shapes array and ignores subsequent events
-            } else if let protractor = self.newShape as? Protractor { //special case for protractor behaviour and events
-                self.recreateShape(shape: protractor, startPoint: startPoint, loc: loc)
-                protractor.p0 = startPoint
-                protractor.p1 = loc
-                let d = self.distance(startPoint, loc)
-                let angle = atan2(loc.y - startPoint.y, loc.x - startPoint.x)
-                let x2 = startPoint.x + d * cos(angle + Double.pi/4)
-                let y2 = startPoint.y + d * sin(angle + Double.pi/4)
-                protractor.p2 = Point(x: x2, y: y2)
-                protractor.delegate = self
-                protractor.setTransformEvents()
-                return //ignores subsequent events
-            } else if let line = self.newShape as? CustomLine {
-                self.recreateShape(shape: line, startPoint: startPoint, loc: loc)
-                line.startPoint = startPoint
-                line.lastPoint = loc
-                line.delegate = self
-                line.setTransformEvents()
-                return
-            } else if let multiline = self.newShape as? Multiline {
-                if self.isNewShape {
-                    self.shapeTransformations[self.newShape.hash] = (0,0,1,0)
-                    multiline.delegate = self
-                    multiline.setTransformEvents()
-                    self.setDeleteEvent(node: self.newShape)
-                    self.isNewShape = false
-                } else {
-                    return
+            case .multiline:
+                if let multiline = self.newShape as? Multiline {
+                    if self.isNewShape {
+                        self.shapeTransformations[self.newShape.hash] = (0,0,1,0)
+                        multiline.delegate = self
+                        multiline.setTransformEvents()
+                        self.setDeleteEvent(node: self.newShape)
+                        self.isNewShape = false
+                        //self.setNewShape(shape: self.newShape)
+                    } else { return }
                 }
-            } else { //general shape creation and events
+            default:
                 self.shapeTransformations[self.newShape.hash] = (0,0, 1, 0)
                 self.newShape.delegate = self
                 self.newShape.setTransformEvents()
                 self.setDeleteEvent(node: self.newShape)
+                //self.setNewShape(shape: self.newShape)
                 return
             }
         }
@@ -348,6 +322,7 @@ class ViewController: UIViewController, MacawViewDelegate {
                 })
             } else {
                 node.isActive = !node.isActive
+                self.setNewShape(shape: node)
             }
         })
     }
@@ -400,6 +375,17 @@ class ViewController: UIViewController, MacawViewDelegate {
     func activateScrollView(enable: Bool) {
         scrollview.isScrollEnabled = enable
         scrollview.pinchGestureRecognizer?.isEnabled = enable
+    }
+    
+    func setNewShape(shape: CustomShape) {
+        if shape.isActive {
+            if self.lastActiveShape != nil {
+                self.lastActiveShape!.isActive = false
+            }
+            self.lastActiveShape = shape
+        } else {
+            self.lastActiveShape = nil
+        }
     }
     
     @IBAction func freeDrawingTool(_ sender: UIButton) {

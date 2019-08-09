@@ -11,6 +11,8 @@ import Macaw
 
 class RectLine: Group, CustomShape {
     var delegate: MacawViewDelegate!
+    var stroke: Stroke!
+    
     var line: Shape!
     var rect: Shape!
     var circle: Shape!

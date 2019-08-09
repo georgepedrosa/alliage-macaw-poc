@@ -16,4 +16,5 @@ protocol CustomShape: Node {
     func updateStroke(stroke: Stroke)
     func getCenter() -> Point?
     func setTransformEvents()
+    var stroke: Stroke! { get set }
 }

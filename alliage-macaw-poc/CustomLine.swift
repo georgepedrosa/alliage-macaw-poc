@@ -12,12 +12,12 @@ import Macaw
 class CustomLine: Group, CustomShape {
     
     var line: Shape!
-    var circle: Shape!
-    var circle2: Shape!
+    var circle0: Shape!
+    var circle1: Shape!
     var backgroundLine: Shape!
     
-    var startPoint: Point!
-    var lastPoint: Point!
+    var p0: Point!
+    var p1: Point!
     
     var radius: Double = 20
     
@@ -27,7 +27,7 @@ class CustomLine: Group, CustomShape {
         didSet {
             if isActive {
                 line.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
-                contents = [line, backgroundLine, circle, circle2]
+                contents = [line, backgroundLine, circle0, circle1]
             } else {
                 line.stroke = self.stroke
                 contents = [line, backgroundLine]
@@ -41,8 +41,8 @@ class CustomLine: Group, CustomShape {
         super.init()
         
         self.stroke = stroke
-        self.startPoint = startPoint
-        self.lastPoint = lastPoint
+        self.p0 = startPoint
+        self.p1 = lastPoint
         
         let circleStroke = Stroke(fill: Color.green, width: 5.0)
         
@@ -50,164 +50,69 @@ class CustomLine: Group, CustomShape {
         line = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
         backgroundLine = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
-        let circleLocus = Circle(cx: lastPoint.x, cy: lastPoint.y, r: radius)
-        circle = Shape(form: circleLocus, fill: Color.clear, stroke: circleStroke)
+        let circleLocus = Circle(cx: startPoint.x, cy: startPoint.y, r: radius)
+        circle0 = Shape(form: circleLocus, fill: Color.clear, stroke: circleStroke)
         
-        let circleLocus2 = Circle(cx: startPoint.x, cy: startPoint.y, r: radius)
-        circle2 = Shape(form: circleLocus2, fill: Color.clear, stroke: circleStroke)
+        let circleLocus2 = Circle(cx: lastPoint.x, cy: lastPoint.y, r: radius)
+        circle1 = Shape(form: circleLocus2, fill: Color.clear, stroke: circleStroke)
         
-        contents = [line, backgroundLine, circle, circle2]
+        contents = [line, backgroundLine, circle0, circle1]
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
-        line.form = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
-        backgroundLine.form = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
-        circle.form = Circle(cx: lastPoint.x, cy: lastPoint.y, r: radius)
-        circle2.form = Circle(cx: startPoint.x, cy: startPoint.y, r: radius)
-        //self.startPoint = startPoint
-        //self.lastPoint = lastPoint
+        p0 = startPoint
+        p1 = lastPoint
+        updateFormFromPoints()
     }
     
     func updateStroke(stroke: Stroke) {
         line.stroke = stroke
     }
     
-    func updateCircleStroke(stroke: Stroke) {
-        circle.stroke = stroke
-        circle2.stroke = stroke
-    }
-    
-    func updateSize(scale: Double) {
-        let circleLocus = circle.form as! Circle
-        let newLocus = Circle(cx: circleLocus.cx, cy: circleLocus.cy, r: radius/scale)
-        circle.form = newLocus
-        
-        let circle2Locus = circle2.form as! Circle
-        let newLocus2 = Circle(cx: circle2Locus.cx, cy: circle2Locus.cy, r: radius/scale)
-        circle2.form = newLocus2
-    }
-    
     func getCenter() -> Point? {
         return line.bounds?.center()
     }
-    
-    func activateCircleAction() {
-        
-    }
-    
+
     func setTransformEvents() {
-        var startPoint = Point()
-        var lastPoint = Point(x: 0, y: 0)
-        var tempLine: CustomLine!
-        
-        self.circle2.onTouchPressed { (event) in
+        circle0.onTouchMoved { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
             self.delegate.activateScrollView(enable: false)
             
             let transform = self.delegate.shapeTransformations[self.hash]
-            let center = self.getCenter()
-            lastPoint = Point(x: self.lastPoint.x - self.startPoint.x, y: self.lastPoint.y - self.startPoint.y)
-            let lastPointAux = Shape(form: Point(x: 0, y: 0))
-            lastPointAux.place = Transform.move(dx: transform!.dx + center!.x, dy:  transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y).move(dx: lastPoint.x, dy: lastPoint.y)
-            lastPoint = Point(x: lastPointAux.place.dx, y: lastPointAux.place.dy)
-            tempLine = CustomLine(startPoint: loc, lastPoint: lastPoint, stroke: self.delegate.stroke)
-            tempLine.delegate = self.delegate
-            let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == self.hash
-            })
-            self.delegate.shapesGroup.contents[index!] = tempLine
+            let newP0 = Point(x: loc.x - transform!.dx, y: loc.y - transform!.dy)
+            
+            self.p0 = newP0
+            self.updateFormFromPoints()
         }
         
-        self.circle.onTouchPressed { (event) in
+        circle1.onTouchMoved { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
             self.delegate.activateScrollView(enable: false)
             
             let transform = self.delegate.shapeTransformations[self.hash]
-            let pointAux = Shape(form: Point(x: 0, y: 0))
-            let center = self.getCenter()
-            pointAux.place = Transform.move(dx: transform!.dx + center!.x, dy: transform!.dy + center!.y).scale(sx: transform!.scale, sy: transform!.scale).rotate(angle: transform!.angle).move(dx: -center!.x, dy: -center!.y)
-            startPoint = Point(x: pointAux.place.dx, y: pointAux.place.dy)
-            tempLine = CustomLine(startPoint: startPoint, lastPoint: loc, stroke: self.delegate.stroke)
-            tempLine.delegate = self.delegate
-            let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == self.hash
-            })
-            self.delegate.shapesGroup.contents[index!] = tempLine
-        }
-        
-        self.circle2.onTouchMoved { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            tempLine.updateForm(startPoint: loc, lastPoint: tempLine.lastPoint)
-        }
-        
-        self.circle.onTouchMoved({ (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            tempLine.updateForm(startPoint: tempLine.startPoint, lastPoint: loc)
-        })
-        
-        self.circle2.onTouchReleased { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
+            let newP1 = Point(x: loc.x - transform!.dx, y: loc.y - transform!.dy)
             
-            let x = tempLine.lastPoint.x - loc.x
-            let y = tempLine.lastPoint.y - loc.y
-            let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(x: x, y: y), stroke: self.delegate.stroke)
-            newLine.delegate = self.delegate
-            newLine.place = Transform.move(dx: loc.x, dy: loc.y).scale(sx: 1, sy: 1)
-            newLine.startPoint = loc
-            newLine.lastPoint = tempLine.lastPoint
-            self.delegate.shapeTransformations[newLine.hash] = (loc.x, loc.y, 1, 0)
-            
-            let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == tempLine.hash
-            })
-            self.delegate.shapesGroup.contents[index!] = newLine
-            newLine.setTransformEvents()
-            self.delegate.activateScrollView(enable: true)
+            self.p1 = newP1
+            self.updateFormFromPoints()
         }
-        
-        self.circle.onTouchReleased { (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            
-            let newLine = CustomLine(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y), stroke: self.delegate.stroke)
-            newLine.delegate = self.delegate
-            //newLine.updateForm(startPoint: Point(0, 0), lastPoint: Point(loc.x - startPoint.x, loc.y - startPoint.y))
-            newLine.place = Transform.move(dx: startPoint.x, dy: startPoint.y).scale(sx: 1, sy: 1)
-            newLine.startPoint = startPoint
-            newLine.lastPoint = loc
-            self.delegate.shapeTransformations[newLine.hash] = (startPoint.x,startPoint.y, 1, 0)
-            let index = self.delegate.shapesGroup.contents.firstIndex(where: { (node) -> Bool in
-                node.hash == tempLine.hash
-            })
-            self.delegate.shapesGroup.contents[index!] = newLine
-            newLine.setTransformEvents()
-            self.delegate.activateScrollView(enable: true)
-        }
-        
-        self.backgroundLine.onPan { (event) in
-            guard let _ = event.node else { print("problem on line pan")
+        backgroundLine.onPan { (event) in
+            guard let _ = event.node else { print("problem on arc pan")
                 return
             }
-            if !self.isActive {
-                return
-            }
+            if !self.isActive { return }
             self.delegate.activateScrollView(enable: false)
+            
             let transform = self.delegate.shapeTransformations[self.hash]
             self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
             self.delegate.updatePlace(node: self)
             self.delegate.activateScrollView(enable: true)
         }
-        self.onTap(f: { (event) in
-            if self.delegate.activeTool == .none { return }
-            guard let node = event.node else { print("problem on panel pan")
-                return
-            }
-            if self.delegate.activeTool == .delete {
-                self.delegate.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
-                    shape.hash == node.hash
-                })
-            } else {
-                self.isActive = !self.isActive
-            }
-        })
+    }
+    
+    func updateFormFromPoints() {
+        line.form = Line(p0.x, p0.y, p1.x, p1.y)
+        backgroundLine.form = Line(p0.x, p0.y, p1.x, p1.y)
+        circle0.form = Circle(cx: p0.x, cy: p0.y, r: radius)
+        circle1.form = Circle(cx: p1.x, cy: p1.y, r: radius)
     }
 }

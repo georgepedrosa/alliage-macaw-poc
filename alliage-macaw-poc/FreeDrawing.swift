@@ -20,7 +20,7 @@ class FreeDrawing: Group, CustomShape {
     
     var isActive: Bool = false {
         didSet {
-            contents = (isActive ? [backgroundRect, drawing, backgroundDrawing] : [drawing, backgroundDrawing])
+            contents = (isActive ? [drawing, backgroundDrawing, backgroundRect] : [drawing, backgroundDrawing])
         }
     }
     
@@ -78,7 +78,7 @@ class FreeDrawing: Group, CustomShape {
     }
     
     func setTransformEvents() {
-        backgroundDrawing.onPan { (event) in
+        backgroundRect.onPan { (event) in
             guard let _ = event.node else { print("problem on pan")
                 return
             }

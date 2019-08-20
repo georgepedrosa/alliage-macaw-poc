@@ -17,14 +17,31 @@ class CustomText: Group, CustomShape {
     public var rect: Shape!
     var textNode: Text!
     
+    var startPoint: Point!
+    var p0: Point!
+    
     var isActive: Bool = true {
         didSet {
-            rect.stroke = (isActive ? Stroke(fill: Color.blue, width: 2.0) : Stroke(fill: Color.clear, width: 2.0))
+            if isActive {
+                rect.stroke = Stroke(fill: Color.blue, width: 2.0)
+                self.delegate.customTexts.removeAll(where: { (text) -> Bool in
+                    text == self
+                })
+                self.delegate.customTexts.append(self)
+                self.delegate.inputTextView.becomeFirstResponder()
+            } else {
+                rect.stroke = Stroke(fill: Color.clear, width: 2.0)
+                self.delegate.inputTextView.resignFirstResponder()
+            }
         }
     }
     
     init(text: String, startPoint: Point, color: Color) {
         super.init()
+        
+        self.startPoint = startPoint
+        p0 = startPoint
+        
         textNode = Text(text: text, fill: color, place: .move(startPoint.x, startPoint.y))
         let rectLocus = Rect(x: 0, y: 0, w: 30, h: textNode.bounds.h)
         rect = Shape(form: rectLocus, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0), place: .move(startPoint.x, startPoint.y))
@@ -79,33 +96,23 @@ class CustomText: Group, CustomShape {
                 })
                 return
             }
-            
-            if self.delegate.isKeyboardShowing && !self.isActive {
-                self.delegate.inputTextView.resignFirstResponder()
+
+            if let previousText = self.delegate.lastActiveShape as? CustomText {
+                previousText.isActive = false
+                self.delegate.lastActiveShape = nil
                 return
             }
+            
             self.isActive = !self.isActive
-            if self.isActive {
-                self.delegate.customTexts.removeAll(where: { (text) -> Bool in
-                    text == self
-                })
-                for text in self.delegate.customTexts {
-                    text.isActive = false //deselects all texts except current one
-                }
-                self.delegate.customTexts.append(self)
-                self.delegate.inputTextView.becomeFirstResponder()
-                
-            } else {
-                self.delegate.inputTextView.resignFirstResponder()
-            }
+            self.delegate.setNewShape(shape: self)
         })
         
         self.onPan { event in
-            //self.scrollview.isScrollEnabled = false
+            if !self.isActive {
+                return
+            }
             self.delegate.activateScrollView(enable: false)
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
+            self.move(dx: event.dx, dy: event.dy)
             self.delegate.activateScrollView(enable: true)
         }
         self.delegate.shapesGroup.contents.append(self)
@@ -113,6 +120,11 @@ class CustomText: Group, CustomShape {
     
     func setTransformEvents() {
         
+    }
+    
+    func move(dx: Double, dy: Double) {
+        self.place = .move(self.place.dx + dx, self.place.dy + dy)
+        p0 = Point(x: startPoint.x + self.place.dx, y: startPoint.y + self.place.dy)
     }
 
 }

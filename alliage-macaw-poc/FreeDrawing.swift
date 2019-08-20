@@ -18,6 +18,8 @@ class FreeDrawing: Group, CustomShape {
     var path: PathBuilder!
     var backgroundRect: Shape!
     
+    var points: [Point]!
+    
     var isActive: Bool = false {
         didSet {
             contents = (isActive ? [drawing, backgroundDrawing, backgroundRect] : [drawing, backgroundDrawing])
@@ -27,6 +29,8 @@ class FreeDrawing: Group, CustomShape {
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
         super.init()
         self.stroke = stroke
+        
+        points = [startPoint]
         
         path = MoveTo(x: startPoint.x, y: startPoint.y)
         path = path.lineTo(x: startPoint.x, y: startPoint.y)
@@ -54,6 +58,7 @@ class FreeDrawing: Group, CustomShape {
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
+        points.append(lastPoint)
         path = path.lineTo(x: lastPoint.x, y: lastPoint.y)
         drawing.form = path.build()
         backgroundDrawing.form = path.build()
@@ -84,11 +89,25 @@ class FreeDrawing: Group, CustomShape {
             }
             if !self.isActive { return }
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
+            self.move(dx: event.dx, dy: event.dy)
             self.delegate.activateScrollView(enable: true)
         }
+    }
+    
+    func updateFormFromPoints() {
+        path = MoveTo(x: points[0].x, y: points[0].y)
+        for i in 1..<points.count {
+            path = path.lineTo(x: points[i].x, y: points[i].y)
+        }
+        drawing.form = path.build()
+        backgroundDrawing.form = path.build()
+        backgroundRect.form = drawing.form.bounds()
+    }
+    
+    func move(dx: Double, dy: Double) {
+        for i in 0..<points.count {
+            points[i] = Point(x: points[i].x + dx, y: points[i].y + dy)
+        }
+        updateFormFromPoints()
     }
 }

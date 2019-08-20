@@ -55,51 +55,18 @@ class Protractor: Group, CustomShape {
         self.p1 = p1
         self.p2 = p2
         
-        let locusLine1 = Line(p0.x, p0.y, p1.x, p1.y)
-        let locusLine2 = Line(p0.x, p0.y, p2.x, p2.y)
-        
-        line1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
-        line2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
-        backgroundLine1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        backgroundLine2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        
-        let locusCircle0 = Circle(cx: p0.x, cy: p0.y, r: 15)
-        circle0 = Shape(form: locusCircle0, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        let locusCircle1 = Circle(cx: p1.x, cy: p1.y, r: 15)
-        circle1 = Shape(form: locusCircle1, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        let locusCircle2 = Circle(cx: p2.x, cy: p2.y, r: 15)
-        circle2 = Shape(form: locusCircle2, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        
-        let ellipseLocus = Ellipse(cx: p0.x, cy: p0.y, rx: 40, ry: 40)
-        
-        let theta1 = atan2(p1.y - p0.y, p1.x - p0.x)
-        let theta2 = atan2(p2.y - p0.y, p2.x - p0.x)
-        
-        var angleInDegrees = (theta2-theta1)*degreesPerRadian
-        if angleInDegrees < 0 {
-            angleInDegrees += 360
-        }
-
-        let arcLocus = Arc(ellipse: ellipseLocus, shift: theta1, extent: theta2 - theta1)
-        
-        arc = Shape(form: arcLocus, fill: Color.clear, stroke: Stroke(fill: Color.orange, width: self.stroke.width))
-        
-        text = Text(text: String(format: "%.2f", angleInDegrees) + "º", fill: Color.blue, place: .move(p0.x, p0.y))
-        
-        var angleText = theta1 + ((theta2 - theta1)/2)
-        
-        if theta2 >= -Double.pi && theta2 <= -(Double.pi - angleText) && theta1 <= Double.pi && theta1 >= Double.pi - angleText {
-            angleText = Double.pi + angleText
-        }
-        
-        let distanceText = 70.0
-        
-        let textX = distanceText * cos(angleText) + p0.x
-        let textY = distanceText * sin(angleText) + p0.y
-        
-        text.place = .move(dx: textX, dy: textY)
+        line1 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
+        line2 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
+        backgroundLine1 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        backgroundLine2 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        circle2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        arc = Shape(form: Ellipse(), fill: Color.clear, stroke: Stroke(fill: Color.orange, width: self.stroke.width))
+        text = Text(text: "", fill: Color.blue, place: .move(p0.x, p0.y))
         
         contents = [arc, line1, line2, backgroundLine1, backgroundLine2, circle0, circle1, circle2, text]
+        updateFormFromPoints()
     }
 
     func updateForm(startPoint: Point, lastPoint: Point) {
@@ -151,10 +118,7 @@ class Protractor: Group, CustomShape {
             if !self.isActive { return }
             
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
+            self.move(dx: event.dx, dy: event.dy)
             self.delegate.activateScrollView(enable: true)
         }
         self.backgroundLine2.onPan { (event) in
@@ -165,10 +129,7 @@ class Protractor: Group, CustomShape {
             if !self.isActive { return }
             
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
+            self.move(dx: event.dx, dy: event.dy)
             self.delegate.activateScrollView(enable: true)
         }
     }
@@ -226,11 +187,12 @@ class Protractor: Group, CustomShape {
         return Double(sqrt(xDist * xDist + yDist * yDist))
     }
     
-//    func getAngle(vertex: Point, pointA: Point, pointB: Point) -> Double {
-//        //arccos((P122 + P132 - P232) / (2 * P12 * P13))
-//
-//        return acos((pow(distance(vertex, pointA), 2.0) + pow(distance(vertex, pointB), 2.0) - pow(distance(pointA, pointB), 2.0)) / (2 * distance(vertex, pointA) * distance(vertex, pointB)))
-//    }
+    func move(dx: Double, dy: Double) {
+        p0 = Point(x: p0.x + dx, y: p0.y + dy)
+        p1 = Point(x: p1.x + dx, y: p1.y + dy)
+        p2 = Point(x: p2.x + dx, y: p2.y + dy)
+        updateFormFromPoints()
+    }
 }
 
 enum ProtractorCircle {

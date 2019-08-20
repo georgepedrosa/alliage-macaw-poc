@@ -29,13 +29,15 @@ protocol MacawViewDelegate {
     var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] { get set }
     func activateScrollView(enable: Bool)
     func updatePlace(node: Node)
+    func setNewShape(shape: CustomShape)
     var shapesGroup: Group { get set }
     var activeTool: Tool { get set }
     var stroke: Stroke { get }
     var textColor: Color { get }
     var inputTextView: UITextView { get }
     var customTexts: [CustomText] { get set }
-    var isKeyboardShowing: Bool { get set }
+    var isKeyboardShowing: Bool { get }
+    var lastActiveShape: CustomShape? { get set }
 }
 
 class ViewController: UIViewController, MacawViewDelegate {
@@ -47,9 +49,7 @@ class ViewController: UIViewController, MacawViewDelegate {
     var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] = [:]
     
     var transformHistory: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] = [:]
-    
-    var macawActions: [MacawAction] = []
-    
+        
     @IBOutlet weak var buttonsStackView: UIStackView!
     @IBOutlet weak var scrollview: UIScrollView!
     
@@ -179,12 +179,6 @@ class ViewController: UIViewController, MacawViewDelegate {
             
             isKeyboardShowing = notification.name == UIResponder.keyboardWillShowNotification //storing keyboard state for future reference on text events
             
-            if !isKeyboardShowing { //deactivates all text nodes if keyboard is dismissed
-                for text in self.customTexts {
-                text.isActive = false
-                }
-            }
-            
             bottomConstraint?.constant = isKeyboardShowing ? -keyboardFrame.height : 0 //sets inputView constraint according to keyboard height
             self.messageInputContainerView.isHidden = !self.messageInputContainerView.isHidden
 
@@ -269,13 +263,17 @@ class ViewController: UIViewController, MacawViewDelegate {
             case .none, .delete, .selection:
                 return
             case .text:
+                if self.isKeyboardShowing {
+                    self.inputTextView.resignFirstResponder()
+                    return
+                }
                 let customText = CustomText(text: "", startPoint: startPoint, color: self.textColor)
                 customText.delegate = self
                 self.customTexts.append(customText) //stores all created texts
-                self.inputTextView.becomeFirstResponder() //always displays keyboard after creating text
                 self.shapeTransformations[customText.hash] = (0,0, 1, 0)
                 customText.setTransformEvents(startPoint: startPoint)
-                //self.setNewShape(shape: customText)
+                self.setNewShape(shape: customText)
+                self.inputTextView.becomeFirstResponder() //always displays keyboard after creating text
                 return //adds newly created text to shapes array and ignores subsequent events
             case .multiline:
                 if let multiline = self.newShape as? Multiline {

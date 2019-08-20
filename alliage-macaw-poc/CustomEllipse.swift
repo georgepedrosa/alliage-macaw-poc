@@ -57,69 +57,38 @@ class CustomEllipse: Group, CustomShape {
         
         self.stroke = stroke
         updatePoints(startPoint: startPoint, lastPoint: lastPoint)
+
+        ellipse = Shape(form: Ellipse(), fill: Color.clear, stroke: stroke)
+        backgroundRect = Shape(form: Rect(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2))
         
-        let width = lastPoint.x - startPoint.x
-        let height = lastPoint.y - startPoint.y
-        let ellipseLocus = Ellipse(cx: startPoint.x + width/2.0, cy: startPoint.y + height/2.0, rx: width/2.0, ry: height/2.0)
-        ellipse = Shape(form: ellipseLocus, fill: Color.clear, stroke: stroke)
-        backgroundRect = Shape(form: ellipseLocus.bounds(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2))
+        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle3 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         
-        let locusCircle0 = Circle(cx: p0.x, cy: p0.y, r: 15)
-        circle0 = Shape(form: locusCircle0, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        let locusCircle1 = Circle(cx: p1.x, cy: p1.y, r: 15)
-        circle1 = Shape(form: locusCircle1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        let locusCircle2 = Circle(cx: p2.x, cy: p2.y, r: 15)
-        circle2 = Shape(form: locusCircle2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        let locusCircle3 = Circle(cx: p3.x, cy: p3.y, r: 15)
-        circle3 = Shape(form: locusCircle3, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle01 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle02 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle23 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle13 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         
-        let locusCircle01 = Circle(cx: (p0.x + p1.x)/2, cy: p0.y, r: 15)
-        circle01 = Shape(form: locusCircle01, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        let locusCircle02 = Circle(cx: p0.x, cy: (p0.y + p2.y)/2, r: 15)
-        circle02 = Shape(form: locusCircle02, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        let locusCircle23 = Circle(cx: (p2.x + p3.x)/2, cy: p2.y, r: 15)
-        circle23 = Shape(form: locusCircle23, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        let locusCircle13 = Circle(cx: p1.x, cy: (p1.y + p3.y)/2, r: 15)
-        circle13 = Shape(form: locusCircle13, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         
-        let locusAnchor0 = Circle(cx: p0.x, cy: p0.y, r: 2)
-        let locusAnchor1 = Circle(cx: p1.x, cy: p1.y, r: 2)
-        let locusAnchor2 = Circle(cx: p2.x, cy: p2.y, r: 2)
-        let locusAnchor3 = Circle(cx: p3.x, cy: p3.y, r: 2)
-        let locusAnchor01 = Circle(cx: (p0.x + p1.x)/2, cy: p0.y, r: 2)
-        let locusAnchor02 = Circle(cx: p0.x, cy: (p0.y + p2.y)/2, r: 2)
-        let locusAnchor23 = Circle(cx: (p2.x + p3.x)/2, cy: p2.y, r: 2)
-        let locusAnchor13 = Circle(cx: p1.x, cy: (p1.y + p3.y)/2, r: 2)
-        
-        anchor0 = Shape(form: locusAnchor0, fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
-        anchor1 = Shape(form: locusAnchor1, fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
-        anchor2 = Shape(form: locusAnchor2, fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
-        anchor3 = Shape(form: locusAnchor3, fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
-        anchor01 = Shape(form: locusAnchor01, fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
-        anchor02 = Shape(form: locusAnchor02, fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
-        anchor23 = Shape(form: locusAnchor23, fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
-        anchor13 = Shape(form: locusAnchor13, fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor0 = Shape(form: Circle(), fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor1 = Shape(form: Circle(), fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor2 = Shape(form: Circle(), fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor3 = Shape(form: Circle(), fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor01 = Shape(form: Circle(), fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor02 = Shape(form: Circle(), fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor23 = Shape(form: Circle(), fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor13 = Shape(form: Circle(), fill: Color.green, stroke: Stroke(fill: Color.green, width: 5.0))
         
         contents = [backgroundRect, ellipse, anchor0, anchor1, anchor2, anchor3, anchor01, anchor02, anchor13, anchor23, circle0, circle1, circle2, circle3, circle01, circle02, circle23, circle13]
+        
+        updateFormFromPoints()
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
         updatePoints(startPoint: startPoint, lastPoint: lastPoint)
         updateFormFromPoints()
-        
-//        let width = lastPoint.x - startPoint.x
-//        let height = lastPoint.y - startPoint.y
-//        ellipse.form = Ellipse(cx: startPoint.x + width/2.0, cy: startPoint.y + height/2.0, rx: width/2.0, ry: height/2.0)
-//        backgroundRect.form = ellipse.form.bounds()
-//        circle0.form = Circle(cx: p0.x, cy: p0.y, r: 15)
-//        circle1.form = Circle(cx: p1.x, cy: p1.y, r: 15)
-//        circle2.form = Circle(cx: p2.x, cy: p2.y, r: 15)
-//        circle3.form = Circle(cx: p3.x, cy: p3.y, r: 15)
-//
-//        circle01.form = Circle(cx: (p0.x + p1.x)/2, cy: p0.y, r: 15)
-//        circle02.form = Circle(cx: p0.x, cy: (p0.y + p2.y)/2, r: 15)
-//        circle23.form = Circle(cx: (p2.x + p3.x)/2, cy: p2.y, r: 15)
-//        circle13.form = Circle(cx: p1.x, cy: (p1.y + p3.y)/2, r: 15)
     }
     
     func setTransformEvents() {
@@ -236,10 +205,7 @@ class CustomEllipse: Group, CustomShape {
                 return
             }
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
+            self.move(dx: event.dx, dy: event.dy)
             self.delegate.activateScrollView(enable: true)
         }
     }
@@ -286,5 +252,12 @@ class CustomEllipse: Group, CustomShape {
         p1 = Point(x: p3.x, y: p0.y)
         p2 = Point(x: p0.x, y: p3.y)
     }
-
+    
+    func move(dx: Double, dy: Double) {
+        p0 = Point(x: p0.x + dx, y: p0.y + dy)
+        p1 = Point(x: p1.x + dx, y: p1.y + dy)
+        p2 = Point(x: p2.x + dx, y: p2.y + dy)
+        p3 = Point(x: p3.x + dx, y: p3.y + dy)
+        updateFormFromPoints()
+    }
 }

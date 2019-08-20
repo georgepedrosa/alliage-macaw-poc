@@ -46,17 +46,12 @@ class CustomLine: Group, CustomShape {
         
         let circleStroke = Stroke(fill: Color.green, width: 5.0)
         
-        let lineLocus = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
-        line = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
-        backgroundLine = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        
-        let circleLocus = Circle(cx: startPoint.x, cy: startPoint.y, r: radius)
-        circle0 = Shape(form: circleLocus, fill: Color.clear, stroke: circleStroke)
-        
-        let circleLocus2 = Circle(cx: lastPoint.x, cy: lastPoint.y, r: radius)
-        circle1 = Shape(form: circleLocus2, fill: Color.clear, stroke: circleStroke)
-        
+        line = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: self.stroke.width))
+        backgroundLine = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: circleStroke)
+        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: circleStroke)
         contents = [line, backgroundLine, circle0, circle1]
+        updateFormFromPoints()
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
@@ -101,10 +96,7 @@ class CustomLine: Group, CustomShape {
             }
             if !self.isActive { return }
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
+            self.move(dx: event.dx, dy: event.dy)
             self.delegate.activateScrollView(enable: true)
         }
     }
@@ -114,5 +106,11 @@ class CustomLine: Group, CustomShape {
         backgroundLine.form = Line(p0.x, p0.y, p1.x, p1.y)
         circle0.form = Circle(cx: p0.x, cy: p0.y, r: radius)
         circle1.form = Circle(cx: p1.x, cy: p1.y, r: radius)
+    }
+    
+    func move(dx: Double, dy: Double) {
+        p0 = Point(x: p0.x + dx, y: p0.y + dy)
+        p1 = Point(x: p1.x + dx, y: p1.y + dy)
+        updateFormFromPoints()
     }
 }

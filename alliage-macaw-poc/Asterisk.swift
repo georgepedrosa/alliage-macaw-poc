@@ -13,6 +13,8 @@ class Asterisk: Group, CustomShape {
     var delegate: MacawViewDelegate!
     var stroke: Stroke!
     
+    var p0: Point!
+    
     var line1: Shape!
     var line2: Shape!
     var line3: Shape!
@@ -40,11 +42,36 @@ class Asterisk: Group, CustomShape {
         
         self.stroke = stroke
 
-        let x1 = startPoint.x
-        let y1 = startPoint.y
+        p0 = Point(x: startPoint.x, y: startPoint.y)
         
-        let x2 = startPoint.x + 30
-        let y2 = startPoint.y + 30
+        line1 = Shape(form: Line(), fill: Color.clear, stroke: stroke)
+        backgroundLine1 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        
+        line2 = Shape(form: Line(), fill: Color.clear, stroke: stroke)
+        backgroundLine2 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        
+        line3 = Shape(form: Line(), fill: Color.clear, stroke: stroke)
+        backgroundLine3 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        
+        line4 = Shape(form: Line(), fill: Color.clear, stroke: stroke)
+        backgroundLine4 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        
+        contents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4]
+        backgroundRect = Shape(form: self.bounds!, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
+        contents.append(backgroundRect)
+        
+        updateFormFromPoints()
+    }
+    
+    func updateForm(startPoint: Point, lastPoint: Point) {
+    }
+    
+    func updateFormFromPoints() {
+        let x1 = p0.x
+        let y1 = p0.y
+        
+        let x2 = x1 + 30
+        let y2 = y1 + 30
         
         let cx = (x1+x2)/2
         let cy = (y1+y2)/2
@@ -67,31 +94,17 @@ class Asterisk: Group, CustomShape {
         let x8 = (  (x2 - cx) * cos(2.36) + (y2 - cy) * sin(2.36) ) + cx
         let y8 = ( -(x2 - cx) * sin(2.36) + (y2 - cy) * cos(2.36) ) + cy
         
-        let lineLocus1 = Line(x1, y1, x2, y2)
-        line1 = Shape(form: lineLocus1, fill: Color.clear, stroke: stroke)
-        backgroundLine1 = Shape(form: lineLocus1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        line1.form = Line(x1, y1, x2, y2)
+        backgroundLine1.form = Line(x1, y1, x2, y2)
+        line2.form = Line(x3, y3, x4, y4)
+        backgroundLine2.form = Line(x3, y3, x4, y4)
+        line3.form = Line(x5, y5, x6, y6)
+        backgroundLine3.form = Line(x5, y5, x6, y6)
+        line4.form = Line(x7, y7, x8, y8)
+        backgroundLine4.form = Line(x7, y7, x8, y8)
         
-        let lineLocus2 = Line(x3, y3, x4, y4)
-        line2 = Shape(form: lineLocus2, fill: Color.clear, stroke: stroke)
-        backgroundLine2 = Shape(form: lineLocus2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        
-        let lineLocus3 = Line(x5, y5, x6, y6)
-        line3 = Shape(form: lineLocus3, fill: Color.clear, stroke: stroke)
-        backgroundLine3 = Shape(form: lineLocus3, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        
-        let lineLocus4 = Line(x7, y7, x8, y8)
-        line4 = Shape(form: lineLocus4, fill: Color.clear, stroke: stroke)
-        backgroundLine4 = Shape(form: lineLocus4, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        
-        contents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4]
-        
-        backgroundRect = Shape(form: self.bounds!, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
-        
-        contents.append(backgroundRect)
-
-    }
-    
-    func updateForm(startPoint: Point, lastPoint: Point) {
+        let group = Group(contents: [line1, line2, line3, line4])
+        backgroundRect.form = group.bounds!
     }
     
     func updateStroke(stroke: Stroke) {
@@ -112,12 +125,13 @@ class Asterisk: Group, CustomShape {
             }
             if !self.isActive { return }
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
+            self.move(dx: event.dx, dy: event.dy)
             self.delegate.activateScrollView(enable: true)
         }
     }
     
+    func move(dx: Double, dy: Double) {
+        p0 = Point(x: p0.x + dx, y: p0.y + dy)
+        updateFormFromPoints()
+    }
 }

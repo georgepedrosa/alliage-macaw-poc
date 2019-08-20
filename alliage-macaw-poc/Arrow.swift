@@ -13,6 +13,8 @@ import Macaw
 
 class Arrow: Group, CustomShape {
     
+    let headAngle = Double.pi/4
+    
     var delegate: MacawViewDelegate!
     var stroke: Stroke!
     
@@ -35,14 +37,8 @@ class Arrow: Group, CustomShape {
     var isActive: Bool = true {
         didSet {
             if isActive {
-                //line.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
-                //headLeft.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
-                //headRight.stroke = Stroke(fill: Color.blue, width: self.stroke.width)
                 contents = [line, backgroundLine, headLeft, backgroundHeadLeft, headRight, backgroundHeadRight, anchor0, anchor1, circle0, circle1]
             } else {
-                //line.stroke = self.stroke
-                //headLeft.stroke = self.stroke
-                //headRight.stroke = self.stroke
                 contents = [line, backgroundLine, headLeft, backgroundHeadLeft, headRight, backgroundHeadRight]
             }
         }
@@ -56,48 +52,21 @@ class Arrow: Group, CustomShape {
         p0 = startPoint
         p1 = lastPoint
         
-        let x1 = startPoint.x
-        let y1 = startPoint.y
+        line = Shape(form: Line(), fill: Color.clear, stroke: stroke)
+        backgroundLine = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        headLeft = Shape(form: Line(), fill: Color.clear, stroke: stroke)
+        backgroundHeadLeft = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
+        headRight = Shape(form: Line(), fill: Color.clear, stroke: stroke)
+        backgroundHeadRight = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
-        let x2 = lastPoint.x
-        let y2 = lastPoint.y
-        
-        let l1 = max(distance(startPoint, lastPoint),0.005)
-        var l2 = l1/10
-        
-        if l2 > 25 {
-            l2 = 25
-        }
-        
-        let x3 = x2 + ( (l2/l1) * ( ( (x1-x2) * cos(0.78) ) + ( (y1-y2) * (sin(0.78) ) ) ) )
-        let y3 = y2 + ( (l2/l1) * ( ( (y1-y2) * cos(0.78) ) - ( (x1-x2) * (sin(0.78) ) ) ) )
-        let x4 = x2 + ( (l2/l1) * ( ( (x1-x2) * cos(0.78) ) - ( (y1-y2) * (sin(0.78) ) ) ) )
-        let y4 = y2 + ( (l2/l1) * ( ( (y1-y2) * cos(0.78) ) + ( (x1-x2) * (sin(0.78) ) ) ) )
-        
-        let lineLocus = Line(startPoint.x, startPoint.y, lastPoint.x, lastPoint.y)
-        let headLeftLocus = Line(x1: x2, y1: y2, x2: x3, y2: y3)
-        let headRightLocus = Line(x1: x2, y1: y2, x2: x4, y2: y4)
-        
-        line = Shape(form: lineLocus, fill: Color.clear, stroke: stroke)
-        backgroundLine = Shape(form: lineLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        headLeft = Shape(form: headLeftLocus, fill: Color.clear, stroke: stroke)
-        backgroundHeadLeft = Shape(form: headLeftLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        headRight = Shape(form: headRightLocus, fill: Color.clear, stroke: stroke)
-        backgroundHeadRight = Shape(form: headRightLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        
-        let circleLocus = Circle(cx: startPoint.x, cy: startPoint.y, r: 20)
-        circle0 = Shape(form: circleLocus, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        
-        let circleLocus2 = Circle(cx: lastPoint.x, cy: lastPoint.y, r: 20)
-        circle1 = Shape(form: circleLocus2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        
-        let anchor0Locus = Circle(cx: startPoint.x, cy: startPoint.y, r: 2)
-        anchor0 = Shape(form: anchor0Locus, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        
-        let anchor1Locus = Circle(cx: lastPoint.x, cy: lastPoint.y, r: 2)
-        anchor1 = Shape(form: anchor1Locus, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        anchor0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
         
         contents = [line, backgroundLine, headLeft, backgroundHeadLeft, headRight, backgroundHeadRight, anchor0, anchor1, circle0, circle1]
+        
+        updateFormFromPoints()
     }
     
     func updateForm(startPoint: Point, lastPoint: Point) {
@@ -110,10 +79,7 @@ class Arrow: Group, CustomShape {
         circle0.onTouchMoved { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            let newP0 = Point(x: loc.x - transform!.dx, y: loc.y - transform!.dy)
-            
+            let newP0 = Point(x: loc.x, y: loc.y)
             self.p0 = newP0
             self.updateFormFromPoints()
         }
@@ -121,10 +87,7 @@ class Arrow: Group, CustomShape {
         circle1.onTouchMoved { (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            let newP1 = Point(x: loc.x - transform!.dx, y: loc.y - transform!.dy)
-            
+            let newP1 = Point(x: loc.x, y: loc.y)
             self.p1 = newP1
             self.updateFormFromPoints()
         }
@@ -134,10 +97,7 @@ class Arrow: Group, CustomShape {
             }
             if !self.isActive { return }
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
+            self.move(dx: event.dx, dy: event.dy)
             self.delegate.activateScrollView(enable: true)
         }
     }
@@ -156,10 +116,10 @@ class Arrow: Group, CustomShape {
             l2 = 25
         }
         
-        let x3 = x2 + ( (l2/l1) * ( ( (x1-x2) * cos(0.78) ) + ( (y1-y2) * (sin(0.78) ) ) ) )
-        let y3 = y2 + ( (l2/l1) * ( ( (y1-y2) * cos(0.78) ) - ( (x1-x2) * (sin(0.78) ) ) ) )
-        let x4 = x2 + ( (l2/l1) * ( ( (x1-x2) * cos(0.78) ) - ( (y1-y2) * (sin(0.78) ) ) ) )
-        let y4 = y2 + ( (l2/l1) * ( ( (y1-y2) * cos(0.78) ) + ( (x1-x2) * (sin(0.78) ) ) ) )
+        let x3 = x2 + ( (l2/l1) * ( ( (x1-x2) * cos(headAngle) ) + ( (y1-y2) * (sin(headAngle) ) ) ) )
+        let y3 = y2 + ( (l2/l1) * ( ( (y1-y2) * cos(headAngle) ) - ( (x1-x2) * (sin(headAngle) ) ) ) )
+        let x4 = x2 + ( (l2/l1) * ( ( (x1-x2) * cos(headAngle) ) - ( (y1-y2) * (sin(headAngle) ) ) ) )
+        let y4 = y2 + ( (l2/l1) * ( ( (y1-y2) * cos(headAngle) ) + ( (x1-x2) * (sin(headAngle) ) ) ) )
         
         let headLeftLocus = Line(x1: x2, y1: y2, x2: x3, y2: y3)
         let headRightLocus = Line(x1: x2, y1: y2, x2: x4, y2: y4)
@@ -191,5 +151,11 @@ class Arrow: Group, CustomShape {
         let xDist = a.x - b.x
         let yDist = a.y - b.y
         return Double(sqrt(xDist * xDist + yDist * yDist))
+    }
+    
+    func move(dx: Double, dy: Double) {
+        p0 = Point(x: p0.x + dx, y: p0.y + dy)
+        p1 = Point(x: p1.x + dx, y: p1.y + dy)
+        updateFormFromPoints()
     }
 }

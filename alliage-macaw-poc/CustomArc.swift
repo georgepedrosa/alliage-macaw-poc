@@ -53,34 +53,16 @@ class CustomArc: Group, CustomShape {
         self.p1 = p1
         self.p2 = p2
         
-        let locusCircle0 = Circle(cx: p0.x, cy: p0.y, r: 15)
-        circle0 = Shape(form: locusCircle0, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        let locusCircle1 = Circle(cx: p1.x, cy: p1.y, r: 15)
-        circle1 = Shape(form: locusCircle1, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        let locusCircle2 = Circle(cx: p2.x, cy: p2.y, r: 15)
-        circle2 = Shape(form: locusCircle2, fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        
-        let locusAnchor0 = Circle(cx: p0.x, cy: p0.y, r: 2)
-        anchor0 = Shape(form: locusAnchor0, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        let locusAnchor1 = Circle(cx: p1.x, cy: p1.y, r: 2)
-        anchor1 = Shape(form: locusAnchor1, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        let locusAnchor2 = Circle(cx: p2.x, cy: p2.y, r: 2)
-        anchor2 = Shape(form: locusAnchor2, fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        
-        let locusLine1 = Line(x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y)
-        line1 = Shape(form: locusLine1, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
-        let locusLine2 = Line(x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y)
-        line2 = Shape(form: locusLine2, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
+        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        anchor0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        line1 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
+        line2 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
 
-        var path: PathBuilder = MoveTo(x: p0.x, y: p0.y)
-        
-        for index in 1...100 {
-            let t: Double = Double(index)/100
-            let x = pow((1.0-t), 2.0)*p0.x + 2*(1.0-t)*t*p1.x + pow(t, 2.0)*p2.x
-            let y = pow((1.0-t), 2.0)*p0.y + 2*(1.0-t)*t*p1.y + pow(t, 2.0)*p2.y
-            
-            path = path.lineTo(x: x, y: y)
-        }
+        let path: PathBuilder = MoveTo(x: p0.x, y: p0.y)
         
         drawing = Shape(
             form: path.build(),
@@ -101,6 +83,8 @@ class CustomArc: Group, CustomShape {
         )
         
         contents = [line1, line2, drawing, backgroundDrawing, anchor0, anchor1, anchor2, circle0, circle1, circle2]
+        
+        updateFormFromPoints()
     }
     
     func setTransformEvents() {
@@ -137,10 +121,7 @@ class CustomArc: Group, CustomShape {
             }
             if !self.isActive { return }
             self.delegate.activateScrollView(enable: false)
-            
-            let transform = self.delegate.shapeTransformations[self.hash]
-            self.delegate.shapeTransformations.updateValue((transform!.dx + event.dx, transform!.dy + event.dy, transform!.scale, transform!.angle), forKey: self.hash)
-            self.delegate.updatePlace(node: self)
+            self.move(dx: event.dx, dy: event.dy)
             self.delegate.activateScrollView(enable: true)
         }
     }
@@ -194,5 +175,12 @@ class CustomArc: Group, CustomShape {
     
     func getCenter() -> Point? {
         return p1
+    }
+    
+    func move(dx: Double, dy: Double) {
+        p0 = Point(x: p0.x + dx, y: p0.y + dy)
+        p1 = Point(x: p1.x + dx, y: p1.y + dy)
+        p2 = Point(x: p2.x + dx, y: p2.y + dy)
+        updateFormFromPoints()
     }
 }

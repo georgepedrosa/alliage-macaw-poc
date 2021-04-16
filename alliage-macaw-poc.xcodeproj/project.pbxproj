@@ -13,18 +13,28 @@
 		1055C3A822A0561600C40F60 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1055C3A722A0561600C40F60 /* Assets.xcassets */; };
 		1055C3AB22A0561600C40F60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1055C3A922A0561600C40F60 /* LaunchScreen.storyboard */; };
 		85A143B1DDB23D5F843851E7 /* Pods_alliage_macaw_poc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D048124AE54A71DCCC49710B /* Pods_alliage_macaw_poc.framework */; };
-		AD1114F122AEB96B00119BDC /* CustomText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1114F022AEB96B00119BDC /* CustomText.swift */; };
-		AD111C9F22AA99BE005D02E8 /* CustomEllipse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD111C9E22AA99BE005D02E8 /* CustomEllipse.swift */; };
-		AD111CA122AAF9D5005D02E8 /* FreeDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD111CA022AAF9D5005D02E8 /* FreeDrawing.swift */; };
-		AD138C1D22A9787A007D92B6 /* CustomShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD138C1C22A9787A007D92B6 /* CustomShape.swift */; };
-		AD138C1F22A994A7007D92B6 /* CustomLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD138C1E22A994A7007D92B6 /* CustomLine.swift */; };
-		AD138C2122A999F9007D92B6 /* CustomRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD138C2022A999F9007D92B6 /* CustomRect.swift */; };
-		AD1BD73322E6187B00A5C519 /* Multiline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD1BD73222E6187B00A5C519 /* Multiline.swift */; };
-		AD24A39522B7FB0000184D93 /* Protractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD24A39422B7FB0000184D93 /* Protractor.swift */; };
-		AD28D6DF22D3DFDF00785CC3 /* CustomArc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD28D6DE22D3DFDF00785CC3 /* CustomArc.swift */; };
-		ADEBECA522A81CF40016B427 /* RectLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADEBECA422A81CF40016B427 /* RectLine.swift */; };
-		ADEBECA722A83FFE0016B427 /* Arrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADEBECA622A83FFE0016B427 /* Arrow.swift */; };
-		ADEBECA922A86A1C0016B427 /* Asterisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADEBECA822A86A1C0016B427 /* Asterisk.swift */; };
+		AD598D4D262883AF00D9B293 /* Annotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D4C262883AF00D9B293 /* Annotation.swift */; };
+		AD598D4F262883F700D9B293 /* BaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D4E262883F700D9B293 /* BaseModel.swift */; };
+		AD598D5226289FBB00D9B293 /* UIImageView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D5126289FBB00D9B293 /* UIImageView+Extensions.swift */; };
+		AD598D5426289FF700D9B293 /* UIImage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D5326289FF700D9B293 /* UIImage+Extensions.swift */; };
+		AD598D662628A1F900D9B293 /* CustomText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D572628A1F800D9B293 /* CustomText.swift */; };
+		AD598D672628A1F900D9B293 /* Multiline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D582628A1F800D9B293 /* Multiline.swift */; };
+		AD598D682628A1F900D9B293 /* Asterisk.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D592628A1F800D9B293 /* Asterisk.swift */; };
+		AD598D692628A1F900D9B293 /* CustomArc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D5A2628A1F800D9B293 /* CustomArc.swift */; };
+		AD598D6A2628A1F900D9B293 /* Protractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D5B2628A1F800D9B293 /* Protractor.swift */; };
+		AD598D6B2628A1F900D9B293 /* CustomLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D5C2628A1F900D9B293 /* CustomLine.swift */; };
+		AD598D6C2628A1F900D9B293 /* CustomEllipse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D5D2628A1F900D9B293 /* CustomEllipse.swift */; };
+		AD598D6D2628A1F900D9B293 /* CustomShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D5E2628A1F900D9B293 /* CustomShape.swift */; };
+		AD598D6E2628A1F900D9B293 /* CustomRect.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D5F2628A1F900D9B293 /* CustomRect.swift */; };
+		AD598D6F2628A1F900D9B293 /* Nerve.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D602628A1F900D9B293 /* Nerve.swift */; };
+		AD598D702628A1F900D9B293 /* CustomImplant.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D612628A1F900D9B293 /* CustomImplant.swift */; };
+		AD598D712628A1F900D9B293 /* FreeDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D622628A1F900D9B293 /* FreeDrawing.swift */; };
+		AD598D722628A1F900D9B293 /* CustomCalibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D632628A1F900D9B293 /* CustomCalibration.swift */; };
+		AD598D732628A1F900D9B293 /* Arrow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D642628A1F900D9B293 /* Arrow.swift */; };
+		AD598D742628A1F900D9B293 /* Ruler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D652628A1F900D9B293 /* Ruler.swift */; };
+		AD598D762628CDE300D9B293 /* CoordinateSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D752628CDE300D9B293 /* CoordinateSystem.swift */; };
+		AD598D792628CE2700D9B293 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D782628CE2700D9B293 /* AppConstants.swift */; };
+		AD598D7B2628D07100D9B293 /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D7A2628D07100D9B293 /* String+Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,18 +47,28 @@
 		1055C3AC22A0561600C40F60 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3FB7DDD5101AEEC44B22F4B6 /* Pods-alliage-macaw-poc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-alliage-macaw-poc.debug.xcconfig"; path = "Target Support Files/Pods-alliage-macaw-poc/Pods-alliage-macaw-poc.debug.xcconfig"; sourceTree = "<group>"; };
 		873AAEEAB1AD6C0F715381F4 /* Pods-alliage-macaw-poc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-alliage-macaw-poc.release.xcconfig"; path = "Target Support Files/Pods-alliage-macaw-poc/Pods-alliage-macaw-poc.release.xcconfig"; sourceTree = "<group>"; };
-		AD1114F022AEB96B00119BDC /* CustomText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomText.swift; sourceTree = "<group>"; };
-		AD111C9E22AA99BE005D02E8 /* CustomEllipse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEllipse.swift; sourceTree = "<group>"; };
-		AD111CA022AAF9D5005D02E8 /* FreeDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeDrawing.swift; sourceTree = "<group>"; };
-		AD138C1C22A9787A007D92B6 /* CustomShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomShape.swift; sourceTree = "<group>"; };
-		AD138C1E22A994A7007D92B6 /* CustomLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomLine.swift; sourceTree = "<group>"; };
-		AD138C2022A999F9007D92B6 /* CustomRect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomRect.swift; sourceTree = "<group>"; };
-		AD1BD73222E6187B00A5C519 /* Multiline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Multiline.swift; sourceTree = "<group>"; };
-		AD24A39422B7FB0000184D93 /* Protractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protractor.swift; sourceTree = "<group>"; };
-		AD28D6DE22D3DFDF00785CC3 /* CustomArc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomArc.swift; sourceTree = "<group>"; };
-		ADEBECA422A81CF40016B427 /* RectLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectLine.swift; sourceTree = "<group>"; };
-		ADEBECA622A83FFE0016B427 /* Arrow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Arrow.swift; sourceTree = "<group>"; };
-		ADEBECA822A86A1C0016B427 /* Asterisk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asterisk.swift; sourceTree = "<group>"; };
+		AD598D4C262883AF00D9B293 /* Annotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Annotation.swift; sourceTree = "<group>"; };
+		AD598D4E262883F700D9B293 /* BaseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseModel.swift; sourceTree = "<group>"; };
+		AD598D5126289FBB00D9B293 /* UIImageView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Extensions.swift"; sourceTree = "<group>"; };
+		AD598D5326289FF700D9B293 /* UIImage+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Extensions.swift"; sourceTree = "<group>"; };
+		AD598D572628A1F800D9B293 /* CustomText.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomText.swift; sourceTree = "<group>"; };
+		AD598D582628A1F800D9B293 /* Multiline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Multiline.swift; sourceTree = "<group>"; };
+		AD598D592628A1F800D9B293 /* Asterisk.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Asterisk.swift; sourceTree = "<group>"; };
+		AD598D5A2628A1F800D9B293 /* CustomArc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomArc.swift; sourceTree = "<group>"; };
+		AD598D5B2628A1F800D9B293 /* Protractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protractor.swift; sourceTree = "<group>"; };
+		AD598D5C2628A1F900D9B293 /* CustomLine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomLine.swift; sourceTree = "<group>"; };
+		AD598D5D2628A1F900D9B293 /* CustomEllipse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomEllipse.swift; sourceTree = "<group>"; };
+		AD598D5E2628A1F900D9B293 /* CustomShape.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomShape.swift; sourceTree = "<group>"; };
+		AD598D5F2628A1F900D9B293 /* CustomRect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomRect.swift; sourceTree = "<group>"; };
+		AD598D602628A1F900D9B293 /* Nerve.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Nerve.swift; sourceTree = "<group>"; };
+		AD598D612628A1F900D9B293 /* CustomImplant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomImplant.swift; sourceTree = "<group>"; };
+		AD598D622628A1F900D9B293 /* FreeDrawing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreeDrawing.swift; sourceTree = "<group>"; };
+		AD598D632628A1F900D9B293 /* CustomCalibration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomCalibration.swift; sourceTree = "<group>"; };
+		AD598D642628A1F900D9B293 /* Arrow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Arrow.swift; sourceTree = "<group>"; };
+		AD598D652628A1F900D9B293 /* Ruler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ruler.swift; sourceTree = "<group>"; };
+		AD598D752628CDE300D9B293 /* CoordinateSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateSystem.swift; sourceTree = "<group>"; };
+		AD598D782628CE2700D9B293 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
+		AD598D7A2628D07100D9B293 /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		D048124AE54A71DCCC49710B /* Pods_alliage_macaw_poc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_alliage_macaw_poc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -85,24 +105,16 @@
 		1055C39F22A0561500C40F60 /* alliage-macaw-poc */ = {
 			isa = PBXGroup;
 			children = (
+				AD598D772628CE1800D9B293 /* Constants */,
+				AD598D552628A19600D9B293 /* Utils */,
+				AD598D5026289F9000D9B293 /* Extensions */,
+				AD598D4B2628839600D9B293 /* Models */,
 				1055C3A022A0561500C40F60 /* AppDelegate.swift */,
 				1055C3A222A0561500C40F60 /* ViewController.swift */,
 				1055C3A422A0561500C40F60 /* Main.storyboard */,
 				1055C3A722A0561600C40F60 /* Assets.xcassets */,
 				1055C3A922A0561600C40F60 /* LaunchScreen.storyboard */,
 				1055C3AC22A0561600C40F60 /* Info.plist */,
-				AD138C1C22A9787A007D92B6 /* CustomShape.swift */,
-				ADEBECA422A81CF40016B427 /* RectLine.swift */,
-				ADEBECA622A83FFE0016B427 /* Arrow.swift */,
-				ADEBECA822A86A1C0016B427 /* Asterisk.swift */,
-				AD138C1E22A994A7007D92B6 /* CustomLine.swift */,
-				AD138C2022A999F9007D92B6 /* CustomRect.swift */,
-				AD111C9E22AA99BE005D02E8 /* CustomEllipse.swift */,
-				AD111CA022AAF9D5005D02E8 /* FreeDrawing.swift */,
-				AD1114F022AEB96B00119BDC /* CustomText.swift */,
-				AD24A39422B7FB0000184D93 /* Protractor.swift */,
-				AD28D6DE22D3DFDF00785CC3 /* CustomArc.swift */,
-				AD1BD73222E6187B00A5C519 /* Multiline.swift */,
 			);
 			path = "alliage-macaw-poc";
 			sourceTree = "<group>";
@@ -114,6 +126,64 @@
 				873AAEEAB1AD6C0F715381F4 /* Pods-alliage-macaw-poc.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		AD598D4B2628839600D9B293 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AD598D4C262883AF00D9B293 /* Annotation.swift */,
+				AD598D4E262883F700D9B293 /* BaseModel.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AD598D5026289F9000D9B293 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				AD598D5126289FBB00D9B293 /* UIImageView+Extensions.swift */,
+				AD598D5326289FF700D9B293 /* UIImage+Extensions.swift */,
+				AD598D7A2628D07100D9B293 /* String+Extensions.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		AD598D552628A19600D9B293 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				AD598D562628A19B00D9B293 /* MacawShapes */,
+				AD598D752628CDE300D9B293 /* CoordinateSystem.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		AD598D562628A19B00D9B293 /* MacawShapes */ = {
+			isa = PBXGroup;
+			children = (
+				AD598D642628A1F900D9B293 /* Arrow.swift */,
+				AD598D592628A1F800D9B293 /* Asterisk.swift */,
+				AD598D5A2628A1F800D9B293 /* CustomArc.swift */,
+				AD598D632628A1F900D9B293 /* CustomCalibration.swift */,
+				AD598D5D2628A1F900D9B293 /* CustomEllipse.swift */,
+				AD598D612628A1F900D9B293 /* CustomImplant.swift */,
+				AD598D5C2628A1F900D9B293 /* CustomLine.swift */,
+				AD598D5F2628A1F900D9B293 /* CustomRect.swift */,
+				AD598D5E2628A1F900D9B293 /* CustomShape.swift */,
+				AD598D572628A1F800D9B293 /* CustomText.swift */,
+				AD598D622628A1F900D9B293 /* FreeDrawing.swift */,
+				AD598D582628A1F800D9B293 /* Multiline.swift */,
+				AD598D602628A1F900D9B293 /* Nerve.swift */,
+				AD598D5B2628A1F800D9B293 /* Protractor.swift */,
+				AD598D652628A1F900D9B293 /* Ruler.swift */,
+			);
+			path = MacawShapes;
+			sourceTree = "<group>";
+		};
+		AD598D772628CE1800D9B293 /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				AD598D782628CE2700D9B293 /* AppConstants.swift */,
+			);
+			path = Constants;
 			sourceTree = "<group>";
 		};
 		D7C69FC8309D7EA333BC9C67 /* Frameworks */ = {
@@ -246,20 +316,30 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AD111C9F22AA99BE005D02E8 /* CustomEllipse.swift in Sources */,
+				AD598D6C2628A1F900D9B293 /* CustomEllipse.swift in Sources */,
 				1055C3A322A0561500C40F60 /* ViewController.swift in Sources */,
+				AD598D4D262883AF00D9B293 /* Annotation.swift in Sources */,
+				AD598D712628A1F900D9B293 /* FreeDrawing.swift in Sources */,
+				AD598D7B2628D07100D9B293 /* String+Extensions.swift in Sources */,
+				AD598D792628CE2700D9B293 /* AppConstants.swift in Sources */,
+				AD598D692628A1F900D9B293 /* CustomArc.swift in Sources */,
 				1055C3A122A0561500C40F60 /* AppDelegate.swift in Sources */,
-				AD24A39522B7FB0000184D93 /* Protractor.swift in Sources */,
-				AD1BD73322E6187B00A5C519 /* Multiline.swift in Sources */,
-				AD138C1D22A9787A007D92B6 /* CustomShape.swift in Sources */,
-				AD111CA122AAF9D5005D02E8 /* FreeDrawing.swift in Sources */,
-				ADEBECA922A86A1C0016B427 /* Asterisk.swift in Sources */,
-				AD138C2122A999F9007D92B6 /* CustomRect.swift in Sources */,
-				AD1114F122AEB96B00119BDC /* CustomText.swift in Sources */,
-				ADEBECA722A83FFE0016B427 /* Arrow.swift in Sources */,
-				AD28D6DF22D3DFDF00785CC3 /* CustomArc.swift in Sources */,
-				AD138C1F22A994A7007D92B6 /* CustomLine.swift in Sources */,
-				ADEBECA522A81CF40016B427 /* RectLine.swift in Sources */,
+				AD598D4F262883F700D9B293 /* BaseModel.swift in Sources */,
+				AD598D682628A1F900D9B293 /* Asterisk.swift in Sources */,
+				AD598D6D2628A1F900D9B293 /* CustomShape.swift in Sources */,
+				AD598D722628A1F900D9B293 /* CustomCalibration.swift in Sources */,
+				AD598D672628A1F900D9B293 /* Multiline.swift in Sources */,
+				AD598D732628A1F900D9B293 /* Arrow.swift in Sources */,
+				AD598D6E2628A1F900D9B293 /* CustomRect.swift in Sources */,
+				AD598D6F2628A1F900D9B293 /* Nerve.swift in Sources */,
+				AD598D6A2628A1F900D9B293 /* Protractor.swift in Sources */,
+				AD598D662628A1F900D9B293 /* CustomText.swift in Sources */,
+				AD598D5226289FBB00D9B293 /* UIImageView+Extensions.swift in Sources */,
+				AD598D5426289FF700D9B293 /* UIImage+Extensions.swift in Sources */,
+				AD598D762628CDE300D9B293 /* CoordinateSystem.swift in Sources */,
+				AD598D742628A1F900D9B293 /* Ruler.swift in Sources */,
+				AD598D6B2628A1F900D9B293 /* CustomLine.swift in Sources */,
+				AD598D702628A1F900D9B293 /* CustomImplant.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

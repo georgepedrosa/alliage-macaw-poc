@@ -10,15 +10,31 @@ import UIKit
 import Macaw
 
 class Asterisk: Group, CustomShape {
-    var delegate: MacawViewDelegate!
+    
+    var annotationId: Int!
+    var id: Int!
+    var type: Annotation.Types!
+    var comment: String = ""
+    
+    weak var delegate: MacawViewDelegate?
     var stroke: Stroke!
     
     var p0: Point!
+    var p1: Point!
+    var p2: Point!
+    var p3: Point!
+    var p4: Point!
+    var p5: Point!
+    var p6: Point!
+    var p7: Point!
+    var p8: Point!
     
     var line1: Shape!
     var line2: Shape!
     var line3: Shape!
     var line4: Shape!
+    
+    var backgroundCircle: Shape!
     
     var backgroundLine1: Shape!
     var backgroundLine2: Shape!
@@ -27,20 +43,35 @@ class Asterisk: Group, CustomShape {
     
     var backgroundRect: Shape!
     
+    var idText: Text!
+    
+    var activeContents: [Node]!
+    var inactiveContents: [Node]!
+    
     var isActive: Bool = true {
         didSet {
-            if isActive {
-                contents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4, backgroundRect]
+            isHidden = false
+        }
+    }
+    
+    var isHidden: Bool = false {
+        didSet {
+            if isHidden {
+                contents = []
             } else {
-                contents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4]
+                contents = isActive ? activeContents : inactiveContents
             }
         }
     }
     
-    required init(startPoint: Point, lastPoint: Point, stroke: Stroke) {
+    required init(startPoint: Point, lastPoint: Point, stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
         super.init()
         
         self.stroke = stroke
+        self.type = type
+        self.id = id
+        self.annotationId = annotationId
+        self.comment = comment
 
         p0 = Point(x: startPoint.x, y: startPoint.y)
         
@@ -56,9 +87,16 @@ class Asterisk: Group, CustomShape {
         line4 = Shape(form: Line(), fill: Color.clear, stroke: stroke)
         backgroundLine4 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         
-        contents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4]
-        backgroundRect = Shape(form: self.bounds!, fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
-        contents.append(backgroundRect)
+        backgroundCircle = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 1.0))
+        
+        backgroundRect = Shape(form: Rect(), fill: Color.clear, stroke: Stroke(fill: Color.white, width: 2, dashes: [2, 2]))
+        
+        idText = Text(text: String(annotationId))
+        idText.fill = self.stroke.fill
+
+        activeContents = [idText, line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4, backgroundRect, backgroundCircle]
+        inactiveContents = [line1, backgroundLine1, line2, backgroundLine2, line3, backgroundLine3, line4, backgroundLine4, backgroundCircle]
+        contents = activeContents
         
         updateFormFromPoints()
     }
@@ -70,29 +108,45 @@ class Asterisk: Group, CustomShape {
         let x1 = p0.x
         let y1 = p0.y
         
-        let x2 = x1 + 30
-        let y2 = y1 + 30
+        let x2 = x1 + 10
+        let y2 = y1 + 10
+        
+        p1 = Point(x2, y2)
         
         let cx = (x1+x2)/2
         let cy = (y1+y2)/2
         
+        p8 = Point(cx, cy)
+        
         let x3 = (  (x1 - cx) * cos(0.78) + (y1 - cy) * sin(0.78) ) + cx
         let y3 = ( -(x1 - cx) * sin(0.78) + (y1 - cy) * cos(0.78) ) + cy
+        
+        p2 = Point(x3, y3)
         
         let x4 = (  (x2 - cx) * cos(0.78) + (y2 - cy) * sin(0.78) ) + cx
         let y4 = ( -(x2 - cx) * sin(0.78) + (y2 - cy) * cos(0.78) ) + cy
         
+        p3 = Point(x4, y4)
+        
         let x5 = (  (x1 - cx) * cos(1.57) + (y1 - cy) * sin(1.57) ) + cx
         let y5 = ( -(x1 - cx) * sin(1.57) + (y1 - cy) * cos(1.57) ) + cy
+        
+        p4 = Point(x5, y5)
         
         let x6 = (  (x2 - cx) * cos(1.57) + (y2 - cy) * sin(1.57) ) + cx
         let y6 = ( -(x2 - cx) * sin(1.57) + (y2 - cy) * cos(1.57) ) + cy
         
+        p5 = Point(x6, y6)
+        
         let x7 = (  (x1 - cx) * cos(2.36) + (y1 - cy) * sin(2.36) ) + cx
         let y7 = ( -(x1 - cx) * sin(2.36) + (y1 - cy) * cos(2.36) ) + cy
         
+        p6 = Point(x7, y7)
+        
         let x8 = (  (x2 - cx) * cos(2.36) + (y2 - cy) * sin(2.36) ) + cx
         let y8 = ( -(x2 - cx) * sin(2.36) + (y2 - cy) * cos(2.36) ) + cy
+        
+        p7 = Point(x8, y8)
         
         line1.form = Line(x1, y1, x2, y2)
         backgroundLine1.form = Line(x1, y1, x2, y2)
@@ -103,15 +157,21 @@ class Asterisk: Group, CustomShape {
         line4.form = Line(x7, y7, x8, y8)
         backgroundLine4.form = Line(x7, y7, x8, y8)
         
+        backgroundCircle.form = Circle(cx: cx, cy: cy, r: 15)
+        
+        idText.place = .move(dx: p0.x, dy: p0.y - 20)
+        
         let group = Group(contents: [line1, line2, line3, line4])
         backgroundRect.form = group.bounds!
     }
     
-    func updateStroke(stroke: Stroke) {
+    func updateStroke(stroke: Stroke, stroke2: Stroke?) {
+        self.stroke = stroke
         line1.stroke = stroke
         line2.stroke = stroke
         line3.stroke = stroke
         line4.stroke = stroke
+        idText.fill = self.stroke.fill
     }
     
     func getCenter() -> Point? {
@@ -119,14 +179,14 @@ class Asterisk: Group, CustomShape {
     }
     
     func setTransformEvents() {
-        backgroundRect.onPan { (event) in
+        backgroundRect.onPan { [weak self] (event) in
             guard let _ = event.node else { print("problem on arc pan")
                 return
             }
-            if !self.isActive { return }
-            self.delegate.activateScrollView(enable: false)
-            self.move(dx: event.dx, dy: event.dy)
-            self.delegate.activateScrollView(enable: true)
+            if !self!.isActive { return }
+            self?.delegate?.activateScrollView(enable: false)
+            self?.move(dx: event.dx, dy: event.dy)
+            self?.delegate?.activateScrollView(enable: true)
         }
     }
     

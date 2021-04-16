@@ -11,6 +11,13 @@ import Macaw
 
 class CustomArc: Group, CustomShape {
     
+    var annotationId: Int!
+    var id: Int!
+    var type: Annotation.Types!
+    var comment: String = ""
+    
+    var idText: Text!
+    
     var drawing: Shape!
     var backgroundDrawing: Shape!
     
@@ -29,25 +36,38 @@ class CustomArc: Group, CustomShape {
     var p1: Point!
     var p2: Point!
     
-    var delegate: MacawViewDelegate!
+    weak var delegate: MacawViewDelegate?
     
     var stroke: Stroke!
     
+    var activeContents: [Node]!
+    var inactiveContents: [Node]!
+    
     var isActive: Bool = true {
         didSet {
-            if isActive {
-                contents = [line1, line2, drawing, backgroundDrawing, anchor0, anchor1, anchor2, circle0, circle1, circle2]
+            isHidden = false
+        }
+    }
+    
+    var isHidden: Bool = false {
+        didSet {
+            if isHidden {
+                contents = []
             } else {
-                contents = [drawing, backgroundDrawing]
+                contents = isActive ? activeContents : inactiveContents
             }
         }
     }
 
-    init(p0: Point, p1: Point, p2: Point, delegate: MacawViewDelegate, stroke: Stroke) {
+    init(p0: Point, p1: Point, p2: Point, delegate: MacawViewDelegate, stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
         super.init()
         
         self.delegate = delegate
         self.stroke = stroke
+        self.type = type
+        self.id = id
+        self.annotationId = annotationId
+        self.comment = comment
         
         self.p0 = p0
         self.p1 = p1
@@ -56,9 +76,9 @@ class CustomArc: Group, CustomShape {
         circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
         circle2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        anchor0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        anchor1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
-        anchor2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.green, width: 5.0))
+        anchor0 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
+        anchor1 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
+        anchor2 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
         line1 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
         line2 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
 
@@ -82,47 +102,52 @@ class CustomArc: Group, CustomShape {
             )
         )
         
-        contents = [line1, line2, drawing, backgroundDrawing, anchor0, anchor1, anchor2, circle0, circle1, circle2]
+        idText = Text(text: String(annotationId))
+        idText.fill = self.stroke.fill
+        
+        activeContents = [line1, line2, drawing, backgroundDrawing, anchor0, anchor1, anchor2, idText, circle0, circle1, circle2]
+        inactiveContents = [drawing, backgroundDrawing]
+        contents = activeContents
         
         updateFormFromPoints()
     }
     
     func setTransformEvents() {
-        self.circle0.onTouchMoved { (event) in
+        self.circle0.onTouchMoved { [weak self] (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
-            self.delegate.activateScrollView(enable: false)
-            let transform = self.delegate.shapeTransformations[self.hash]
-            let newP0 = Point(x: loc.x - transform!.dx, y: loc.y - transform!.dy)
-            self.p0 = newP0
-            self.delegate.activateScrollView(enable: true)
-            self.updateFormFromPoints()
+            self?.delegate?.activateScrollView(enable: false)
+            //let transform = self.delegate.shapeTransformations[self.hash]
+            let newP0 = Point(x: loc.x, y: loc.y)
+            self?.p0 = newP0
+            self?.delegate?.activateScrollView(enable: true)
+            self?.updateFormFromPoints()
         }
-        self.circle1.onTouchMoved { (event) in
+        self.circle1.onTouchMoved { [weak self] (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
-            self.delegate.activateScrollView(enable: false)
-            let transform = self.delegate.shapeTransformations[self.hash]
-            let newP1 = Point(x: loc.x - transform!.dx, y: loc.y - transform!.dy)
-            self.p1 = newP1
-            self.delegate.activateScrollView(enable: true)
-            self.updateFormFromPoints()
+            self?.delegate?.activateScrollView(enable: false)
+            //let transform = self.delegate.shapeTransformations[self.hash]
+            let newP1 = Point(x: loc.x, y: loc.y)
+            self?.p1 = newP1
+            self?.delegate?.activateScrollView(enable: true)
+            self?.updateFormFromPoints()
         }
-        self.circle2.onTouchMoved { (event) in
+        self.circle2.onTouchMoved { [weak self] (event) in
             guard let loc = event.points.first?.location(in: .scene) else { return }
-            self.delegate.activateScrollView(enable: false)
-            let transform = self.delegate.shapeTransformations[self.hash]
-            let newP2 = Point(x: loc.x - transform!.dx, y: loc.y - transform!.dy)
-            self.p2 = newP2
-            self.delegate.activateScrollView(enable: true)
-            self.updateFormFromPoints()
+            self?.delegate?.activateScrollView(enable: false)
+            //let transform = self.delegate.shapeTransformations[self.hash]
+            let newP2 = Point(x: loc.x, y: loc.y)
+            self?.p2 = newP2
+            self?.delegate?.activateScrollView(enable: true)
+            self?.updateFormFromPoints()
         }
-        self.backgroundDrawing.onPan { (event) in
+        self.backgroundDrawing.onPan { [weak self] (event) in
             guard let _ = event.node else { print("problem on arc pan")
                 return
             }
-            if !self.isActive { return }
-            self.delegate.activateScrollView(enable: false)
-            self.move(dx: event.dx, dy: event.dy)
-            self.delegate.activateScrollView(enable: true)
+            if !self!.isActive { return }
+            self?.delegate?.activateScrollView(enable: false)
+            self?.move(dx: event.dx, dy: event.dy)
+            self?.delegate?.activateScrollView(enable: true)
         }
     }
     
@@ -153,14 +178,17 @@ class CustomArc: Group, CustomShape {
         circle0.form = Circle(cx: p0.x, cy: p0.y, r: 15)
         circle1.form = Circle(cx: p1.x, cy: p1.y, r: 15)
         circle2.form = Circle(cx: p2.x, cy: p2.y, r: 15)
-        anchor0.form = Circle(cx: p0.x, cy: p0.y, r: 2)
-        anchor1.form = Circle(cx: p1.x, cy: p1.y, r: 2)
-        anchor2.form = Circle(cx: p2.x, cy: p2.y, r: 2)
+        anchor0.form = Rect(x: p0.x-4, y: p0.y-4, w: 8, h: 8)
+        anchor1.form = Rect(x: p1.x-4, y: p1.y-4, w: 8, h: 8)
+        anchor2.form = Rect(x: p2.x-4, y: p2.y-4, w: 8, h: 8)
         line1.form = Line(x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y)
         line2.form = Line(x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y)
+        idText.place = .move(dx: p2.x+5, dy: p2.y)
     }
     
-    func updateStroke(stroke: Stroke) {
+    func updateStroke(stroke: Stroke, stroke2: Stroke?) {
+        self.stroke = stroke
+        idText.fill = self.stroke.fill
         drawing.stroke = stroke
     }
     

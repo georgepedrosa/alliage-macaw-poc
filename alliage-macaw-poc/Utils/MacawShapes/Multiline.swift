@@ -25,10 +25,10 @@ class Multiline: Group, CustomShape {
     var circles: Group!
     var idText: Text!
     
-    var totalDistance: Double = 0.0
-    var pixelsPerMilimeter: Double!
+//    var totalDistance: Double = 0.0
+//    var pixelsPerMilimeter: Double!
     
-    var coordinateSystem: CoordinateSystem!
+//    var coordinateSystem: CoordinateSystem!
     
     var activeContents: [Node]!
     var inactiveContents: [Node]!
@@ -51,13 +51,13 @@ class Multiline: Group, CustomShape {
     
     var stroke: Stroke!
     
-    required init(startPoint: Point, lastPoint: Point, stroke: Stroke, coordinateSystem: CoordinateSystem, pixelsPerMilimeter: Double, type: Annotation.Types, id: Int? = nil, annotationId: Int) {
+    required init(startPoint: Point, lastPoint: Point, stroke: Stroke,  type: Annotation.Types, id: Int? = nil, annotationId: Int) {
         super.init()
         
         self.stroke = stroke
         self.points.append(startPoint)
-        self.coordinateSystem = coordinateSystem
-        self.pixelsPerMilimeter = pixelsPerMilimeter
+//        self.coordinateSystem = coordinateSystem
+//        self.pixelsPerMilimeter = pixelsPerMilimeter
         self.type = type
         self.id = id
         self.annotationId = annotationId
@@ -102,13 +102,13 @@ class Multiline: Group, CustomShape {
     
     }
     
-    init(points: [Point], stroke: Stroke, coordinateSystem: CoordinateSystem, pixelsPerMilimeter: Double, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
+    init(points: [Point], stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
         super.init()
         
         self.stroke = stroke
         self.points = points
-        self.coordinateSystem = coordinateSystem
-        self.pixelsPerMilimeter = pixelsPerMilimeter
+//        self.coordinateSystem = coordinateSystem
+//        self.pixelsPerMilimeter = pixelsPerMilimeter
         self.type = type
         self.id = id
         self.annotationId = annotationId
@@ -188,18 +188,18 @@ class Multiline: Group, CustomShape {
             let middleY = (points[points.count-1].y + points[points.count-2].y)/2
             let middlePoint = Point(middleX, middleY)
             
-            let d = distance(points[points.count-2], points[points.count-1], scaled: true)
-            totalDistance += d
+//            let d = distance(points[points.count-2], points[points.count-1], scaled: true)
+//            totalDistance += d
+//
+//            let textNode = Text(text: String(format: "%.2f", d/pixelsPerMilimeter) + " mm")
+//            textNode.place = .move(dx: middlePoint.x+10, dy: middlePoint.y+10)
+//            textNode.fill = self.stroke.fill
+//
+//            texts.contents.append(textNode)
+//            self.contents.append(textNode)
             
-            let textNode = Text(text: String(format: "%.2f", d/pixelsPerMilimeter) + " mm")
-            textNode.place = .move(dx: middlePoint.x+10, dy: middlePoint.y+10)
-            textNode.fill = self.stroke.fill
-            
-            texts.contents.append(textNode)
-            self.contents.append(textNode)
-            
-            lastText.text = String(format: "%.2f", totalDistance/pixelsPerMilimeter) + " mm"
-            lastText.place = .move(dx: points.last!.x+10, dy: points.last!.y+10)
+//            lastText.text = String(format: "%.2f", totalDistance/pixelsPerMilimeter) + " mm"
+//            lastText.place = .move(dx: points.last!.x+10, dy: points.last!.y+10)
         }
     }
     
@@ -241,7 +241,7 @@ class Multiline: Group, CustomShape {
         
         var path: PathBuilder = MoveTo(x: points[0].x, y: points[0].y)
 
-        totalDistance = 0.0
+//        totalDistance = 0.0
         
         for i in 0..<points.count {
             path = path.lineTo(x: points[i].x, y: points[i].y)
@@ -268,25 +268,25 @@ class Multiline: Group, CustomShape {
                 let middleY = (points[i].y + points[i-1].y)/2
                 let middlePoint = Point(middleX, middleY)
                 
-                let d = distance(points[i-1], points[i], scaled: true)
-                totalDistance += d
+//                let d = distance(points[i-1], points[i], scaled: true)
+//                totalDistance += d
                 
-                if created {
-                    let textNode = Text(text: String(format: "%.2f", d/pixelsPerMilimeter) + " mm")
-                    textNode.place = .move(dx: middlePoint.x+10, dy: middlePoint.y+10)
-                    textNode.fill = self.stroke.fill
-                    texts.contents.append(textNode)
-                    self.contents.append(textNode)
-                } else {
-                    let text = texts.contents[i-1] as! Text
-                    text.text = String(format: "%.2f", d/pixelsPerMilimeter) + " mm"
-                    text.place = .move(dx: middlePoint.x+10, dy: middlePoint.y+10)
-                }
+//                if created {
+//                    let textNode = Text(text: String(format: "%.2f", d/pixelsPerMilimeter) + " mm")
+//                    textNode.place = .move(dx: middlePoint.x+10, dy: middlePoint.y+10)
+//                    textNode.fill = self.stroke.fill
+//                    texts.contents.append(textNode)
+//                    self.contents.append(textNode)
+//                } else {
+//                    let text = texts.contents[i-1] as! Text
+//                    text.text = String(format: "%.2f", d/pixelsPerMilimeter) + " mm"
+//                    text.place = .move(dx: middlePoint.x+10, dy: middlePoint.y+10)
+//                }
             }
         }
         
-        lastText.text = String(format: "%.2f", totalDistance/pixelsPerMilimeter) + " mm"
-        lastText.place = .move(dx: points.last!.x+10, dy: points.last!.y+10)
+//        lastText.text = String(format: "%.2f", totalDistance/pixelsPerMilimeter) + " mm"
+//        lastText.place = .move(dx: points.last!.x+10, dy: points.last!.y+10)
 
         drawing.form = path.build()
         backgroundDrawing.form = path.build()
@@ -300,37 +300,37 @@ class Multiline: Group, CustomShape {
         updateFormFromPoints()
     }
     
-    func distance(_ a: Point, _ b: Point, scaled: Bool = false) -> Double {
-        if a == b { return 0.0001 }
-        var newA = a
-        var newB = b
-        if scaled {
-            newA = getScaledPoint(x: a.x, y: a.y)
-            newB = getScaledPoint(x: b.x, y: b.y)
-        }
-        let xDist = newA.x - newB.x
-        let yDist = newA.y - newB.y
-        return Double(sqrt(xDist * xDist + yDist * yDist))
-    }
+//    func distance(_ a: Point, _ b: Point, scaled: Bool = false) -> Double {
+//        if a == b { return 0.0001 }
+//        var newA = a
+//        var newB = b
+//        if scaled {
+//            newA = getScaledPoint(x: a.x, y: a.y)
+//            newB = getScaledPoint(x: b.x, y: b.y)
+//        }
+//        let xDist = newA.x - newB.x
+//        let yDist = newA.y - newB.y
+//        return Double(sqrt(xDist * xDist + yDist * yDist))
+//    }
     
-    func getScaledPoint(x: Double, y: Double) -> Point {
-        let newX = (x * coordinateSystem.imageWidth)/coordinateSystem.frameWidth
-        let newY = (y * coordinateSystem.imageHeight)/coordinateSystem.frameHeight
-        return Point(newX, newY)
-    }
+//    func getScaledPoint(x: Double, y: Double) -> Point {
+//        let newX = (x * coordinateSystem.imageWidth)/coordinateSystem.frameWidth
+//        let newY = (y * coordinateSystem.imageHeight)/coordinateSystem.frameHeight
+//        return Point(newX, newY)
+//    }
     
-    func updateCalibration(pixelsPerMilimeter: Double) {
-        self.pixelsPerMilimeter = pixelsPerMilimeter
-        totalDistance = 0
-        for i in 0..<points.count {
-            if points.count > 1 && i > 0 {
-                let d = distance(points[i-1], points[i], scaled: true)
-                totalDistance += d
-                
-                let text = texts.contents[i-1] as! Text
-                text.text = String(format: "%.2f", d/pixelsPerMilimeter) + " mm"
-            }
-        }
-        lastText.text = String(format: "%.2f", totalDistance/pixelsPerMilimeter) + " mm"
-    }
+//    func updateCalibration(pixelsPerMilimeter: Double) {
+//        self.pixelsPerMilimeter = pixelsPerMilimeter
+//        totalDistance = 0
+//        for i in 0..<points.count {
+//            if points.count > 1 && i > 0 {
+//                let d = distance(points[i-1], points[i], scaled: true)
+//                totalDistance += d
+//
+//                let text = texts.contents[i-1] as! Text
+//                text.text = String(format: "%.2f", d/pixelsPerMilimeter) + " mm"
+//            }
+//        }
+//        lastText.text = String(format: "%.2f", totalDistance/pixelsPerMilimeter) + " mm"
+//    }
 }

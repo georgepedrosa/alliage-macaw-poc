@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0930"
+   LastUpgradeVersion = "1100"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "EF3244A1187EC269114B6B6D36330536"
+               BlueprintIdentifier = "1CBE890FB81E7706B0A7C85EF7657002"
                BuildableName = "Macaw.framework"
                BlueprintName = "Macaw"
                ReferencedContainer = "container:Pods.xcodeproj">

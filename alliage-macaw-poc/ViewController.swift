@@ -55,6 +55,9 @@ protocol MacawViewDelegate: class {
 
 class ViewController: UIViewController, MacawViewDelegate {
     
+    var colorSelectorPopup: ColorSelectorPopup!
+    var selectorBackground: UIView!
+    
     var previousMacawHeight: CGFloat! //stores previous Macaw view height to be used on view redimensions
     var previousMacawWidth: CGFloat! //stores previous Macaw view width to be used on view redimensions
     
@@ -103,7 +106,26 @@ class ViewController: UIViewController, MacawViewDelegate {
     
     var isNewShape: Bool = true //global variable used for nerve and multiline shapes to determina if a new line or a new shape should be created
     
-    var activeTool: Annotation.Types = .none
+    var activeTool: Annotation.Types = .none {
+        willSet {
+            if newValue == .none {
+                isNewShape = true
+                freeButton.isSelected = false
+                textButton.isSelected = false
+                lineButton.isSelected = false
+                rectButton.isSelected = false
+                circleButton.isSelected = false
+                protractorButton.isSelected = false
+                arcButton.isSelected = false
+                arrowButton.isSelected = false
+                asteriskButton.isSelected = false
+                multilineButton.isSelected = false
+                selectionButton.isSelected = false
+                handButton.isSelected = false
+                deleteButton.isSelected = false
+            }
+        }
+    }
     
     var bottomConstraint: NSLayoutConstraint?
     
@@ -138,7 +160,7 @@ class ViewController: UIViewController, MacawViewDelegate {
     var miniatureButton = UIButton()
         
     @IBOutlet weak var buttonsStackView: UIStackView!
-    @IBOutlet weak var scrollview: UIScrollView!
+    @IBOutlet weak var imageScrollView: UIScrollView!
     
     @IBOutlet weak var freeButton: UIButton!
     @IBOutlet weak var textButton: UIButton!
@@ -175,6 +197,7 @@ class ViewController: UIViewController, MacawViewDelegate {
     }
     
     func setSelectionTool(activate: Bool) {
+        activeTool = .none
         if !activate {
             selectionButton.isSelected = false
             drawingActive = true
@@ -192,42 +215,30 @@ class ViewController: UIViewController, MacawViewDelegate {
         setupMacawView()
         createCanvas()
         configInputContainer()
-//        configMacawView()
-//        createCanvas()
-//
-//        view.addSubview(messageInputContainerView)
-//        messageInputContainerView.translatesAutoresizingMaskIntoConstraints = false
-//        messageInputContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-//        messageInputContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-//        messageInputContainerView.heightAnchor.constraint(equalToConstant: 48).isActive = true
-//
-//        bottomConstraint = NSLayoutConstraint(item: messageInputContainerView, attribute: .bottom, relatedBy: .equal, toItem: view, attribute: .bottom, multiplier: 1, constant: 0)
-//        view.addConstraint(bottomConstraint!)
-//
-//        setupInputComponents()
-//        configInputNotifications()
+        //setupColorSelectorView()
     }
     
     func setupScrollView() {
         activateScrollView(enable: false)
-        scrollview.delegate = self
-        scrollview.bounces = false
-        scrollview.bouncesZoom = false
-        scrollview.minimumZoomScale = 1.0
+        imageScrollView.delegate = self
+        imageScrollView.bounces = false
+        imageScrollView.bouncesZoom = false
+        imageScrollView.minimumZoomScale = 1.0
     }
     
     func setupBackgroundView() {
-        scrollview.addSubview(backgroundView)
+        imageScrollView.addSubview(backgroundView)
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
-        backgroundView.centerXAnchor.constraint(equalTo: scrollview.centerXAnchor).isActive = true
-        backgroundView.centerYAnchor.constraint(equalTo: scrollview.centerYAnchor).isActive = true
-        backgroundView.widthAnchor.constraint(equalTo:scrollview.widthAnchor).isActive = true
-        backgroundView.heightAnchor.constraint(equalTo:scrollview.heightAnchor).isActive = true
+        backgroundView.centerXAnchor.constraint(equalTo: imageScrollView.centerXAnchor).isActive = true
+        backgroundView.centerYAnchor.constraint(equalTo: imageScrollView.centerYAnchor).isActive = true
+        backgroundView.widthAnchor.constraint(equalTo:imageScrollView.widthAnchor).isActive = true
+        backgroundView.heightAnchor.constraint(equalTo:imageScrollView.heightAnchor).isActive = true
         
-        imageView.image = image
+//        imageView.image = image
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.backgroundColor = .darkGray
         
-        scrollview.contentSize = CGSize(width: backgroundView.frame.width, height: backgroundView.frame.height)
+        imageScrollView.contentSize = CGSize(width: backgroundView.frame.width, height: backgroundView.frame.height)
 
         backgroundView.addSubview(imageView)
         
@@ -250,6 +261,30 @@ class ViewController: UIViewController, MacawViewDelegate {
         canvas = Shape(form: Rect(x: 0, y: 0, w: Double(UIScreen.main.bounds.width), h: Double(UIScreen.main.bounds.height)), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 1.0))
         
         macawView.node = Group(contents: [shapesGroup, canvas])
+    }
+    
+    func setupColorSelectorView() {
+        colorSelectorPopup = ColorSelectorPopup(frame: .zero, isNerve: false)
+        selectorBackground = UIView()
+        selectorBackground.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        self.view.addSubview(selectorBackground)
+        selectorBackground.snp.makeConstraints { (make) in
+            make.top.equalToSuperview()
+            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.bottom.equalToSuperview()
+        }
+        selectorBackground.addSubview(colorSelectorPopup)
+        colorSelectorPopup.snp.makeConstraints { (make) in
+            make.width.equalTo(300)
+            make.height.equalTo(240)
+            make.centerX.equalToSuperview()
+            make.centerY.equalToSuperview()
+        }
+        selectorBackground.isHidden = true
+        colorSelectorPopup.delegate = self
+        
+        self.view.bringSubviewToFront(selectorBackground)
     }
     
 //    func updateMacawViewConstraints() { //updates macaw view constraints after examImage constraints are changed; macawView covers only visible image, not black bars
@@ -324,7 +359,7 @@ class ViewController: UIViewController, MacawViewDelegate {
     func createCanvas() {
         
         var newShape: CustomShape!
-//        var timer: ParkBenchTimer!
+        var timer: ParkBenchTimer!
         var startPoint = Point()
         var isLastPoint = false
         var lastCalibrationId: Int?
@@ -410,26 +445,23 @@ class ViewController: UIViewController, MacawViewDelegate {
             case .arc:
                 newShape = CustomArc(p0: startPoint, p1: startPoint, p2: startPoint, delegate: self!, stroke: stroke, type: .arc, annotationId: self!.newAnnotationId, comment: "")
             case .multiline:
-//                if self!.isNewShape {
-//                    newShape = Multiline(startPoint: startPoint, lastPoint: startPoint, stroke: stroke, coordinateSystem: self!.coordinateSystem, pixelsPerMilimeter: self!.getSelectedCalibration()?.pixelsPerMilimeter ?? 0, type: .multiline, annotationId: self!.newAnnotationId)
-//                    self?.addNewAnnotation(shape: newShape)
-//                    self?.commentaryOptionsView.selectedAnnotationId = newShape.annotationId
-//                    self?.commentaryOptionsView.collectionView.reloadData()
-//                    timer = ParkBenchTimer()
-//                    isLastPoint = false
-//                } else {
-//                    if let multiline = newShape as? Multiline {
-//                        let time = timer.stop()
-//                        if time < 0.5 {
-//                            self?.isNewShape = true
-//                            isLastPoint = true
-//                        } else {
-//                            multiline.newPoint(point: startPoint)
-//                            timer = ParkBenchTimer()
-//                        }
-//                    }
+                if self!.isNewShape {
+                    newShape = Multiline(startPoint: startPoint, lastPoint: startPoint, stroke: stroke, type: .multiline, annotationId: self!.newAnnotationId)
+                    timer = ParkBenchTimer()
+                    isLastPoint = false
+                } else {
+                    if let multiline = newShape as? Multiline {
+                        let time = timer.stop()
+                        if time < 0.5 {
+                            self?.isNewShape = true
+                            isLastPoint = true
+                        } else {
+                            multiline.newPoint(point: startPoint)
+                            timer = ParkBenchTimer()
+                        }
+                    }
                     return
-//                }
+                }
             case .nerve:
 //                if self!.isNewShape {
 //                    let outerStroke = stroke2!
@@ -606,32 +638,24 @@ class ViewController: UIViewController, MacawViewDelegate {
         newShape = nil
     }
     
-//    func addNewAnnotation(shape: CustomShape) {
-//
-//        var color = "0xffffffff"
-//
-//        if let nerve = shape as? Nerve {
-//            color = App.Colors.getColorString(nerve.outerStroke!.fill) + "&" + App.Colors.getColorString(nerve.stroke!.fill)
-//        } else {
-//            color = App.Colors.getColorString(shape.stroke!.fill)
-//        }
-//
-//        var text = ""
-//        if let textShape = shape as? CustomText {
-//            text = textShape.textNode.text
-//        }
-//
-//        let annotation = annotationMapper.mapAnnotation(from: shape, id_exame_fk: self.exam.id, id_anotacao: String(shape.annotationId), cor_anotacao: color, espessura_anotacao: shape.stroke.width, texto_anotacao: text, descricao_anotacao: shape.comment)
-//        commentaryOptionsView.addAnnotation(annotation: annotation)
-//    }
-//
     func setTapEvent(node: CustomShape) {
         node.onTap(f: { [weak self] (event) in
+            
+            if self!.activeTool == .none && self!.deleteButton.isSelected {
+                self!.deleteShape(node: node)
+            }
+            
             if self!.activeTool == .none && !self!.selectionButton.isSelected { return }
             guard let node = event.node as? CustomShape else { print("problem on panel tap")
                 return
             }
             self?.selectShape(node: node)
+        })
+    }
+    
+    func deleteShape(node: CustomShape) {
+        self.shapesGroup.contents.removeAll(where: { (shape) -> Bool in
+            shape.hash == node.hash
         })
     }
 
@@ -658,8 +682,8 @@ class ViewController: UIViewController, MacawViewDelegate {
     }
     
     func activateScrollView(enable: Bool) {
-        scrollview.isScrollEnabled = enable
-        scrollview.pinchGestureRecognizer?.isEnabled = enable
+        imageScrollView.isScrollEnabled = enable
+        imageScrollView.pinchGestureRecognizer?.isEnabled = enable
     }
     
     func setLastActiveShape(newShape: CustomShape) { //deselects last selected shape and updates it with new shape
@@ -686,32 +710,16 @@ class ViewController: UIViewController, MacawViewDelegate {
 //    }
     
     
-    
     @IBAction func freeDrawingTool(_ sender: UIButton) {
         toolSelected()
         activeTool = .freeDrawing
         freeButton.isSelected = true
-
-//        if lastSelectedButton != freeButton {
-//            if lastSelectedButton != nil {
-//                lastSelectedButton.isSelected = false
-//            }
-//            freeButton.isSelected = true
-//            lastSelectedButton = freeButton
-//        }
     }
     
     @IBAction func textTool(_ sender: UIButton) {
         toolSelected()
         activeTool = .text
         textButton.isSelected = true
-//        if lastSelectedButton != textButton {
-//            if lastSelectedButton != nil {
-//                lastSelectedButton.isSelected = false
-//            }
-//            textButton.isSelected = true
-//            lastSelectedButton = textButton
-//        }
     }
     
     @IBAction func activeLineTool(_ sender: UIButton) {
@@ -763,66 +771,19 @@ class ViewController: UIViewController, MacawViewDelegate {
         multilineButton.isSelected = true
     }
     
-//    @IBAction func activateSelectionTool(_ sender: Any) {
-//        activeTool = .none
-//        drawingActive = false
-//        activeTool = .selection
-//        selectionButton.isSelected = true
-//    }
-//
-//    @IBAction func undoTool(_ sender: Any) {
-////        if let undoneAction = macawActions.popLast() {
-////            let node = group.contents.first { (node) -> Bool in
-////                node.hash == undoneAction.nodeHash
-////            }
-////
-////            if node != nil {
-////
-////                let shape = node as! CustomShape
-////
-////                if undoneAction.type == ActionType.create {
-////
-////                } else {
-////
-////                    let transformation = (dx: -undoneAction.transformation!.dx, dy: -undoneAction.transformation!.dy, scale: undoneAction.transformation!.scale, angle: undoneAction.transformation!.scale)
-////                    shapeTransformations[shape.hash] = transformation
-////                    updatePlace(node: shape)
-////                }
-////            }
-////        }
-//
-//        isNewShape = true
-//        if let undoneNode = shapesGroup.contents.popLast() {
-//            if let freeDrawing = undoneNode as? FreeDrawing {
-//                freeDrawing.deleteShape()
-//            }
-//            if let text = undoneNode as? CustomText {
-//                text.deleteShape()
-//            }
-//            redoShapes.append(undoneNode)
-//        }
-//    }
-//
-//    @IBAction func redoTool(_ sender: Any) {
-//        isNewShape = true
-//        if let redoneNode = redoShapes.popLast() {
-//            if let freeDrawing = redoneNode as? FreeDrawing {
-//                freeDrawing.redoShape()
-//            }
-//            if let text = redoneNode as? CustomText {
-//                text.redoShape()
-//            }
-//            shapesGroup.contents.append(redoneNode)
-//        }
-//    }
-//
-//    @IBAction func deleteTool(_ sender: UIButton) {
-//        activeTool = .none
-//        drawingActive = false
-//        activeTool = .delete
-//        deleteButton.isSelected = true
-//    }
-//
+    @IBAction func activateSelectionTool(_ sender: Any) {
+        setSelectionTool(activate: !selectionButton.isSelected)
+    }
+
+    @IBAction func deleteTool(_ sender: UIButton) {
+        
+        if let shape = lastActiveShape {
+            if shape.isActive {
+                deleteShape(node: shape)
+            }
+        }
+    }
+
     func toolSelected() {
         activateScrollView(enable: false)
         activeTool = .none
@@ -839,12 +800,75 @@ extension ViewController: UIScrollViewDelegate {
 extension ViewController: UITextViewDelegate {
     
     func textViewDidBeginEditing(_ textView: UITextView) {
-        let customText = customTexts.last
-        textView.text = customText?.textNode.text
+        if textView == inputTextView {
+            let customText = customTexts.last
+            textView.text = customText?.textNode.text
+        }
     }
     
     func textViewDidChange(_ textView: UITextView) {
-        let customText = customTexts.last
-        customText?.setText(text: textView.text ?? "")
+        if textView == inputTextView { //logic for automatic line breaking in text
+            if let customText = customTexts.last {
+                customText.setText(text: textView.text ?? "")
+                if customText.textNode.bounds.h > customText.rectLimit.form.bounds().h {
+                    customText.updateBoundsHeight()
+                }
+                if customText.textNode.bounds.w > customText.rectLimit.form.bounds().w {
+                    var textString = customText.textNode.text
+                    let textStringWithoutBreak = textString
+                    textString = breakLine(text: textString)
+                    customText.setText(text: textString)
+                    if customText.textNode.bounds.w > customText.rectLimit.form.bounds().w  {
+                        customText.updateBoundsWidth()
+                        customText.setText(text: textStringWithoutBreak)
+                    }
+                    if customText.textNode.bounds.h > customText.rectLimit.form.bounds().h {
+                        customText.updateBoundsHeight()
+                    }
+                }
+                textView.text = customText.textNode.text
+            }
+        }
+    }
+    
+    func breakLine(text: String) -> String {
+        var text = text
+        for i in stride(from: text.count-1, to: 0, by: -1) {
+            if text[i] == " " {
+                let offset = i == text.count-1 ? i : i+1
+                text.insert("\n", at: text.index(text.startIndex, offsetBy: offset))
+                break
+            }
+        }
+        return text
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView == inputTextView {
+            if textView.text == "" {
+                if let customText = customTexts.last {
+//                    deleteShape(withAnnotationId: customText.annotationId, id: customText.id, isImplant: false)
+                }
+            }
+        }
+    }
+}
+
+extension ViewController: ColorSelectorPopupDelegate {
+
+    func dismiss() {
+        selectorBackground.isHidden = true
+//        nerveSelectorBackground.isHidden = true
+    }
+    
+    func colorSelected(innerColor: Color, outerColor: Color? = nil, annotationId: Int) {
+        if let shape = shapesGroup.contents.first(where: { (node) -> Bool in
+            let shape = node as! CustomShape
+            return shape.annotationId == annotationId
+        }) as? CustomShape {
+                let stroke = Stroke(fill: innerColor, width: shape.stroke.width)
+                shape.updateStroke(stroke: stroke, stroke2: nil)
+                selectorBackground.isHidden = true
+        }
     }
 }

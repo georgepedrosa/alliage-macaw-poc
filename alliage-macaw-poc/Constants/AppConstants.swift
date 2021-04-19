@@ -18,25 +18,25 @@ struct App {
     }
     
     struct Colors {
-//        static let extraLightBlue = UIColor(rgb: 0xd9def2)
-//        static let lightBlue = UIColor(rgb:0xa3b7ec)
-//        static let lightMediumBlue = UIColor(red:0.72, green:0.77, blue:0.90, alpha:1.0)
-//        static let mediumBlue = UIColor(rgb: 0x8399cd)
-//        static let darkBlue = UIColor(rgb:  0x385e97)
-//        static let extraDarkBlue = UIColor(rgb:0x4b4d66)
-//        static let lightGray = UIColor(rgb: 0xe6e6e6)
-//        static let darkGray =  UIColor(rgb:0x666666)
-//        static let alertDelete = UIColor(rgb: 0xEBC7A3)
-//        static let alertEdit = UIColor(rgb: 0xA3B6E3)
-//        static let selectionBlue = UIColor(rgb:0x4c85ff)
-//
-//        static func getColorString(_ color: Fill) -> String {
-//            let colorValue = color as! Color
-//            var string = "0x"
-//            string.append(contentsOf: String(colorValue.val, radix: 16))
-//            string.append(contentsOf: "ff")
-//            return string
-//        }
+        static let extraLightBlue = UIColor(rgb: 0xd9def2)
+        static let lightBlue = UIColor(rgb:0xa3b7ec)
+        static let lightMediumBlue = UIColor(red:0.72, green:0.77, blue:0.90, alpha:1.0)
+        static let mediumBlue = UIColor(rgb: 0x8399cd)
+        static let darkBlue = UIColor(rgb:  0x385e97)
+        static let extraDarkBlue = UIColor(rgb:0x4b4d66)
+        static let lightGray = UIColor(rgb: 0xe6e6e6)
+        static let darkGray =  UIColor(rgb:0x666666)
+        static let alertDelete = UIColor(rgb: 0xEBC7A3)
+        static let alertEdit = UIColor(rgb: 0xA3B6E3)
+        static let selectionBlue = UIColor(rgb:0x4c85ff)
+
+        static func getColorString(_ color: Fill) -> String {
+            let colorValue = color as! Color
+            var string = "0x"
+            string.append(contentsOf: String(colorValue.val, radix: 16))
+            string.append(contentsOf: "ff")
+            return string
+        }
         
         static let stringArray: [String] = ["FFEBEE", "FFCDD2", "EF9A9A", "E57373", "EF5350", "F44336", "E53935",        //reds
             "D32F2F", "C62828", "B71C1C", "FF8A80", "FF5252", "FF1744", "D50000",

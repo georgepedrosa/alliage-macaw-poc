@@ -1,13 +1,19 @@
 PODS:
+  - IQKeyboardManagerSwift (6.2.1)
   - Macaw (0.9.5):
     - SWXMLHash
+  - SnapKit (5.0.1)
   - SWXMLHash (4.9.0)
 
 DEPENDENCIES:
+  - IQKeyboardManagerSwift (= 6.2.1)
   - Macaw (from `https://github.com/exyte/Macaw.git`, commit `34292e6e2b9f0b2cb59ac7ef51ed225c1fe3bdff`)
+  - SnapKit (~> 5.0.0)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
+    - IQKeyboardManagerSwift
+    - SnapKit
     - SWXMLHash
 
 EXTERNAL SOURCES:
@@ -21,9 +27,11 @@ CHECKOUT OPTIONS:
     :git: https://github.com/exyte/Macaw.git
 
 SPEC CHECKSUMS:
+  IQKeyboardManagerSwift: 0f0ae8935360b4003e6ea1ac7c19898f01e2f7c7
   Macaw: 10bf9e327cb75f24e3225d5229a80ed544df85f0
+  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SWXMLHash: 87b0006848a548b7f9485b40bc71721b3ae39add
 
-PODFILE CHECKSUM: fb1a0cd5cc2469b842540c5e944bf2f6f1e63737
+PODFILE CHECKSUM: d75cd69c88994f8ede5c0270e076957511e8444d
 
-COCOAPODS: 1.6.1
+COCOAPODS: 1.8.4

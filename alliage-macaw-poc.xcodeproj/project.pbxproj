@@ -13,6 +13,13 @@
 		1055C3A822A0561600C40F60 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1055C3A722A0561600C40F60 /* Assets.xcassets */; };
 		1055C3AB22A0561600C40F60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1055C3A922A0561600C40F60 /* LaunchScreen.storyboard */; };
 		85A143B1DDB23D5F843851E7 /* Pods_alliage_macaw_poc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D048124AE54A71DCCC49710B /* Pods_alliage_macaw_poc.framework */; };
+		AD2A162E262DD5D6006608C2 /* ParkBenchTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2A162D262DD5D6006608C2 /* ParkBenchTimer.swift */; };
+		AD2A1632262DEF96006608C2 /* ColorSelectorPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2A1630262DEF96006608C2 /* ColorSelectorPopup.swift */; };
+		AD2A1633262DEF96006608C2 /* ColorSelectorPopup.xib in Resources */ = {isa = PBXBuildFile; fileRef = AD2A1631262DEF96006608C2 /* ColorSelectorPopup.xib */; };
+		AD2A1635262DEFC2006608C2 /* ColorSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2A1634262DEFC2006608C2 /* ColorSelectorView.swift */; };
+		AD2A1638262DF007006608C2 /* NibView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2A1637262DF007006608C2 /* NibView.swift */; };
+		AD2A163A262DF04A006608C2 /* UIColor+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2A1639262DF04A006608C2 /* UIColor+Extensions.swift */; };
+		AD2A163C262DF13B006608C2 /* UIView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2A163B262DF13B006608C2 /* UIView+Extensions.swift */; };
 		AD598D4D262883AF00D9B293 /* Annotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D4C262883AF00D9B293 /* Annotation.swift */; };
 		AD598D4F262883F700D9B293 /* BaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D4E262883F700D9B293 /* BaseModel.swift */; };
 		AD598D5226289FBB00D9B293 /* UIImageView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD598D5126289FBB00D9B293 /* UIImageView+Extensions.swift */; };
@@ -47,6 +54,13 @@
 		1055C3AC22A0561600C40F60 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3FB7DDD5101AEEC44B22F4B6 /* Pods-alliage-macaw-poc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-alliage-macaw-poc.debug.xcconfig"; path = "Target Support Files/Pods-alliage-macaw-poc/Pods-alliage-macaw-poc.debug.xcconfig"; sourceTree = "<group>"; };
 		873AAEEAB1AD6C0F715381F4 /* Pods-alliage-macaw-poc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-alliage-macaw-poc.release.xcconfig"; path = "Target Support Files/Pods-alliage-macaw-poc/Pods-alliage-macaw-poc.release.xcconfig"; sourceTree = "<group>"; };
+		AD2A162D262DD5D6006608C2 /* ParkBenchTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParkBenchTimer.swift; sourceTree = "<group>"; };
+		AD2A1630262DEF96006608C2 /* ColorSelectorPopup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorSelectorPopup.swift; sourceTree = "<group>"; };
+		AD2A1631262DEF96006608C2 /* ColorSelectorPopup.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ColorSelectorPopup.xib; sourceTree = "<group>"; };
+		AD2A1634262DEFC2006608C2 /* ColorSelectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorSelectorView.swift; sourceTree = "<group>"; };
+		AD2A1637262DF007006608C2 /* NibView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NibView.swift; sourceTree = "<group>"; };
+		AD2A1639262DF04A006608C2 /* UIColor+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Extensions.swift"; sourceTree = "<group>"; };
+		AD2A163B262DF13B006608C2 /* UIView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extensions.swift"; sourceTree = "<group>"; };
 		AD598D4C262883AF00D9B293 /* Annotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Annotation.swift; sourceTree = "<group>"; };
 		AD598D4E262883F700D9B293 /* BaseModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseModel.swift; sourceTree = "<group>"; };
 		AD598D5126289FBB00D9B293 /* UIImageView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+Extensions.swift"; sourceTree = "<group>"; };
@@ -105,6 +119,8 @@
 		1055C39F22A0561500C40F60 /* alliage-macaw-poc */ = {
 			isa = PBXGroup;
 			children = (
+				AD2A1636262DEFF5006608C2 /* Custom */,
+				AD2A162F262DEF80006608C2 /* Views */,
 				AD598D772628CE1800D9B293 /* Constants */,
 				AD598D552628A19600D9B293 /* Utils */,
 				AD598D5026289F9000D9B293 /* Extensions */,
@@ -128,6 +144,24 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		AD2A162F262DEF80006608C2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AD2A1634262DEFC2006608C2 /* ColorSelectorView.swift */,
+				AD2A1630262DEF96006608C2 /* ColorSelectorPopup.swift */,
+				AD2A1631262DEF96006608C2 /* ColorSelectorPopup.xib */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AD2A1636262DEFF5006608C2 /* Custom */ = {
+			isa = PBXGroup;
+			children = (
+				AD2A1637262DF007006608C2 /* NibView.swift */,
+			);
+			path = Custom;
+			sourceTree = "<group>";
+		};
 		AD598D4B2628839600D9B293 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -143,6 +177,8 @@
 				AD598D5126289FBB00D9B293 /* UIImageView+Extensions.swift */,
 				AD598D5326289FF700D9B293 /* UIImage+Extensions.swift */,
 				AD598D7A2628D07100D9B293 /* String+Extensions.swift */,
+				AD2A1639262DF04A006608C2 /* UIColor+Extensions.swift */,
+				AD2A163B262DF13B006608C2 /* UIView+Extensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -152,6 +188,7 @@
 			children = (
 				AD598D562628A19B00D9B293 /* MacawShapes */,
 				AD598D752628CDE300D9B293 /* CoordinateSystem.swift */,
+				AD2A162D262DD5D6006608C2 /* ParkBenchTimer.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -257,6 +294,7 @@
 				1055C3AB22A0561600C40F60 /* LaunchScreen.storyboard in Resources */,
 				1055C3A822A0561600C40F60 /* Assets.xcassets in Resources */,
 				1055C3A622A0561500C40F60 /* Main.storyboard in Resources */,
+				AD2A1633262DEF96006608C2 /* ColorSelectorPopup.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -291,18 +329,11 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-alliage-macaw-poc/Pods-alliage-macaw-poc-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/Macaw/Macaw.framework",
-				"${BUILT_PRODUCTS_DIR}/SWXMLHash/SWXMLHash.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-alliage-macaw-poc/Pods-alliage-macaw-poc-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Macaw.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SWXMLHash.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-alliage-macaw-poc/Pods-alliage-macaw-poc-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -322,17 +353,23 @@
 				AD598D712628A1F900D9B293 /* FreeDrawing.swift in Sources */,
 				AD598D7B2628D07100D9B293 /* String+Extensions.swift in Sources */,
 				AD598D792628CE2700D9B293 /* AppConstants.swift in Sources */,
+				AD2A163A262DF04A006608C2 /* UIColor+Extensions.swift in Sources */,
 				AD598D692628A1F900D9B293 /* CustomArc.swift in Sources */,
+				AD2A162E262DD5D6006608C2 /* ParkBenchTimer.swift in Sources */,
 				1055C3A122A0561500C40F60 /* AppDelegate.swift in Sources */,
 				AD598D4F262883F700D9B293 /* BaseModel.swift in Sources */,
 				AD598D682628A1F900D9B293 /* Asterisk.swift in Sources */,
+				AD2A163C262DF13B006608C2 /* UIView+Extensions.swift in Sources */,
 				AD598D6D2628A1F900D9B293 /* CustomShape.swift in Sources */,
 				AD598D722628A1F900D9B293 /* CustomCalibration.swift in Sources */,
 				AD598D672628A1F900D9B293 /* Multiline.swift in Sources */,
 				AD598D732628A1F900D9B293 /* Arrow.swift in Sources */,
+				AD2A1632262DEF96006608C2 /* ColorSelectorPopup.swift in Sources */,
 				AD598D6E2628A1F900D9B293 /* CustomRect.swift in Sources */,
 				AD598D6F2628A1F900D9B293 /* Nerve.swift in Sources */,
+				AD2A1635262DEFC2006608C2 /* ColorSelectorView.swift in Sources */,
 				AD598D6A2628A1F900D9B293 /* Protractor.swift in Sources */,
+				AD2A1638262DF007006608C2 /* NibView.swift in Sources */,
 				AD598D662628A1F900D9B293 /* CustomText.swift in Sources */,
 				AD598D5226289FBB00D9B293 /* UIImageView+Extensions.swift in Sources */,
 				AD598D5426289FF700D9B293 /* UIImage+Extensions.swift in Sources */,

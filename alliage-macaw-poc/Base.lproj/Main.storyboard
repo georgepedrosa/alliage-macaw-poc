@@ -26,94 +26,88 @@
                                         <rect key="frame" x="0.0" y="1067" width="834" height="45"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="plN-Ma-TUR">
-                                                <rect key="frame" x="0.0" y="0.0" width="39.5" height="45"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="42" height="45"/>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="V68-iO-gAn">
-                                                <rect key="frame" x="39.5" y="0.0" width="41.5" height="45"/>
+                                                <rect key="frame" x="42" y="0.0" width="43.5" height="45"/>
                                                 <state key="normal" title="Free"/>
                                                 <connections>
                                                     <action selector="freeDrawingTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="K1e-mS-Cmm"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mv1-sv-Fzz">
-                                                <rect key="frame" x="81" y="0.0" width="39.5" height="45"/>
+                                                <rect key="frame" x="85.5" y="0.0" width="42.5" height="45"/>
                                                 <state key="normal" title="Text"/>
                                                 <connections>
                                                     <action selector="textTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="iwO-cq-RiT"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TSP-ah-PlD">
-                                                <rect key="frame" x="120.5" y="0.0" width="39.5" height="45"/>
+                                                <rect key="frame" x="128" y="0.0" width="42" height="45"/>
                                                 <state key="normal" title="Line"/>
                                                 <connections>
                                                     <action selector="activeLineTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="vp8-9Z-Uhz"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sTw-eg-CJO" userLabel="Rect">
-                                                <rect key="frame" x="160" y="0.0" width="42.5" height="45"/>
+                                                <rect key="frame" x="170" y="0.0" width="45" height="45"/>
                                                 <state key="normal" title="Rect"/>
                                                 <connections>
                                                     <action selector="activeRectTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="9Im-Hp-z5J"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ctm-vA-tLO" userLabel="Circle">
-                                                <rect key="frame" x="202.5" y="0.0" width="53" height="45"/>
+                                                <rect key="frame" x="215" y="0.0" width="56" height="45"/>
                                                 <state key="normal" title="Circle"/>
                                                 <connections>
                                                     <action selector="activeCircleTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="bdj-tP-d0A"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1tb-89-E0c">
-                                                <rect key="frame" x="255.5" y="0.0" width="92.5" height="45"/>
+                                                <rect key="frame" x="271" y="0.0" width="98.5" height="45"/>
                                                 <state key="normal" title="Protractor"/>
                                                 <connections>
                                                     <action selector="activeShapeTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JfD-FN-xIx"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gn3-hU-KTO">
-                                                <rect key="frame" x="348" y="0.0" width="54.5" height="45"/>
+                                                <rect key="frame" x="369.5" y="0.0" width="57.5" height="45"/>
                                                 <state key="normal" title="Arrow"/>
                                                 <connections>
                                                     <action selector="activeArrowTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="W27-0A-CL1"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kAX-CW-OT2">
-                                                <rect key="frame" x="402.5" y="0.0" width="74" height="45"/>
+                                                <rect key="frame" x="427" y="0.0" width="78.5" height="45"/>
                                                 <state key="normal" title="Asterisk"/>
                                                 <connections>
                                                     <action selector="activeAsteriskTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hwG-6V-DLE"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PMz-9r-nNa" userLabel="Arc Button">
-                                                <rect key="frame" x="476.5" y="0.0" width="40" height="45"/>
+                                                <rect key="frame" x="505.5" y="0.0" width="42" height="45"/>
                                                 <state key="normal" title="Arc"/>
                                                 <connections>
                                                     <action selector="activateArcTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="QIe-JJ-FGN"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wUZ-zK-c9c">
-                                                <rect key="frame" x="516.5" y="0.0" width="76.5" height="45"/>
+                                                <rect key="frame" x="547.5" y="0.0" width="81.5" height="45"/>
                                                 <state key="normal" title="Multiline"/>
                                                 <connections>
                                                     <action selector="activateMultilineTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ZIM-b8-e8C"/>
                                                 </connections>
                                             </button>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GPb-Yg-kxR">
-                                                <rect key="frame" x="593" y="0.0" width="49" height="45"/>
-                                                <state key="normal" title="Undo"/>
-                                                <connections>
-                                                    <action selector="undoTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="IAv-Kq-Mtl"/>
-                                                </connections>
-                                            </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cMn-T3-RRK">
-                                                <rect key="frame" x="642" y="0.0" width="47.5" height="45"/>
-                                                <state key="normal" title="Redo"/>
+                                                <rect key="frame" x="629" y="0.0" width="52" height="45"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                                <state key="normal" title="Color"/>
                                                 <connections>
-                                                    <action selector="redoTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="zzX-gN-FPp"/>
+                                                    <action selector="colorTool:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JkJ-fg-ICS"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bAU-70-Kf3">
-                                                <rect key="frame" x="689.5" y="0.0" width="85" height="45"/>
+                                                <rect key="frame" x="681" y="0.0" width="90" height="45"/>
                                                 <color key="tintColor" red="0.061538845639999999" green="0.59061285620000004" blue="0.044842892830000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <state key="normal" title="Selection"/>
                                                 <connections>
@@ -121,7 +115,7 @@
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eE1-FZ-vSJ">
-                                                <rect key="frame" x="774.5" y="0.0" width="59.5" height="45"/>
+                                                <rect key="frame" x="771" y="0.0" width="63" height="45"/>
                                                 <color key="tintColor" red="1" green="0.011233948299999999" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <state key="normal" title="Delete"/>
                                                 <connections>
@@ -151,6 +145,7 @@
                         <outlet property="asteriskButton" destination="kAX-CW-OT2" id="jDa-f9-Vfy"/>
                         <outlet property="buttonsStackView" destination="7JC-yd-ygI" id="Wda-Ii-2ko"/>
                         <outlet property="circleButton" destination="ctm-vA-tLO" id="15t-mW-Ztp"/>
+                        <outlet property="colorButton" destination="cMn-T3-RRK" id="x86-mU-tRC"/>
                         <outlet property="deleteButton" destination="eE1-FZ-vSJ" id="ec7-n2-Ge6"/>
                         <outlet property="freeButton" destination="V68-iO-gAn" id="j0p-s9-P4j"/>
                         <outlet property="handButton" destination="PMz-9r-nNa" id="faj-2b-jVc"/>

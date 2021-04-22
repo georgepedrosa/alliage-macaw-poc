@@ -1,16 +1,15 @@
 //
 //  ColorSelectorView.swift
-//  Alliage
+//  alliage-macaw-poc
 //
-//  Created by George Pedrosa on 09/10/19.
-//  Copyright © 2019 LDS. All rights reserved.
+//  Created by George Pedrosa on 20/04/21.
+//  Copyright © 2021 Vitor Muniz. All rights reserved.
 //
 
 import UIKit
-import SnapKit
 
 protocol ColorSelectorViewDelegate: class {
-    func colorSelected(color: Int, selector: ColorSelectorView)
+    func colorSelected(color: Int)
 }
 
 class ColorSelectorView: UIView {
@@ -69,14 +68,14 @@ class ColorSelectorView: UIView {
         }
         self.addSubview(selectedColor)
         selectedColor.snp.makeConstraints { (make) in
-            make.top.equalTo(titleLabel.snp.bottom).offset(5)
-            make.leading.equalToSuperview().inset(10)
+            make.top.equalToSuperview().inset(5)
+            make.leading.equalTo(titleLabel.snp.trailing).offset(5)
             make.height.equalTo(20)
             make.width.equalTo(20)
         }
         self.addSubview(collectionView)
         collectionView.snp.makeConstraints { (make) in
-            make.top.equalTo(selectedColor.snp.bottom).offset(5)
+            make.top.equalTo(selectedColor.snp.bottom).offset(10)
             make.leading.equalToSuperview().inset(10)
             make.trailing.equalToSuperview().inset(10)
             make.bottom.equalToSuperview().inset(5)
@@ -106,7 +105,7 @@ extension ColorSelectorView: UICollectionViewDelegate, UICollectionViewDataSourc
         let color = Int(colorString, radix: 16)!
         selectedColor.backgroundColor = UIColor(rgb: color)
         if let colorDelegate = delegate {
-            colorDelegate.colorSelected(color: color, selector: self)
+            colorDelegate.colorSelected(color: color)
         }
     }
     
@@ -114,3 +113,4 @@ extension ColorSelectorView: UICollectionViewDelegate, UICollectionViewDataSourc
         return CGSize(width: 20, height: 20)
     }
 }
+

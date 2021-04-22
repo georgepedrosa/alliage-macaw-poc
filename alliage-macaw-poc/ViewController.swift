@@ -38,21 +38,6 @@ protocol MacawViewDelegate: class {
     var macawView: MacawView { get set }
 }
 
-//protocol MacawViewDelegate {
-//    var shapeTransformations: [Int:(dx:Double,dy:Double,scale:Double, angle:Double)] { get set }
-//    func activateScrollView(enable: Bool)
-//    func updatePlace(node: Node)
-//    func setNewShape(shape: CustomShape)
-//    var shapesGroup: Group { get set }
-//    var activeTool: Tool { get set }
-//    var stroke: Stroke { get }
-//    var textColor: Color { get }
-//    var inputTextView: UITextView { get }
-//    var customTexts: [CustomText] { get set }
-//    var isKeyboardShowing: Bool { get }
-//    var lastActiveShape: CustomShape? { get set }
-//}
-
 class ViewController: UIViewController, MacawViewDelegate {
     
     var colorSelectorPopup: ColorSelectorPopup!
@@ -132,36 +117,14 @@ class ViewController: UIViewController, MacawViewDelegate {
     var canvas: Shape! //rectangle shape where new shapes are drawn
     var macawView = MacawView()
     var shapesGroup = Group() //macaw group node where shapes are stored
-    
-//    weak var delegate: ExamImportViewControllerDelegate?
-//    var selectedButton: ExamEditBaseView! //currently selected button; for interface purposes
 
     var lastActiveView: UIView?
-    
-//    @IBOutlet weak var backgroundView: UIView!
-//    @IBOutlet weak var imageScrollView: UIScrollView!
-//    @IBOutlet weak var examImage: UIImageView!
-        
-//    var imageMatrix: ImageMatrix!
-//
-//    var pencilShapesView: PencilShapesView!
-//    var measureShapesView: MeasureShapesView!
-//    var nerveOptionsView: NerveOptionsView!
-//    var miniatureOptionsView: MiniatureOptionsView!
-//    var odontogramOptionsView: OdontogramOptionsView!
-//    var commentaryOptionsView: CommentaryOptionsView!
-//    var implantOptionsView: ImplantOptionsView!
     var selectionView: UIView!
-    
-    @IBOutlet weak var undoButton: UIButton!
-    @IBOutlet weak var redoButton: UIButton!
-//    @IBOutlet weak var selectionButton: UIButton!
-    var nerveButton = UIButton()
-    var miniatureButton = UIButton()
         
     @IBOutlet weak var buttonsStackView: UIStackView!
     @IBOutlet weak var imageScrollView: UIScrollView!
     
+    @IBOutlet weak var colorButton: UIButton!
     @IBOutlet weak var freeButton: UIButton!
     @IBOutlet weak var textButton: UIButton!
     @IBOutlet weak var lineButton: UIButton!
@@ -215,7 +178,7 @@ class ViewController: UIViewController, MacawViewDelegate {
         setupMacawView()
         createCanvas()
         configInputContainer()
-        //setupColorSelectorView()
+        setupColorSelectorView()
     }
     
     func setupScrollView() {
@@ -228,35 +191,38 @@ class ViewController: UIViewController, MacawViewDelegate {
     
     func setupBackgroundView() {
         imageScrollView.addSubview(backgroundView)
-        backgroundView.translatesAutoresizingMaskIntoConstraints = false
-        backgroundView.centerXAnchor.constraint(equalTo: imageScrollView.centerXAnchor).isActive = true
-        backgroundView.centerYAnchor.constraint(equalTo: imageScrollView.centerYAnchor).isActive = true
-        backgroundView.widthAnchor.constraint(equalTo:imageScrollView.widthAnchor).isActive = true
-        backgroundView.heightAnchor.constraint(equalTo:imageScrollView.heightAnchor).isActive = true
         
-//        imageView.image = image
-        imageView.translatesAutoresizingMaskIntoConstraints = false
+        backgroundView.snp.makeConstraints { (make) in
+            make.centerX.equalTo(imageScrollView.snp.centerX)
+            make.centerY.equalTo(imageScrollView.snp.centerY)
+            make.width.equalTo(imageScrollView.snp.width)
+            make.height.equalTo(imageScrollView.snp.height)
+        }
+        
         imageView.backgroundColor = .darkGray
         
         imageScrollView.contentSize = CGSize(width: backgroundView.frame.width, height: backgroundView.frame.height)
 
         backgroundView.addSubview(imageView)
         
-        imageView.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor).isActive = true
-        imageView.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor).isActive = true
-        imageView.widthAnchor.constraint(equalTo:backgroundView.widthAnchor).isActive = true
-        imageView.heightAnchor.constraint(equalTo:backgroundView.heightAnchor).isActive = true
+        imageView.snp.makeConstraints { (make) in
+            make.centerX.equalTo(backgroundView.snp.centerX)
+            make.centerY.equalTo(backgroundView.snp.centerY)
+            make.width.equalTo(backgroundView.snp.width)
+            make.height.equalTo(backgroundView.snp.height)
+        }
     }
     
     func setupMacawView() {
         macawView.backgroundColor = .clear
-        macawView.translatesAutoresizingMaskIntoConstraints = false
         backgroundView.addSubview(macawView)
         
-        macawView.centerXAnchor.constraint(equalTo: imageView.centerXAnchor).isActive = true
-        macawView.centerYAnchor.constraint(equalTo: imageView.centerYAnchor).isActive = true
-        macawView.widthAnchor.constraint(equalTo:imageView.widthAnchor).isActive = true
-        macawView.heightAnchor.constraint(equalTo:imageView.heightAnchor).isActive = true
+        macawView.snp.makeConstraints { (make) in
+            make.centerX.equalTo(imageView.snp.centerX)
+            make.centerY.equalTo(imageView.snp.centerY)
+            make.width.equalTo(imageView.snp.width)
+            make.height.equalTo(imageView.snp.height)
+        }
         
         canvas = Shape(form: Rect(x: 0, y: 0, w: Double(UIScreen.main.bounds.width), h: Double(UIScreen.main.bounds.height)), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 1.0))
         
@@ -264,7 +230,10 @@ class ViewController: UIViewController, MacawViewDelegate {
     }
     
     func setupColorSelectorView() {
-        colorSelectorPopup = ColorSelectorPopup(frame: .zero, isNerve: false)
+        
+        colorButton.setColoredButtonText()
+        
+        colorSelectorPopup = ColorSelectorPopup(frame: .zero)
         selectorBackground = UIView()
         selectorBackground.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         self.view.addSubview(selectorBackground)
@@ -277,7 +246,7 @@ class ViewController: UIViewController, MacawViewDelegate {
         selectorBackground.addSubview(colorSelectorPopup)
         colorSelectorPopup.snp.makeConstraints { (make) in
             make.width.equalTo(300)
-            make.height.equalTo(240)
+            make.height.equalTo(330)
             make.centerX.equalToSuperview()
             make.centerY.equalToSuperview()
         }
@@ -287,7 +256,7 @@ class ViewController: UIViewController, MacawViewDelegate {
         self.view.bringSubviewToFront(selectorBackground)
     }
     
-//    func updateMacawViewConstraints() { //updates macaw view constraints after examImage constraints are changed; macawView covers only visible image, not black bars
+//    func updateMacawViewConstraints() { //updates macaw view constraints after image constraints are changed; macawView covers only visible image, not black bars
 //
 //        newMacawHeight = examImage.calculateRectOfImageInImageView().height
 //        newMacawWidth = examImage.calculateRectOfImageInImageView().width
@@ -362,7 +331,6 @@ class ViewController: UIViewController, MacawViewDelegate {
         var timer: ParkBenchTimer!
         var startPoint = Point()
         var isLastPoint = false
-        var lastCalibrationId: Int?
         
         // creating new shape during first touch on canvas
         canvas.onTouchPressed { [weak self] event in
@@ -375,28 +343,12 @@ class ViewController: UIViewController, MacawViewDelegate {
                 return
             }
             
-            var stroke: Stroke!
-            var stroke2: Stroke?
-            
-            guard let drawingType = self?.activeTool.drawingType() else { return }
-            switch drawingType { //sets strokes based on selected tool
-            case .pencil:
-                stroke = Stroke(fill: Color(val: 0xffffff), width: 5.0)
-            case .measure:
-                stroke = Stroke(fill: Color(val: 0xffffff), width: 5.0)
-            case .nerve:
-                stroke = Stroke(fill: Color(val: 0xffffff), width: 5.0)
-                stroke2 = Stroke(fill: Color(val: 0xffffff), width: 5.0+8.0)
-            case .miniature, .implant:
-                stroke = Stroke(fill: Color.white, width: 2.0, dashes: [5, 5])
-            case .odontogram, .commentary:
-                return
-            }
+            let stroke = Stroke(fill: Color(val: self!.colorSelectorPopup.colorValue), width: 5.0)
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             startPoint = loc //stores initial touch point of new shape to be referenced on subsequent events
             
-            if self!.isNewShape && self!.activeTool.drawingType()! != .miniature && self!.activeTool.drawingType()! != .implant && self!.activeTool != .calibration {
+            if self!.isNewShape {
                 self?.newAnnotationId += 1
             }
             
@@ -404,19 +356,13 @@ class ViewController: UIViewController, MacawViewDelegate {
             switch self!.activeTool {
             case .none:
                 return
-            case .miniature:
-                let rectLocus = Rect(x: loc.x, y: loc.y, w: 0, h: 0)
-                let stroke = Stroke(fill: Color.white, width: 2.0, dashes: [5, 5])
-                
-                if self!.cropRect != nil {
-                    self?.cropRect!.form = rectLocus
-                } else {
-                    self?.cropRect = Shape(form: rectLocus, fill: Color(0xa3b7ec).with(a: 0.5), stroke: stroke)
-                }
-                self?.shapesGroup.contents.append(self!.cropRect!)
-                return
             case .freeDrawing:
                 newShape = FreeDrawing(startPoint: startPoint, lastPoint: startPoint, stroke: stroke, type: .freeDrawing, annotationId: self!.newAnnotationId)
+                if let shape = self!.lastActiveShape {
+                    if shape.isActive {
+                        shape.isActive = false
+                    }
+                }
             case .text:
                 newShape = CustomText(text: "", startPoint: startPoint, lastPoint: startPoint, stroke: stroke, type: .text, annotationId: self!.newAnnotationId, comment: "")
             case .line:
@@ -429,17 +375,6 @@ class ViewController: UIViewController, MacawViewDelegate {
                 newShape = Arrow(startPoint: startPoint, lastPoint: startPoint, stroke: stroke, type: .arrow, annotationId: self!.newAnnotationId, comment: "")
             case .protractor:
                 newShape = Protractor(p0: startPoint, p1: startPoint, p2: startPoint, delegate: self!, stroke: stroke, type: .protractor, annotationId: self!.newAnnotationId, comment: "")
-            case .implant:
-//                if let calibration = self?.getSelectedCalibration()?.pixelsPerMilimeter {
-//                    if let implant = self?.selectedImplant {
-//                        let image = UIImage(data: implant.imagem_implante!.data)
-//                        newShape = CustomImplant(startPoint: startPoint, lastPoint: startPoint, delegate: self, type: .implant, annotationId: nil, comment: "", image: image, idImplant: implant.id!, calibration: calibration, rotation: 0, implantType: implant, coordinateSystem: self!.coordinateSystem)
-//                    } else {
-//                        return
-//                    }
-//                } else {
-                    return
-//                }
             case .asterisk:
                 newShape = Asterisk(startPoint: startPoint, lastPoint: startPoint, stroke: stroke, type: .asterisk, annotationId: self!.newAnnotationId, comment: "")
             case .arc:
@@ -462,70 +397,19 @@ class ViewController: UIViewController, MacawViewDelegate {
                     }
                     return
                 }
-            case .nerve:
-//                if self!.isNewShape {
-//                    let outerStroke = stroke2!
-//                    newShape = Nerve(startPoint: startPoint, lastPoint: startPoint, stroke: stroke, outerStroke: outerStroke, type: .nerve, annotationId: self!.newAnnotationId)
-//                    self?.addNewAnnotation(shape: newShape)
-//                    self?.commentaryOptionsView.selectedAnnotationId = newShape.annotationId
-//                    self?.commentaryOptionsView.collectionView.reloadData()
-//                    timer = ParkBenchTimer()
-//                    isLastPoint = false
-//                } else {
-//                    if let nerve = newShape as? Nerve {
-//                        let time = timer.stop()
-//                        if time < 0.5 {
-//                            self?.isNewShape = true
-//                            isLastPoint = true
-//                        } else {
-//                            nerve.newPoint(point: startPoint)
-//                            timer = ParkBenchTimer()
-//                        }
-//                    }
-                    return
-//                }
-            case .ruler:
-//                newShape = Ruler(startPoint: startPoint, lastPoint: startPoint, stroke: stroke, coordinateSystem: self!.coordinateSystem, pixelsPerMilimeter: self!.getSelectedCalibration()?.pixelsPerMilimeter ?? 0, type: .ruler, annotationId: self!.newAnnotationId, comment: "")
-                return //remove
-            case .calibration:
-//                if let id = lastCalibrationId {
-//                    self?.shapesGroup.contents.removeAll(where: { (node) -> Bool in
-//                        node.hash == id
-//                    })
-//                }
-//                newShape = CustomCalibration(startPoint: startPoint, lastPoint: startPoint, stroke: stroke, calibrationDelegate: self!, coordinateSystem: self!.coordinateSystem, type: .calibration, annotationId: -1, comment: "")
-                return //remove
             }
             
             self?.setLastActiveShape(newShape: newShape)
             self?.shapesGroup.contents.append(newShape)
             
-            if self!.activeTool != .multiline && self!.activeTool != .nerve && self!.activeTool != .freeDrawing && self!.activeTool != .calibration {
-//                self?.addNewAnnotation(shape: newShape)
-//                self?.commentaryOptionsView.selectedAnnotationId = newShape.annotationId
-//                self?.commentaryOptionsView.collectionView.reloadData()
-            }
         }
         
         // resizing new shape when moving first touch
         canvas.onTouchMoved { [weak self] (event) in
-            if self!.activeTool == .none || self!.selectionButton.isSelected { return } //self.selectionButton.isSelected { return }
-            
-//            if self!.activeTool == .implant {
-//                if self!.selectedImplant == nil || self!.getSelectedCalibration() == nil { return }
-//            }
+            if self!.activeTool == .none || self!.selectionButton.isSelected { return }
             
             guard let loc = event.points.first?.location(in: .scene) else { return }
             
-//            if self!.activeTool == .miniature {
-//                if loc.x < 0 || loc.y < 0 || loc.x > Double(self!.imageView.image.calculateRectOfImageInImageView().width) || loc.y > Double(self!.examImage.calculateRectOfImageInImageView().height) { return }
-//
-//                let width = loc.x - startPoint.x
-//                let height = loc.y - startPoint.y
-//
-//                self?.cropRect!.form = Rect(x: startPoint.x, y: startPoint.y, w: width, h: height)
-//                return
-//            }
             newShape.updateForm(startPoint: startPoint, lastPoint: loc) //updates form of newly created shape while initial touch isn't released
             if self!.activeTool == .freeDrawing {
                 startPoint = loc //Free Draw line creation: start point is the last touched point
@@ -538,27 +422,19 @@ class ViewController: UIViewController, MacawViewDelegate {
             if self!.selectionButton.isSelected { return }
             
             switch self!.activeTool {
-            case .none, .miniature:
+            case .none:
                 return
             case .text:
                 if self!.isKeyboardShowing {
                     self?.inputTextView.resignFirstResponder()
                     return
                 }
-//                let customText = CustomText(text: "", startPoint: startPoint, stroke: Stroke(fill: self.textColor, width: self.textSize), type: .text, annotationId: self.newAnnotationId, comment: "")
                 let customText = newShape as! CustomText
                 customText.delegate = self
-                self?.customTexts.append(customText) //stores all created texts
-                //                self.shapeTransformations[customText.hash] = (0,0, 1, 0)
+                self?.customTexts.append(customText) //stores all
                 customText.setTransformEvents()
-//                self.setNewShape(shape: customText)
                 self?.macawTextActive = true
                 self?.inputTextView.becomeFirstResponder() //always displays keyboard after creating text
-//                self.addNewAnnotation(shape: customText)
-//                self.commentaryOptionsView.selectedAnnotationId = customText.annotationId
-//                self.commentaryOptionsView.collectionView.reloadData()
-                
-//                self.selectTool(tool: .selection, button: self.selectionButton)
                 self?.setSelectionTool(activate: true)
             return //adds newly created text to shapes array and ignores subsequent events
             case .multiline:
@@ -571,11 +447,9 @@ class ViewController: UIViewController, MacawViewDelegate {
                                     node.hash == multiline.hash
                                 })
                             }
-                            //self.selectTool(tool: .selection, button: self.selectionButton),
                             self?.setSelectionTool(activate: true)
                             return
                         } else {
-                            //                            self.shapeTransformations[self.newShape.hash] = (0,0,1,0)
                             multiline.delegate = self
                             multiline.setTransformEvents()
                             self?.setTapEvent(node: newShape)
@@ -585,44 +459,8 @@ class ViewController: UIViewController, MacawViewDelegate {
                         return
                     }
                 }
-            case .nerve:
-                if let nerve = newShape as? Nerve {
-                    if self!.isNewShape {
-                        if isLastPoint {
-                            self?.isNewShape = true
-                            if nerve.points.count == 1 {
-                                self?.shapesGroup.contents.removeAll(where: { (node) -> Bool in
-                                    node.hash == nerve.hash
-                                })
-                            }
-                            self?.setSelectionTool(activate: true)
-//                            self.selectTool(tool: .selection, button: self.selectionButton)
-                            return
-                        } else {
-                            //                            self.shapeTransformations[self.newShape.hash] = (0,0,1,0)
-                            nerve.delegate = self
-                            nerve.setTransformEvents()
-                            self?.setTapEvent(node: newShape)
-                            self?.isNewShape = false
-                        }
-                    } else {
-                        return
-                    }
-                }
-            case .implant:
-//                if self!.selectedImplant == nil || self!.getSelectedCalibration() == nil { return }
-//                newShape.delegate = self
-//                newShape.setTransformEvents()
-//                self?.setTapEvent(node: newShape)
-//                self?.setSelectionTool(activate: true)
-                return
             default:
-//                if let calibration = newShape as? CustomCalibration {
-//                    self?.measurePixels(calibration.distance(calibration.p0, calibration.p1, scaled: true))
-//                    lastCalibrationId = calibration.hash
-//                }
                 if let freeDrawing = newShape as? FreeDrawing {
-//                    self?.addNewAnnotation(shape: freeDrawing)
                     self?.selectShape(node: freeDrawing)
                 }
                 newShape.delegate = self
@@ -666,19 +504,8 @@ class ViewController: UIViewController, MacawViewDelegate {
                 shape.hash == node.hash
             })
             self.shapesGroup.contents.append(node) //putting active shape at top of created shapes
-//            if let implant = node as? CustomImplant {
-//                macawView.bringSubviewToFront(implant.pinoImageView)
-//            }
         }
         self.setLastActiveShape(newShape: node)
-//        if node.isActive {
-//            commentaryOptionsView.selectedAnnotationId = node.annotationId
-//        } else {
-//            if commentaryOptionsView.selectedAnnotationId == node.annotationId {
-//                commentaryOptionsView.selectedAnnotationId = nil
-//            }
-//        }
-//        commentaryOptionsView.collectionView.reloadData()
     }
     
     func activateScrollView(enable: Bool) {
@@ -701,14 +528,6 @@ class ViewController: UIViewController, MacawViewDelegate {
             self.lastActiveShape = nil
         }
     }
-    
-    func measurePixels(_ d: Double) { //should be overriden by methods in iPhone and iPad report controllers
-    }
-    
-//    @objc func dismissColorSelector() {
-//        self.dismiss()
-//    }
-    
     
     @IBAction func freeDrawingTool(_ sender: UIButton) {
         toolSelected()
@@ -776,11 +595,22 @@ class ViewController: UIViewController, MacawViewDelegate {
     }
 
     @IBAction func deleteTool(_ sender: UIButton) {
-        
         if let shape = lastActiveShape {
             if shape.isActive {
                 deleteShape(node: shape)
+                lastActiveShape = nil
             }
+        }
+    }
+    
+    @IBAction func colorTool(_ sender: UIButton) {
+        selectorBackground.isHidden = false
+        if let shape = lastActiveShape {
+            if shape.isActive {
+                colorSelectorPopup.annotationId = shape.annotationId
+            }
+        } else {
+            colorSelectorPopup.annotationId = nil
         }
     }
 
@@ -847,7 +677,7 @@ extension ViewController: UITextViewDelegate {
         if textView == inputTextView {
             if textView.text == "" {
                 if let customText = customTexts.last {
-//                    deleteShape(withAnnotationId: customText.annotationId, id: customText.id, isImplant: false)
+                    deleteShape(node: customText)
                 }
             }
         }
@@ -858,15 +688,18 @@ extension ViewController: ColorSelectorPopupDelegate {
 
     func dismiss() {
         selectorBackground.isHidden = true
-//        nerveSelectorBackground.isHidden = true
     }
     
-    func colorSelected(innerColor: Color, outerColor: Color? = nil, annotationId: Int) {
+    func colorSelected(color: Color, annotationId: Int?) {
+        if annotationId == nil {
+            selectorBackground.isHidden = true
+            return
+        }
         if let shape = shapesGroup.contents.first(where: { (node) -> Bool in
             let shape = node as! CustomShape
             return shape.annotationId == annotationId
         }) as? CustomShape {
-                let stroke = Stroke(fill: innerColor, width: shape.stroke.width)
+                let stroke = Stroke(fill: color, width: shape.stroke.width)
                 shape.updateStroke(stroke: stroke, stroke2: nil)
                 selectorBackground.isHidden = true
         }

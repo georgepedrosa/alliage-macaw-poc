@@ -27,23 +27,6 @@ extension Annotation {
     
     enum Types: String, CustomStringConvertible, CaseIterable {
         
-        func drawingType() -> DrawingType? {
-            switch self {
-            case .freeDrawing, .text, .line, .ellipse, .rect, .arrow, .asterisk, .arc:
-                return .pencil
-            case .calibration, .ruler, .multiline, .protractor:
-                return .measure
-            case .nerve:
-                return .nerve
-            case .miniature:
-                return .miniature
-            case .implant:
-                return .implant
-            case .none:
-                return nil
-            }
-        }
-        
         case rect = "RETANGULO"
         case line = "LINHA"
         case ellipse = "ELIPSE"
@@ -53,13 +36,7 @@ extension Annotation {
         case freeDrawing = "DESENHO"
         case protractor = "ANGULO"
         case multiline = "MULTIPLAS_DISTANCIAS"
-        case ruler = "DISTANCIA"
-//        case selection = "SELECAO"
         case text = "TEXTO"
-        case nerve = "NERVO"
-        case calibration = "CALIBRACAO"
-        case miniature = "MINIATURE"
-        case implant = "IMPLANTE"
         case none = "OUTRO"
         
         var iconName: String {
@@ -82,20 +59,8 @@ extension Annotation {
                 return "protractor"
             case .multiline:
                 return "multiline"
-            case .ruler:
-                return "ruler"
-//            case .selection:
-//                return "selection"
             case .text:
                 return "text"
-            case .nerve:
-                return "nerve"
-            case .calibration:
-                return "calibration"
-            case .miniature:
-                return "miniature"
-            case .implant:
-                return "implant"
             case .none:
                 return ""
             }
@@ -121,20 +86,8 @@ extension Annotation {
                 return "ANGLE"
             case .multiline:
                 return "MULTILINE"
-            case .ruler:
-                return "DISTANCE"
-//            case .selection:
-//                return "SELECTION".nsLocalized
             case .text:
                 return "TEXT"
-            case .nerve:
-                return "NERVE"
-            case .calibration:
-                return "CALIBRATION"
-            case .miniature:
-                return "MINIATURE"
-            case .implant:
-                return "IMPLANT" //TODO nsLocalized
             case .none:
                 return "OTHER"
             }
@@ -184,14 +137,4 @@ extension Annotation {
         }
         return colors
     }
-}
-
-enum DrawingType: String, CaseIterable {
-    case pencil
-    case measure
-    case implant
-    case nerve
-    case miniature
-    case odontogram
-    case commentary
 }

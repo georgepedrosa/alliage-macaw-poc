@@ -24,4 +24,16 @@ extension String {
     subscript (i: Int) -> String {
         return self[i ..< i + 1]
     }
+
+    /// Inserts a line break before the last word, used to wrap annotation text
+    /// that overflows its bounding box.
+    func breakingLastWord() -> String {
+        var text = self
+        for i in stride(from: text.count - 1, to: 0, by: -1) where text[i] == " " {
+            let offset = i == text.count - 1 ? i : i + 1
+            text.insert("\n", at: text.index(text.startIndex, offsetBy: offset))
+            break
+        }
+        return text
+    }
 }

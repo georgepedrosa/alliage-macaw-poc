@@ -15,7 +15,7 @@ class Multiline: Group, CustomShape {
     var id: Int!
     var type: Annotation.Types!
     var comment: String = ""
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     var drawing: Shape!
     var backgroundDrawing: Shape!
     var points: [Point] = []

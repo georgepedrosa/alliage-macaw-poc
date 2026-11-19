@@ -17,7 +17,7 @@ class Arrow: Group, CustomShape {
     var id: Int!
     let headAngle = Double.pi/6
     
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     var stroke: Stroke!
     
     var p0: Point!
@@ -85,10 +85,10 @@ class Arrow: Group, CustomShape {
             )
         )
         
-        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        anchor0 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor1 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
+        circle0 = ShapeFactory.handle()
+        circle1 = ShapeFactory.handle()
+        anchor0 = ShapeFactory.anchor()
+        anchor1 = ShapeFactory.anchor()
         
         idText = Text(text: String(annotationId))
         idText.fill = self.stroke.fill
@@ -140,7 +140,7 @@ class Arrow: Group, CustomShape {
         let x2 = p1.x
         let y2 = p1.y
         
-        let l1 = distance(p0, p1)
+        let l1 = p0.distance(to: p1)
         let l2 = (stroke.width*3)/2
         
         let x3 = x2 + ( (l2/l1) * ( ( (x1-x2) * cos(headAngle) ) + ( (y1-y2) * (sin(headAngle) ) ) ) )
@@ -177,15 +177,6 @@ class Arrow: Group, CustomShape {
     
     func getCenter() -> Point? {
         return line.bounds?.center()
-    }
-    
-    func distance(_ a: Point, _ b: Point) -> Double {
-        
-        if a == b { return 0.0001 }
-        
-        let xDist = a.x - b.x
-        let yDist = a.y - b.y
-        return Double(sqrt(xDist * xDist + yDist * yDist))
     }
     
     func move(dx: Double, dy: Double) {

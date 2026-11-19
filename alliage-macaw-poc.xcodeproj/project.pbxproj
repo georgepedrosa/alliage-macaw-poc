@@ -12,7 +12,12 @@
 		1055C3A622A0561500C40F60 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1055C3A422A0561500C40F60 /* Main.storyboard */; };
 		1055C3A822A0561600C40F60 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1055C3A722A0561600C40F60 /* Assets.xcassets */; };
 		1055C3AB22A0561600C40F60 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1055C3A922A0561600C40F60 /* LaunchScreen.storyboard */; };
+		44B4260314329E4D342506DD /* ColorSelectorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E83594AEC895F8826D913FA /* ColorSelectorViewModel.swift */; };
+		57AFC446134CC9EFE09F5FAB /* ShapeFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F457FB728F7A78BBF7906ADC /* ShapeFactory.swift */; };
+		7A6F78F1BD7AE28EFC722CBE /* ColorPaletteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998BF3154278AFB59CA54D89 /* ColorPaletteViewModel.swift */; };
+		825FEB45C2FF9F1105CA1965 /* DrawingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDDDBE877EB1A90FF7F1EB7 /* DrawingViewModel.swift */; };
 		85A143B1DDB23D5F843851E7 /* Pods_alliage_macaw_poc.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D048124AE54A71DCCC49710B /* Pods_alliage_macaw_poc.framework */; };
+		A2D7FD27FE17E2025671E174 /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13600E89C77EA39F992419F1 /* Observable.swift */; };
 		AD0C134426307AD600FF409D /* UIButton+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD0C134326307AD600FF409D /* UIButton+Extensions.swift */; };
 		AD212C642631DF7500231630 /* UIViewController+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD212C632631DF7500231630 /* UIViewController+Extensions.swift */; };
 		AD212C662631E1B400231630 /* UINavigationController+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD212C652631E1B400231630 /* UINavigationController+Extensions.swift */; };
@@ -54,8 +59,12 @@
 		1055C3A722A0561600C40F60 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1055C3AA22A0561600C40F60 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		1055C3AC22A0561600C40F60 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		13600E89C77EA39F992419F1 /* Observable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
+		1E83594AEC895F8826D913FA /* ColorSelectorViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ColorSelectorViewModel.swift; sourceTree = "<group>"; };
 		3FB7DDD5101AEEC44B22F4B6 /* Pods-alliage-macaw-poc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-alliage-macaw-poc.debug.xcconfig"; path = "Target Support Files/Pods-alliage-macaw-poc/Pods-alliage-macaw-poc.debug.xcconfig"; sourceTree = "<group>"; };
 		873AAEEAB1AD6C0F715381F4 /* Pods-alliage-macaw-poc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-alliage-macaw-poc.release.xcconfig"; path = "Target Support Files/Pods-alliage-macaw-poc/Pods-alliage-macaw-poc.release.xcconfig"; sourceTree = "<group>"; };
+		8BDDDBE877EB1A90FF7F1EB7 /* DrawingViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DrawingViewModel.swift; sourceTree = "<group>"; };
+		998BF3154278AFB59CA54D89 /* ColorPaletteViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ColorPaletteViewModel.swift; sourceTree = "<group>"; };
 		AD0C134326307AD600FF409D /* UIButton+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIButton+Extensions.swift"; sourceTree = "<group>"; };
 		AD212C632631DF7500231630 /* UIViewController+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extensions.swift"; sourceTree = "<group>"; };
 		AD212C652631E1B400231630 /* UINavigationController+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+Extensions.swift"; sourceTree = "<group>"; };
@@ -88,6 +97,7 @@
 		AD598D782628CE2700D9B293 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		AD598D7A2628D07100D9B293 /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		D048124AE54A71DCCC49710B /* Pods_alliage_macaw_poc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_alliage_macaw_poc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F457FB728F7A78BBF7906ADC /* ShapeFactory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShapeFactory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,6 +145,7 @@
 				1055C3A722A0561600C40F60 /* Assets.xcassets */,
 				1055C3A922A0561600C40F60 /* LaunchScreen.storyboard */,
 				1055C3AC22A0561600C40F60 /* Info.plist */,
+				8A3B43B0A51FE58CC7DD443F /* ViewModels */,
 			);
 			path = "alliage-macaw-poc";
 			sourceTree = "<group>";
@@ -146,6 +157,17 @@
 				873AAEEAB1AD6C0F715381F4 /* Pods-alliage-macaw-poc.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		8A3B43B0A51FE58CC7DD443F /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				8BDDDBE877EB1A90FF7F1EB7 /* DrawingViewModel.swift */,
+				1E83594AEC895F8826D913FA /* ColorSelectorViewModel.swift */,
+				998BF3154278AFB59CA54D89 /* ColorPaletteViewModel.swift */,
+			);
+			name = ViewModels;
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 		AD2A162F262DEF80006608C2 /* Views */ = {
@@ -163,6 +185,7 @@
 			children = (
 				AD2A1637262DF007006608C2 /* NibView.swift */,
 				AD2A1641262E13DB006608C2 /* ReusableView.swift */,
+				13600E89C77EA39F992419F1 /* Observable.swift */,
 			);
 			path = Custom;
 			sourceTree = "<group>";
@@ -217,6 +240,7 @@
 				AD598D622628A1F900D9B293 /* FreeDrawing.swift */,
 				AD598D582628A1F800D9B293 /* Multiline.swift */,
 				AD598D5B2628A1F800D9B293 /* Protractor.swift */,
+				F457FB728F7A78BBF7906ADC /* ShapeFactory.swift */,
 			);
 			path = MacawShapes;
 			sourceTree = "<group>";
@@ -385,6 +409,11 @@
 				AD598D5426289FF700D9B293 /* UIImage+Extensions.swift in Sources */,
 				AD598D762628CDE300D9B293 /* CoordinateSystem.swift in Sources */,
 				AD598D6B2628A1F900D9B293 /* CustomLine.swift in Sources */,
+				A2D7FD27FE17E2025671E174 /* Observable.swift in Sources */,
+				825FEB45C2FF9F1105CA1965 /* DrawingViewModel.swift in Sources */,
+				44B4260314329E4D342506DD /* ColorSelectorViewModel.swift in Sources */,
+				57AFC446134CC9EFE09F5FAB /* ShapeFactory.swift in Sources */,
+				7A6F78F1BD7AE28EFC722CBE /* ColorPaletteViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

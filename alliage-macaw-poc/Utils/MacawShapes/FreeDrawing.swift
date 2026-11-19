@@ -15,7 +15,7 @@ class FreeDrawing: Group, CustomShape {
     var id: Int!
     var type: Annotation.Types!
     var comment: String = ""
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     var stroke: Stroke!
     
     var drawing: Shape!

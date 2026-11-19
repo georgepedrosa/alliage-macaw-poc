@@ -6,11 +6,21 @@
 //  Copyright © 2019 Vitor Muniz. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import Macaw
 
+/// Surface the shapes need to interact with the drawing session while being
+/// manipulated (pan/resize/selection/text editing). Implemented by DrawingViewModel.
+protocol ShapeInteractionDelegate: AnyObject {
+    var lastActiveShape: CustomShape? { get set }
+    var customTexts: [CustomText] { get set }
+    var isEditingText: Bool { get set }
+    func activateScrollView(enable: Bool)
+    func setLastActiveShape(newShape: CustomShape)
+}
+
 protocol CustomShape: Group {
-    var delegate: MacawViewDelegate? { get set }
+    var delegate: ShapeInteractionDelegate? { get set }
     var isActive: Bool { get set }
     var isHidden: Bool { get set }
     func updateForm(startPoint: Point, lastPoint: Point)

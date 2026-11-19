@@ -16,7 +16,7 @@ class Asterisk: Group, CustomShape {
     var type: Annotation.Types!
     var comment: String = ""
     
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     var stroke: Stroke!
     
     var p0: Point!

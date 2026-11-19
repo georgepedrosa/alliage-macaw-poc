@@ -36,7 +36,7 @@ class CustomArc: Group, CustomShape {
     var p1: Point!
     var p2: Point!
     
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     
     var stroke: Stroke!
     
@@ -59,7 +59,7 @@ class CustomArc: Group, CustomShape {
         }
     }
 
-    init(p0: Point, p1: Point, p2: Point, delegate: MacawViewDelegate, stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
+    init(p0: Point, p1: Point, p2: Point, delegate: ShapeInteractionDelegate, stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
         super.init()
         
         self.delegate = delegate
@@ -73,12 +73,12 @@ class CustomArc: Group, CustomShape {
         self.p1 = p1
         self.p2 = p2
         
-        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        anchor0 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor1 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor2 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
+        circle0 = ShapeFactory.handle()
+        circle1 = ShapeFactory.handle()
+        circle2 = ShapeFactory.handle()
+        anchor0 = ShapeFactory.anchor()
+        anchor1 = ShapeFactory.anchor()
+        anchor2 = ShapeFactory.anchor()
         line1 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
         line2 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.blue, width: 2.0))
 

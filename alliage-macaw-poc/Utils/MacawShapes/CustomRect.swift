@@ -16,7 +16,7 @@ class CustomRect: Group, CustomShape {
     var type: Annotation.Types!
     var comment: String = ""
     
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     var stroke: Stroke!
     
     var idText: Text!
@@ -66,11 +66,7 @@ class CustomRect: Group, CustomShape {
             }
         }
     }
-    
-    deinit {
-        print("deinit shape")
-    }
-    
+        
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
         super.init()
         
@@ -83,24 +79,24 @@ class CustomRect: Group, CustomShape {
         
         rect = Shape(form: Rect(), fill: Color.clear, stroke: stroke)
 
-        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle3 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle0 = ShapeFactory.handle()
+        circle1 = ShapeFactory.handle()
+        circle2 = ShapeFactory.handle()
+        circle3 = ShapeFactory.handle()
         
-        circle01 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle02 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle23 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle13 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle01 = ShapeFactory.handle()
+        circle02 = ShapeFactory.handle()
+        circle23 = ShapeFactory.handle()
+        circle13 = ShapeFactory.handle()
         
-        anchor0 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor1 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor2 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor3 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor01 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor02 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor23 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor13 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
+        anchor0 = ShapeFactory.anchor()
+        anchor1 = ShapeFactory.anchor()
+        anchor2 = ShapeFactory.anchor()
+        anchor3 = ShapeFactory.anchor()
+        anchor01 = ShapeFactory.anchor()
+        anchor02 = ShapeFactory.anchor()
+        anchor23 = ShapeFactory.anchor()
+        anchor13 = ShapeFactory.anchor()
         
         idText = Text(text: String(annotationId))
         idText.fill = self.stroke.fill
@@ -119,98 +115,87 @@ class CustomRect: Group, CustomShape {
     }
     
     func setTransformEvents() {
-        circle0.onTouchMoved { [weak self] (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self?.delegate?.activateScrollView(enable: false)
-            
-            let newP0 = Point(x: loc.x, y: loc.y)
-            self?.p0 = newP0
-            self?.p1 = Point(x: (self?.p1.x)!, y: (self?.p0.y)!)
-            self?.p2 = Point(x: (self?.p0.x)!, y: (self?.p2.y)!)
-            self?.delegate?.activateScrollView(enable: true)
-            self?.updateFormFromPoints()
+        circle0.onTouchMoved { [weak self] event in
+            guard let self = self, let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate?.activateScrollView(enable: false)
+
+            self.p0 = Point(x: loc.x, y: loc.y)
+            self.p1 = Point(x: self.p1.x, y: self.p0.y)
+            self.p2 = Point(x: self.p0.x, y: self.p2.y)
+            self.delegate?.activateScrollView(enable: true)
+            self.updateFormFromPoints()
         }
-        circle1.onTouchMoved { [weak self] (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self?.delegate?.activateScrollView(enable: false)
-            
-            let newP1 = Point(x: loc.x, y: loc.y)
-            self?.p1 = newP1
-            self?.p0 = Point(x: (self?.p0.x)!, y: (self?.p1.y)!)
-            self?.p3 = Point(x: (self?.p1.x)!, y: (self?.p3.y)!)
-            self?.delegate?.activateScrollView(enable: true)
-            self?.updateFormFromPoints()
+        circle1.onTouchMoved { [weak self] event in
+            guard let self = self, let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate?.activateScrollView(enable: false)
+
+            self.p1 = Point(x: loc.x, y: loc.y)
+            self.p0 = Point(x: self.p0.x, y: self.p1.y)
+            self.p3 = Point(x: self.p1.x, y: self.p3.y)
+            self.delegate?.activateScrollView(enable: true)
+            self.updateFormFromPoints()
         }
-        circle2.onTouchMoved { [weak self] (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self?.delegate?.activateScrollView(enable: false)
-            
-            let newP2 = Point(x: loc.x, y: loc.y)
-            self?.p2 = newP2
-            self?.p0 = Point(x: (self?.p2.x)!, y: (self?.p0.y)!)
-            self?.p3 = Point(x: (self?.p3.x)!, y: (self?.p2.y)!)
-            self?.delegate?.activateScrollView(enable: true)
-            self?.updateFormFromPoints()
+        circle2.onTouchMoved { [weak self] event in
+            guard let self = self, let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate?.activateScrollView(enable: false)
+
+            self.p2 = Point(x: loc.x, y: loc.y)
+            self.p0 = Point(x: self.p2.x, y: self.p0.y)
+            self.p3 = Point(x: self.p3.x, y: self.p2.y)
+            self.delegate?.activateScrollView(enable: true)
+            self.updateFormFromPoints()
         }
-        circle3.onTouchMoved { [weak self] (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self?.delegate?.activateScrollView(enable: false)
-            
-            let newP3 = Point(x: loc.x, y: loc.y)
-            self?.p3 = newP3
-            self?.p1 = Point(x: (self?.p3.x)!, y: (self?.p1.y)!)
-            self?.p2 = Point(x: (self?.p2.x)!, y: (self?.p3.y)!)
-            self?.delegate?.activateScrollView(enable: true)
-            self?.updateFormFromPoints()
+        circle3.onTouchMoved { [weak self] event in
+            guard let self = self, let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate?.activateScrollView(enable: false)
+
+            self.p3 = Point(x: loc.x, y: loc.y)
+            self.p1 = Point(x: self.p3.x, y: self.p1.y)
+            self.p2 = Point(x: self.p2.x, y: self.p3.y)
+            self.delegate?.activateScrollView(enable: true)
+            self.updateFormFromPoints()
         }
-        circle01.onTouchMoved { [weak self] (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self?.delegate?.activateScrollView(enable: false)
-            
-            let newP01 = Point(x: loc.x, y: loc.y)
-            self?.p0 = Point(x: (self?.p0.x)!, y: newP01.y)
-            self?.p1 = Point(x: (self?.p1.x)!, y: newP01.y)
-            self?.delegate?.activateScrollView(enable: true)
-            self?.updateFormFromPoints()
+        circle01.onTouchMoved { [weak self] event in
+            guard let self = self, let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate?.activateScrollView(enable: false)
+
+            self.p0 = Point(x: self.p0.x, y: loc.y)
+            self.p1 = Point(x: self.p1.x, y: loc.y)
+            self.delegate?.activateScrollView(enable: true)
+            self.updateFormFromPoints()
         }
-        circle02.onTouchMoved { [weak self] (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self?.delegate?.activateScrollView(enable: false)
-            
-            let newP02 = Point(x: loc.x, y: loc.y)
-            self?.p0 = Point(x: newP02.x, y: (self?.p0.y)!)
-            self?.p2 = Point(x: newP02.x, y: (self?.p2.y)!)
-            self?.delegate?.activateScrollView(enable: true)
-            self?.updateFormFromPoints()
+        circle02.onTouchMoved { [weak self] event in
+            guard let self = self, let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate?.activateScrollView(enable: false)
+
+            self.p0 = Point(x: loc.x, y: self.p0.y)
+            self.p2 = Point(x: loc.x, y: self.p2.y)
+            self.delegate?.activateScrollView(enable: true)
+            self.updateFormFromPoints()
         }
-        circle13.onTouchMoved { [weak self] (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self?.delegate?.activateScrollView(enable: false)
-            
-            let newP13 = Point(x: loc.x, y: loc.y)
-            self?.p1 = Point(x: newP13.x, y: (self?.p1.y)!)
-            self?.p3 = Point(x: newP13.x, y: (self?.p3.y)!)
-            self?.delegate?.activateScrollView(enable: true)
-            self?.updateFormFromPoints()
+        circle13.onTouchMoved { [weak self] event in
+            guard let self = self, let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate?.activateScrollView(enable: false)
+
+            self.p1 = Point(x: loc.x, y: self.p1.y)
+            self.p3 = Point(x: loc.x, y: self.p3.y)
+            self.delegate?.activateScrollView(enable: true)
+            self.updateFormFromPoints()
         }
-        circle23.onTouchMoved { [weak self] (event) in
-            guard let loc = event.points.first?.location(in: .scene) else { return }
-            self?.delegate?.activateScrollView(enable: false)
-            
-            let newP23 = Point(x: loc.x, y: loc.y)
-            self?.p2 = Point(x: (self?.p2.x)!, y: newP23.y)
-            self?.p3 = Point(x: (self?.p3.x)!, y: newP23.y)
-            self?.delegate?.activateScrollView(enable: true)
-            self?.updateFormFromPoints()
+        circle23.onTouchMoved { [weak self] event in
+            guard let self = self, let loc = event.points.first?.location(in: .scene) else { return }
+            self.delegate?.activateScrollView(enable: false)
+
+            self.p2 = Point(x: self.p2.x, y: loc.y)
+            self.p3 = Point(x: self.p3.x, y: loc.y)
+            self.delegate?.activateScrollView(enable: true)
+            self.updateFormFromPoints()
         }
-        rect.onPan { [weak self] (event) in
-            guard let _ = event.node else { print("problem on arc pan")
-                return
-            }
-            if !(self?.isActive)! { return }
-            self?.delegate?.activateScrollView(enable: false)
-            self?.move(dx: event.dx, dy: event.dy)
-            self?.delegate?.activateScrollView(enable: true)
+        rect.onPan { [weak self] event in
+            guard let self = self, event.node != nil, self.isActive else { return }
+            self.delegate?.activateScrollView(enable: false)
+            self.move(dx: event.dx, dy: event.dy)
+            self.delegate?.activateScrollView(enable: true)
         }
     }
     

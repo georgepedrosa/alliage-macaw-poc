@@ -15,7 +15,7 @@ class CustomText: Group, CustomShape {
     var id: Int!
     var type: Annotation.Types!
     var comment: String = ""
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     var stroke: Stroke!
     
     var textNode: Text!
@@ -60,9 +60,9 @@ class CustomText: Group, CustomShape {
                     text == self
                 })
                 self.delegate?.customTexts.append(self)
-                self.delegate?.macawTextActive = true
+                self.delegate?.isEditingText = true
             } else {
-                self.delegate?.macawTextActive = false
+                self.delegate?.isEditingText = false
             }
             isHidden = false
         }
@@ -93,24 +93,24 @@ class CustomText: Group, CustomShape {
         textNode = Text(text: text, font: font, fill: stroke.fill, place: .move(startPoint.x, startPoint.y))
         rectLimit = Shape(form: Rect(), fill: Color.clear, stroke: Stroke(fill: Color.white, width: 2, dashes: [5, 5]))
         
-        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle3 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle0 = ShapeFactory.handle()
+        circle1 = ShapeFactory.handle()
+        circle2 = ShapeFactory.handle()
+        circle3 = ShapeFactory.handle()
         
-        circle01 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle02 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle23 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle13 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle01 = ShapeFactory.handle()
+        circle02 = ShapeFactory.handle()
+        circle23 = ShapeFactory.handle()
+        circle13 = ShapeFactory.handle()
         
-        anchor0 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor1 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor2 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor3 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor01 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor02 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor23 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor13 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
+        anchor0 = ShapeFactory.anchor()
+        anchor1 = ShapeFactory.anchor()
+        anchor2 = ShapeFactory.anchor()
+        anchor3 = ShapeFactory.anchor()
+        anchor01 = ShapeFactory.anchor()
+        anchor02 = ShapeFactory.anchor()
+        anchor23 = ShapeFactory.anchor()
+        anchor13 = ShapeFactory.anchor()
         
         idText = Text(text: String(annotationId))
         idText.fill = self.stroke.fill
@@ -141,7 +141,7 @@ class CustomText: Group, CustomShape {
             }
             if self.textNode.bounds.w > self.rectLimit.form.bounds().w {
                 let textStringWithoutBreak = textString
-                textString = breakLine(text: textString)
+                textString = textString.breakingLastWord()
                 self.setText(text: textString)
                 if self.textNode.bounds.w > self.rectLimit.form.bounds().w {
                     updateBoundsWidth()
@@ -169,18 +169,6 @@ class CustomText: Group, CustomShape {
         updateFormFromPoints()
     }
     
-    func breakLine(text: String) -> String {
-        var text = text
-        for i in stride(from: text.count-1, to: 0, by: -1) {
-            if text[i] == " " {
-                let offset = i == text.count-1 ? i : i+1
-                text.insert("\n", at: text.index(text.startIndex, offsetBy: offset))
-                break
-            }
-        }
-        return text
-    }
-
     func updateStroke(stroke: Stroke, stroke2: Stroke?) {
         self.stroke = stroke
         idText.fill = self.stroke.fill

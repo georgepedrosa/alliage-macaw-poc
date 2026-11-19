@@ -56,11 +56,11 @@ class Protractor: Group, CustomShape {
         }
     }
     
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     
     var stroke: Stroke!
     
-    init(p0: Point, p1: Point, p2: Point, delegate: MacawViewDelegate, stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
+    init(p0: Point, p1: Point, p2: Point, delegate: ShapeInteractionDelegate, stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
         super.init()
         self.delegate = delegate
         self.stroke = stroke
@@ -77,12 +77,12 @@ class Protractor: Group, CustomShape {
         line2 = Shape(form: Line(), fill: Color.clear, stroke: stroke)
         backgroundLine1 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
         backgroundLine2 = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        anchor0 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor1 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor2 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
+        circle0 = ShapeFactory.handle()
+        circle1 = ShapeFactory.handle()
+        circle2 = ShapeFactory.handle()
+        anchor0 = ShapeFactory.anchor()
+        anchor1 = ShapeFactory.anchor()
+        anchor2 = ShapeFactory.anchor()
         arc = Shape(form: Ellipse(), fill: Color.clear, stroke: stroke)
         text = Text(text: "", fill: stroke.fill, place: .move(p0.x, p0.y))
         idText = Text(text: String(annotationId))
@@ -96,7 +96,7 @@ class Protractor: Group, CustomShape {
 
     func updateForm(startPoint: Point, lastPoint: Point) {
         
-        let d = distance(startPoint, lastPoint)
+        let d = startPoint.distance(to: lastPoint)
         let angle = atan2(lastPoint.y - startPoint.y, lastPoint.x - startPoint.x)
         
         self.p0 = startPoint
@@ -205,12 +205,6 @@ class Protractor: Group, CustomShape {
         return line1.bounds?.center()
     }
 
-    func distance(_ a: Point, _ b: Point) -> Double {
-        let xDist = a.x - b.x
-        let yDist = a.y - b.y
-        return Double(sqrt(xDist * xDist + yDist * yDist))
-    }
-    
     func move(dx: Double, dy: Double) {
         p0 = Point(x: p0.x + dx, y: p0.y + dy)
         p1 = Point(x: p1.x + dx, y: p1.y + dy)

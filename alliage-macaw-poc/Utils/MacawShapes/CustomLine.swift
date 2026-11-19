@@ -51,7 +51,7 @@ class CustomLine: Group, CustomShape {
         }
     }
     
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
         super.init()
@@ -66,10 +66,10 @@ class CustomLine: Group, CustomShape {
                 
         line = Shape(form: Line(), fill: Color.clear, stroke: stroke)
         backgroundLine = Shape(form: Line(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 30.0))
-        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        anchor0 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor1 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
+        circle0 = ShapeFactory.handle()
+        circle1 = ShapeFactory.handle()
+        anchor0 = ShapeFactory.anchor()
+        anchor1 = ShapeFactory.anchor()
         
         idText = Text(text: String(annotationId))
         idText.fill = self.stroke.fill

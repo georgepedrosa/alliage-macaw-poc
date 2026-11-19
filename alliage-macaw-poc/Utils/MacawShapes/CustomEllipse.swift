@@ -16,7 +16,7 @@ class CustomEllipse: Group, CustomShape {
     var type: Annotation.Types!
     var comment: String = ""
     
-    weak var delegate: MacawViewDelegate?
+    weak var delegate: ShapeInteractionDelegate?
     var stroke: Stroke!
     
     var idText: Text!
@@ -67,11 +67,7 @@ class CustomEllipse: Group, CustomShape {
             }
         }
     }
-    
-    deinit {
-        print("deinit shape")
-    }
-    
+        
     required init(startPoint: Point, lastPoint: Point, stroke: Stroke, type: Annotation.Types, id: Int? = nil, annotationId: Int, comment: String) {
         super.init()
         
@@ -86,24 +82,24 @@ class CustomEllipse: Group, CustomShape {
         ellipse = Shape(form: Ellipse(), fill: Color.clear, stroke: stroke)
         backgroundRect = Shape(form: Rect(), fill: Color.clear, stroke: Stroke(fill: Color.white, width: 2, dashes: [5, 5]))
         
-        circle0 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle1 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle2 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle3 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle0 = ShapeFactory.handle()
+        circle1 = ShapeFactory.handle()
+        circle2 = ShapeFactory.handle()
+        circle3 = ShapeFactory.handle()
         
-        circle01 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle02 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle23 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
-        circle13 = Shape(form: Circle(), fill: Color.clear, stroke: Stroke(fill: Color.clear, width: 5.0))
+        circle01 = ShapeFactory.handle()
+        circle02 = ShapeFactory.handle()
+        circle23 = ShapeFactory.handle()
+        circle13 = ShapeFactory.handle()
         
-        anchor0 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor1 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor2 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor3 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor01 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor02 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor23 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
-        anchor13 = Shape(form: Rect(), fill: Color.white, stroke: Stroke(fill: Color.black, width: 1.0))
+        anchor0 = ShapeFactory.anchor()
+        anchor1 = ShapeFactory.anchor()
+        anchor2 = ShapeFactory.anchor()
+        anchor3 = ShapeFactory.anchor()
+        anchor01 = ShapeFactory.anchor()
+        anchor02 = ShapeFactory.anchor()
+        anchor23 = ShapeFactory.anchor()
+        anchor13 = ShapeFactory.anchor()
         
         idText = Text(text: String(annotationId))
         idText.fill = self.stroke.fill
